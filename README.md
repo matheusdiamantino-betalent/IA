@@ -1582,24 +1582,125 @@ Saturação de filas, burst de uploads, latência de agentes, throughput por wor
 
 ## 85. Arquitetura de Pastas e Arquivos
 
-A estrutura deve refletir módulos por contexto e camadas internas.
+A arquitetura de pastas e arquivos deve refletir, de forma explícita, os limites entre domínio, aplicação, interfaces, infraestrutura, segurança, observabilidade e governança. A estrutura não deve ser pensada apenas para organização visual, mas para impor restrições arquiteturais, reduzir acoplamento e facilitar escalabilidade operacional.
+
+### Objetivos da estrutura
+
+- impedir mistura entre regra de negócio e detalhe técnico;
+- favorecer evolução por bounded context;
+- permitir testes por camada e por módulo;
+- explicitar contratos, adapters e fronteiras;
+- centralizar componentes transversais reutilizáveis;
+- reduzir risco de “código utilitário sem dono”.
+
+### Princípios de organização
+
+- módulos organizados por contexto de negócio;
+- internamente, cada módulo organizado por camada;
+- componentes transversais em `shared` apenas quando realmente genéricos;
+- integrações técnicas em `infra`;
+- bootstrap e wiring fora do domínio;
+- documentação e ADRs versionadas junto ao projeto;
+- testes espelhando a organização do código-fonte.
 
 ---
 
 ## 86. Organização por Camadas
 
-- `interfaces`
-- `application`
-- `domain`
-- `infrastructure`
-- `shared`
-- `bootstrap`
-- `docs`
-- `test`
+### 86.1 `interfaces`
+
+Camada de entrada e saída do sistema.
+
+**Responsabilidades:**
+
+- controllers HTTP;
+- serializers;
+- presenters;
+- queue consumers/processors;
+- webhooks/callback handlers;
+- endpoints operacionais.
+
+**Não deve conter:**
+
+- regra de negócio de domínio;
+- acesso direto a banco fora de adapter controlado;
+- lógica de integração espalhada.
+
+### 86.2 `application`
+
+Camada de orquestração e casos de uso.
+
+**Responsabilidades:**
+
+- use cases;
+- application services;
+- DTOs de entrada e saída;
+- policies de fluxo;
+- orchestration services;
+- comandos e queries.
+
+### 86.3 `domain`
+
+Centro da regra de negócio.
+
+**Responsabilidades:**
+
+- entidades;
+- value objects;
+- serviços de domínio;
+- invariantes;
+- regras centrais;
+- contratos puros de repositórios e gateways.
+
+### 86.4 `infrastructure`
+
+Detalhes de implementação técnica.
+
+**Responsabilidades:**
+
+- repositories concretos;
+- adapters de providers;
+- integrações externas;
+- storage;
+- redis;
+- filas;
+- ORM/SQL;
+- OCR/LLM/vector/ACL.
+
+### 86.5 `shared`
+
+Componentes transversais reutilizáveis e estáveis.
+
+**Responsabilidades:**
+
+- enums globais;
+- helpers realmente compartilhados;
+- normalizers;
+- sanitizers;
+- exceptions;
+- guards;
+- interceptors;
+- telemetry.
+
+### 86.6 `bootstrap`
+
+Composição da aplicação.
+
+**Responsabilidades:**
+
+- inicialização de módulos;
+- configuração global;
+- logger;
+- tracing;
+- métricas;
+- validation pipes;
+- filtros globais.
 
 ---
 
 ## 87. Organização por Responsabilidade
+
+### 87.1 Módulos funcionais
 
 - `ingestion`
 - `extraction`
@@ -1612,6 +1713,28 @@ A estrutura deve refletir módulos por contexto e camadas internas.
 - `publication`
 - `governance`
 - `observability`
+- `auth`
+- `health`
+- `audit`
+
+### 87.2 Responsabilidades esperadas por módulo
+
+| Módulo | Responsabilidade primária | Resultado principal |
+|---|---|---|
+| `ingestion` | upload, checksum, metadata, criação inicial | `uploaded_files` |
+| `extraction` | parsing/OCR e segmentação | `question_sources` |
+| `classification` | classificação disciplinar/pedagógica | labels e scores |
+| `resolution` | resolução de matter/submatter/filter IDs | IDs canônicos |
+| `knowledge-retrieval` | busca legal e evidências | fontes fundamentadoras |
+| `transformation` | adaptação V/F e gabarito | `question_drafts` |
+| `quality` | score, validação e gate | aprovação/revisão/rejeição |
+| `review` | fila e decisão humana | decisão auditada |
+| `publication` | payload canônico e integração ACL | publicação |
+| `governance` | prompts, contratos, políticas | versionamento |
+| `observability` | métricas, tracing, logging | telemetria |
+| `auth` | autenticação e autorização | controle de acesso |
+| `health` | readiness/liveness/operabilidade | diagnóstico |
+| `audit` | trilha e consulta de eventos | auditoria |
 
 ---
 
@@ -1619,23 +1742,31 @@ A estrutura deve refletir módulos por contexto e camadas internas.
 
 ### Fase 1 — Fundação
 
-Base NestJS, autenticação, banco, Redis, observabilidade mínima, upload seguro.
+Criação da base NestJS, configuração global, autenticação, banco, Redis, observabilidade mínima, upload seguro e contratos base.
 
-### Fase 2 — Pipeline
+### Fase 2 — Núcleo de Pipeline
 
-Jobs, filas, workers, estados, persistência operacional.
+Criação de jobs, filas, workers, persistência operacional, status, retries e reprocessamento inicial.
 
-### Fase 3 — Inteligência
+### Fase 3 — Agentes Inteligentes
 
-Agentes, busca semântica, taxonomia, validação.
+Incorporação de parsing avançado, classificação, resolução, retrieval legal, adaptação V/F e gabarito comentado.
 
-### Fase 4 — Publicação
+### Fase 4 — Publicação Segura
 
-ACL, revisão, auditoria e integração controlada.
+Implementação de revisão humana, ACL, publicação controlada, auditoria forte e mecanismos de anti-corrupção.
 
-### Fase 5 — Hardening
+### Fase 5 — Operação e Hardening
 
-SLOs, painéis, carga, resiliência avançada e operação madura.
+SLOs, dashboards, resiliência avançada, carga, stress, governança madura e preparação para escala.
+
+### Relação entre fases e estrutura
+
+- Fase 1 cria `bootstrap`, `config`, `shared`, `auth`, `health`, `ingestion` inicial e `infra` base.
+- Fase 2 expande `queues`, `workers`, `processing_jobs` e módulos de pipeline.
+- Fase 3 expande `classification`, `resolution`, `knowledge-retrieval`, `transformation`, `quality`.
+- Fase 4 expande `review`, `publication`, `audit`, ACL e política de governança.
+- Fase 5 reforça `observability`, `runbooks`, `load tests`, `resilience tests` e automações.
 
 ---
 
@@ -1643,75 +1774,780 @@ SLOs, painéis, carga, resiliência avançada e operação madura.
 
 ```text
 src/
-├── app.module.ts
 ├── main.ts
+├── app.module.ts
 ├── bootstrap/
+│   ├── app.bootstrap.ts
 │   ├── config.bootstrap.ts
 │   ├── logger.bootstrap.ts
+│   ├── validation.bootstrap.ts
+│   ├── exception-filters.bootstrap.ts
 │   ├── metrics.bootstrap.ts
-│   └── tracing.bootstrap.ts
+│   ├── tracing.bootstrap.ts
+│   ├── queues.bootstrap.ts
+│   ├── swagger.bootstrap.ts
+│   └── shutdown.bootstrap.ts
+├── config/
+│   ├── app.config.ts
+│   ├── auth.config.ts
+│   ├── db.config.ts
+│   ├── redis.config.ts
+│   ├── queue.config.ts
+│   ├── storage.config.ts
+│   ├── llm.config.ts
+│   ├── ocr.config.ts
+│   ├── vector.config.ts
+│   ├── observability.config.ts
+│   ├── security.config.ts
+│   ├── feature-flags.config.ts
+│   └── review-policy.config.ts
 ├── shared/
 │   ├── constants/
+│   │   ├── app.constants.ts
+│   │   ├── headers.constants.ts
+│   │   ├── queue-names.constants.ts
+│   │   ├── regex.constants.ts
+│   │   ├── security.constants.ts
+│   │   ├── telemetry.constants.ts
+│   │   └── validation.constants.ts
 │   ├── enums/
+│   │   ├── actor-role.enum.ts
+│   │   ├── agent-name.enum.ts
+│   │   ├── agent-run-status.enum.ts
+│   │   ├── draft-status.enum.ts
+│   │   ├── error-code.enum.ts
+│   │   ├── file-scan-status.enum.ts
+│   │   ├── file-upload-status.enum.ts
+│   │   ├── idempotency-status.enum.ts
+│   │   ├── integration-status.enum.ts
+│   │   ├── job-status.enum.ts
+│   │   ├── job-step-name.enum.ts
+│   │   ├── job-step-status.enum.ts
+│   │   ├── legal-source-type.enum.ts
+│   │   ├── lock-scope.enum.ts
+│   │   ├── publication-action.enum.ts
+│   │   ├── publication-status.enum.ts
+│   │   ├── queue-name.enum.ts
+│   │   ├── review-decision.enum.ts
+│   │   ├── review-status.enum.ts
+│   │   ├── risk-level.enum.ts
+│   │   ├── statement-type.enum.ts
+│   │   ├── taxonomy-resolution-method.enum.ts
+│   │   └── validation-outcome.enum.ts
 │   ├── errors/
+│   │   ├── application.error.ts
+│   │   ├── domain.error.ts
+│   │   ├── infrastructure.error.ts
+│   │   ├── integration.error.ts
+│   │   ├── security.error.ts
+│   │   └── validation.error.ts
+│   ├── exceptions/
+│   │   ├── bad-request.exception.ts
+│   │   ├── conflict.exception.ts
+│   │   ├── forbidden.exception.ts
+│   │   ├── not-found.exception.ts
+│   │   ├── unauthorized.exception.ts
+│   │   └── unprocessable-entity.exception.ts
+│   ├── guards/
+│   │   ├── auth.guard.ts
+│   │   ├── roles.guard.ts
+│   │   ├── idempotency.guard.ts
+│   │   ├── internal-route.guard.ts
+│   │   └── maintenance-mode.guard.ts
+│   ├── interceptors/
+│   │   ├── correlation.interceptor.ts
+│   │   ├── logging.interceptor.ts
+│   │   ├── metrics.interceptor.ts
+│   │   ├── timeout.interceptor.ts
+│   │   ├── tracing.interceptor.ts
+│   │   └── transform-response.interceptor.ts
+│   ├── pipes/
+│   │   ├── parse-uuid.pipe.ts
+│   │   ├── parse-step-name.pipe.ts
+│   │   ├── sanitize-query.pipe.ts
+│   │   └── strict-validation.pipe.ts
+│   ├── decorators/
+│   │   ├── actor.decorator.ts
+│   │   ├── correlation-id.decorator.ts
+│   │   ├── public.decorator.ts
+│   │   ├── roles.decorator.ts
+│   │   └── trace-context.decorator.ts
 │   ├── helpers/
+│   │   ├── async-context.helper.ts
+│   │   ├── correlation-context.helper.ts
+│   │   ├── idempotency-key.helper.ts
+│   │   ├── object-path.helper.ts
+│   │   ├── pagination.helper.ts
+│   │   ├── retry-policy.helper.ts
+│   │   ├── safe-json.helper.ts
+│   │   ├── slug.helper.ts
+│   │   ├── time-window.helper.ts
+│   │   └── uuid.helper.ts
+│   ├── mappers/
+│   │   ├── error.mapper.ts
+│   │   ├── pagination.mapper.ts
+│   │   ├── trace-context.mapper.ts
+│   │   └── validation.mapper.ts
 │   ├── normalizers/
+│   │   ├── array.normalizer.ts
+│   │   ├── boolean.normalizer.ts
+│   │   ├── datetime.normalizer.ts
+│   │   ├── enum.normalizer.ts
+│   │   ├── money.normalizer.ts
+│   │   ├── numeric.normalizer.ts
+│   │   ├── object.normalizer.ts
+│   │   ├── slug.normalizer.ts
+│   │   ├── string.normalizer.ts
+│   │   ├── taxonomy.normalizer.ts
+│   │   ├── text-whitespace.normalizer.ts
+│   │   ├── timezone.normalizer.ts
+│   │   └── unicode.normalizer.ts
 │   ├── sanitizers/
+│   │   ├── file-metadata.sanitizer.ts
+│   │   ├── html-output.sanitizer.ts
+│   │   ├── log-payload.sanitizer.ts
+│   │   ├── prompt-context.sanitizer.ts
+│   │   ├── query-params.sanitizer.ts
+│   │   ├── route-params.sanitizer.ts
+│   │   ├── sensitive-data.masker.ts
+│   │   └── text-input.sanitizer.ts
 │   ├── telemetry/
+│   │   ├── logger.service.ts
+│   │   ├── metrics.service.ts
+│   │   ├── trace.service.ts
+│   │   ├── audit-context.service.ts
+│   │   └── telemetry.types.ts
+│   ├── validators/
+│   │   ├── enum.validator.ts
+│   │   ├── file-type.validator.ts
+│   │   ├── hash.validator.ts
+│   │   ├── json-schema.validator.ts
+│   │   ├── mime-type.validator.ts
+│   │   ├── prompt-safety.validator.ts
+│   │   ├── regex.validator.ts
+│   │   └── uuid.validator.ts
 │   └── utils/
+│       ├── hash.util.ts
+│       ├── hmac.util.ts
+│       ├── random.util.ts
+│       ├── regex.util.ts
+│       └── utf8.util.ts
 ├── modules/
-│   ├── ingestion/
+│   ├── auth/
+│   │   ├── auth.module.ts
 │   │   ├── interfaces/http/
-│   │   ├── application/use-cases/
-│   │   ├── domain/entities/
-│   │   ├── domain/services/
-│   │   ├── domain/contracts/
+│   │   │   ├── auth.controller.ts
+│   │   │   ├── dto/login.request.ts
+│   │   │   └── dto/token.response.ts
+│   │   ├── application/
+│   │   │   ├── dto/authenticated-actor.dto.ts
+│   │   │   ├── services/token-validation.service.ts
+│   │   │   └── use-cases/validate-token.use-case.ts
+│   │   ├── domain/
+│   │   │   ├── entities/authenticated-actor.entity.ts
+│   │   │   └── services/authorization-policy.service.ts
 │   │   └── infrastructure/
+│   │       ├── gateways/auth-provider.gateway.ts
+│   │       └── strategies/jwt.strategy.ts
+│   ├── health/
+│   │   ├── health.module.ts
+│   │   ├── interfaces/http/
+│   │   │   ├── health.controller.ts
+│   │   │   └── dto/health.response.ts
+│   │   ├── application/
+│   │   │   └── use-cases/check-health.use-case.ts
+│   │   └── infrastructure/
+│   │       ├── indicators/database.indicator.ts
+│   │       ├── indicators/queue.indicator.ts
+│   │       ├── indicators/redis.indicator.ts
+│   │       └── indicators/storage.indicator.ts
+│   ├── audit/
+│   │   ├── audit.module.ts
+│   │   ├── interfaces/http/
+│   │   │   ├── audit.controller.ts
+│   │   │   └── dto/list-audit-events.query.ts
+│   │   ├── application/
+│   │   │   ├── services/audit-recorder.service.ts
+│   │   │   └── use-cases/list-publication-events.use-case.ts
+│   │   ├── domain/
+│   │   │   ├── entities/audit-event.entity.ts
+│   │   │   └── contracts/audit-repository.port.ts
+│   │   └── infrastructure/
+│   │       └── repositories/audit.repository.ts
+│   ├── ingestion/
+│   │   ├── ingestion.module.ts
+│   │   ├── interfaces/http/
+│   │   │   ├── uploads.controller.ts
+│   │   │   └── dto/
+│   │   │       ├── create-upload.response.ts
+│   │   │       ├── upload-metadata.request.ts
+│   │   │       └── upload-status.response.ts
+│   │   ├── application/
+│   │   │   ├── dto/
+│   │   │   │   ├── create-upload.command.ts
+│   │   │   │   └── uploaded-file.dto.ts
+│   │   │   ├── services/
+│   │   │   │   ├── file-checksum.service.ts
+│   │   │   │   ├── file-scan.service.ts
+│   │   │   │   └── upload-policy.service.ts
+│   │   │   └── use-cases/
+│   │   │       ├── create-upload.use-case.ts
+│   │   │       └── get-upload-status.use-case.ts
+│   │   ├── domain/
+│   │   │   ├── entities/uploaded-file.entity.ts
+│   │   │   ├── value-objects/file-checksum.vo.ts
+│   │   │   ├── value-objects/file-metadata.vo.ts
+│   │   │   ├── services/file-integrity.service.ts
+│   │   │   └── contracts/
+│   │   │       ├── uploaded-file-repository.port.ts
+│   │   │       ├── file-storage.port.ts
+│   │   │       └── virus-scan.port.ts
+│   │   └── infrastructure/
+│   │       ├── repositories/uploaded-file.repository.ts
+│   │       ├── storage/object-storage.adapter.ts
+│   │       ├── scanners/virus-scan.adapter.ts
+│   │       └── mappers/uploaded-file.mapper.ts
+│   ├── processing/
+│   │   ├── processing.module.ts
+│   │   ├── interfaces/http/
+│   │   │   ├── processing-jobs.controller.ts
+│   │   │   └── dto/
+│   │   │       ├── create-processing-job.request.ts
+│   │   │       ├── processing-job.response.ts
+│   │   │       ├── processing-job-steps.response.ts
+│   │   │       ├── retry-job.request.ts
+│   │   │       └── retry-step.request.ts
+│   │   ├── application/
+│   │   │   ├── dto/
+│   │   │   │   ├── processing-job.dto.ts
+│   │   │   │   ├── processing-step.dto.ts
+│   │   │   │   └── retry-step.command.ts
+│   │   │   ├── orchestrators/
+│   │   │   │   ├── pipeline.orchestrator.ts
+│   │   │   │   └── reprocessing.orchestrator.ts
+│   │   │   ├── services/
+│   │   │   │   ├── job-state-machine.service.ts
+│   │   │   │   ├── processing-step-recorder.service.ts
+│   │   │   │   └── processing-policy.service.ts
+│   │   │   └── use-cases/
+│   │   │       ├── create-processing-job.use-case.ts
+│   │   │       ├── get-processing-job-details.use-case.ts
+│   │   │       ├── list-processing-job-steps.use-case.ts
+│   │   │       ├── retry-processing-job.use-case.ts
+│   │   │       └── retry-processing-step.use-case.ts
+│   │   ├── domain/
+│   │   │   ├── entities/processing-job.entity.ts
+│   │   │   ├── entities/processing-job-step.entity.ts
+│   │   │   ├── value-objects/job-priority.vo.ts
+│   │   │   ├── services/job-transition.service.ts
+│   │   │   └── contracts/
+│   │   │       ├── processing-job-repository.port.ts
+│   │   │       ├── processing-step-repository.port.ts
+│   │   │       └── pipeline-dispatcher.port.ts
+│   │   └── infrastructure/
+│   │       ├── repositories/
+│   │       │   ├── processing-job.repository.ts
+│   │       │   └── processing-job-step.repository.ts
+│   │       ├── queues/
+│   │       │   ├── processing-job.dispatcher.ts
+│   │       │   └── queue-routing.service.ts
+│   │       └── mappers/
+│   │           ├── processing-job.mapper.ts
+│   │           └── processing-step.mapper.ts
 │   ├── extraction/
+│   │   ├── extraction.module.ts
+│   │   ├── interfaces/queue/
+│   │   │   └── extract-questions.processor.ts
+│   │   ├── application/
+│   │   │   ├── dto/
+│   │   │   │   ├── extract-questions.command.ts
+│   │   │   │   └── extracted-question.dto.ts
+│   │   │   ├── services/
+│   │   │   │   ├── document-segmentation.service.ts
+│   │   │   │   └── extraction-result-builder.service.ts
+│   │   │   └── use-cases/extract-questions.use-case.ts
+│   │   ├── domain/
+│   │   │   ├── entities/extracted-question.entity.ts
+│   │   │   ├── value-objects/page-coordinate.vo.ts
+│   │   │   ├── services/question-detection.service.ts
+│   │   │   └── contracts/
+│   │   │       ├── pdf-parser.port.ts
+│   │   │       ├── ocr-provider.port.ts
+│   │   │       └── question-source-repository.port.ts
+│   │   └── infrastructure/
+│   │       ├── parsers/pdf-parser.adapter.ts
+│   │       ├── ocr/ocr-provider.adapter.ts
+│   │       ├── repositories/question-source.repository.ts
+│   │       └── mappers/extracted-question.mapper.ts
 │   ├── classification/
+│   │   ├── classification.module.ts
+│   │   ├── interfaces/queue/classify-question.processor.ts
+│   │   ├── application/
+│   │   │   ├── dto/
+│   │   │   │   ├── classify-question.command.ts
+│   │   │   │   └── classification-result.dto.ts
+│   │   │   ├── services/classification-score.service.ts
+│   │   │   └── use-cases/classify-question.use-case.ts
+│   │   ├── domain/
+│   │   │   ├── entities/draft-classification.entity.ts
+│   │   │   ├── services/classification-policy.service.ts
+│   │   │   └── contracts/
+│   │   │       ├── classification-gateway.port.ts
+│   │   │       └── question-draft-repository.port.ts
+│   │   └── infrastructure/
+│   │       ├── gateways/classification-llm.adapter.ts
+│   │       ├── repositories/classification.repository.ts
+│   │       └── mappers/classification.mapper.ts
 │   ├── resolution/
+│   │   ├── resolution.module.ts
+│   │   ├── interfaces/queue/resolve-ids.processor.ts
+│   │   ├── application/
+│   │   │   ├── dto/resolve-ids.command.ts
+│   │   │   ├── services/taxonomy-match.service.ts
+│   │   │   └── use-cases/resolve-ids.use-case.ts
+│   │   ├── domain/
+│   │   │   ├── entities/taxonomy-resolution.entity.ts
+│   │   │   ├── services/resolution-policy.service.ts
+│   │   │   └── contracts/
+│   │   │       ├── taxonomy-catalog.port.ts
+│   │   │       └── resolution-repository.port.ts
+│   │   └── infrastructure/
+│   │       ├── gateways/taxonomy-catalog.adapter.ts
+│   │       ├── repositories/resolution.repository.ts
+│   │       └── cache/taxonomy-cache.service.ts
 │   ├── knowledge-retrieval/
+│   │   ├── knowledge-retrieval.module.ts
+│   │   ├── interfaces/queue/search-legal-basis.processor.ts
+│   │   ├── application/
+│   │   │   ├── dto/
+│   │   │   │   ├── search-legal-basis.command.ts
+│   │   │   │   └── legal-evidence.dto.ts
+│   │   │   ├── services/reranking.service.ts
+│   │   │   └── use-cases/search-legal-basis.use-case.ts
+│   │   ├── domain/
+│   │   │   ├── entities/legal-evidence.entity.ts
+│   │   │   ├── services/evidence-selection.service.ts
+│   │   │   └── contracts/
+│   │   │       ├── vector-search.port.ts
+│   │   │       ├── embedding-provider.port.ts
+│   │   │       └── legal-source-repository.port.ts
+│   │   └── infrastructure/
+│   │       ├── vector/pgvector-search.adapter.ts
+│   │       ├── embeddings/embedding-provider.adapter.ts
+│   │       ├── repositories/legal-source.repository.ts
+│   │       └── mappers/legal-evidence.mapper.ts
 │   ├── transformation/
+│   │   ├── transformation.module.ts
+│   │   ├── interfaces/queue/
+│   │   │   ├── adapt-true-false.processor.ts
+│   │   │   └── generate-answer-key.processor.ts
+│   │   ├── application/
+│   │   │   ├── dto/
+│   │   │   │   ├── adapt-true-false.command.ts
+│   │   │   │   ├── generate-answer-key.command.ts
+│   │   │   │   └── question-draft.dto.ts
+│   │   │   ├── services/
+│   │   │   │   ├── draft-builder.service.ts
+│   │   │   │   └── semantic-preservation.service.ts
+│   │   │   └── use-cases/
+│   │   │       ├── adapt-true-false.use-case.ts
+│   │   │       └── generate-answer-key.use-case.ts
+│   │   ├── domain/
+│   │   │   ├── entities/question-draft.entity.ts
+│   │   │   ├── services/draft-consistency.service.ts
+│   │   │   └── contracts/
+│   │   │       ├── transformation-gateway.port.ts
+│   │   │       └── question-draft-repository.port.ts
+│   │   └── infrastructure/
+│   │       ├── gateways/transformation-llm.adapter.ts
+│   │       ├── repositories/question-draft.repository.ts
+│   │       └── mappers/question-draft.mapper.ts
 │   ├── quality/
+│   │   ├── quality.module.ts
+│   │   ├── interfaces/queue/validate-draft.processor.ts
+│   │   ├── application/
+│   │   │   ├── dto/
+│   │   │   │   ├── validate-draft.command.ts
+│   │   │   │   └── draft-validation-result.dto.ts
+│   │   │   ├── services/
+│   │   │   │   ├── quality-score.service.ts
+│   │   │   │   ├── validation-gate.service.ts
+│   │   │   │   └── hallucination-risk.service.ts
+│   │   │   └── use-cases/validate-draft.use-case.ts
+│   │   ├── domain/
+│   │   │   ├── entities/draft-validation.entity.ts
+│   │   │   ├── services/validation-policy.service.ts
+│   │   │   └── contracts/validation-repository.port.ts
+│   │   └── infrastructure/
+│   │       ├── repositories/validation.repository.ts
+│   │       └── mappers/validation.mapper.ts
 │   ├── review/
+│   │   ├── review.module.ts
+│   │   ├── interfaces/http/
+│   │   │   ├── review.controller.ts
+│   │   │   └── dto/
+│   │   │       ├── submit-review.request.ts
+│   │   │       └── review-item.response.ts
+│   │   ├── interfaces/queue/prepare-manual-review.processor.ts
+│   │   ├── application/
+│   │   │   ├── dto/
+│   │   │   │   ├── review-decision.command.ts
+│   │   │   │   └── manual-review-item.dto.ts
+│   │   │   ├── services/
+│   │   │   │   ├── review-assignment.service.ts
+│   │   │   │   └── review-sla.service.ts
+│   │   │   └── use-cases/
+│   │   │       ├── list-review-queue.use-case.ts
+│   │   │       ├── claim-review-item.use-case.ts
+│   │   │       └── submit-review.use-case.ts
+│   │   ├── domain/
+│   │   │   ├── entities/manual-review-item.entity.ts
+│   │   │   ├── services/review-decision-policy.service.ts
+│   │   │   └── contracts/manual-review-repository.port.ts
+│   │   └── infrastructure/
+│   │       ├── repositories/manual-review.repository.ts
+│   │       └── mappers/manual-review.mapper.ts
 │   ├── publication/
+│   │   ├── publication.module.ts
+│   │   ├── interfaces/http/
+│   │   │   ├── publication.controller.ts
+│   │   │   └── dto/
+│   │   │       ├── publish-draft.request.ts
+│   │   │       └── publication.response.ts
+│   │   ├── interfaces/queue/publish-draft.processor.ts
+│   │   ├── application/
+│   │   │   ├── dto/
+│   │   │   │   ├── canonical-publication-payload.dto.ts
+│   │   │   │   └── publication-result.dto.ts
+│   │   │   ├── services/
+│   │   │   │   ├── publication-payload-builder.service.ts
+│   │   │   │   ├── publication-guard.service.ts
+│   │   │   │   └── compensation.service.ts
+│   │   │   └── use-cases/
+│   │   │       ├── publish-draft.use-case.ts
+│   │   │       └── get-publication-status.use-case.ts
+│   │   ├── domain/
+│   │   │   ├── entities/publication-event.entity.ts
+│   │   │   ├── services/publication-policy.service.ts
+│   │   │   └── contracts/
+│   │   │       ├── publication-event-repository.port.ts
+│   │   │       └── main-database-publication.port.ts
+│   │   └── infrastructure/
+│   │       ├── acl/mysql-publication.acl-adapter.ts
+│   │       ├── repositories/publication-event.repository.ts
+│   │       └── mappers/publication.mapper.ts
 │   ├── governance/
+│   │   ├── governance.module.ts
+│   │   ├── application/
+│   │   │   ├── services/
+│   │   │   │   ├── prompt-version.service.ts
+│   │   │   │   ├── contract-version.service.ts
+│   │   │   │   └── reprocessing-policy.service.ts
+│   │   │   └── use-cases/
+│   │   │       ├── get-active-prompt-version.use-case.ts
+│   │   │       └── validate-contract-version.use-case.ts
+│   │   ├── domain/
+│   │   │   ├── entities/prompt-version.entity.ts
+│   │   │   ├── entities/contract-version.entity.ts
+│   │   │   └── contracts/governance-repository.port.ts
+│   │   └── infrastructure/
+│   │       ├── repositories/governance.repository.ts
+│   │       └── stores/prompt-template.store.ts
 │   └── observability/
+│       ├── observability.module.ts
+│       ├── application/
+│       │   ├── services/
+│       │   │   ├── audit-trail.service.ts
+│       │   │   ├── metrics-recorder.service.ts
+│       │   │   ├── trace-propagation.service.ts
+│       │   │   └── structured-log.service.ts
+│       │   └── use-cases/export-operational-metrics.use-case.ts
+│       ├── domain/
+│       │   ├── entities/agent-run.entity.ts
+│       │   ├── entities/integration-log.entity.ts
+│       │   ├── entities/llm-invocation.entity.ts
+│       │   ├── entities/dead-letter-event.entity.ts
+│       │   └── contracts/
+│       │       ├── agent-run-repository.port.ts
+│       │       ├── integration-log-repository.port.ts
+│       │       ├── llm-invocation-repository.port.ts
+│       │       └── dead-letter-repository.port.ts
+│       └── infrastructure/
+│           ├── repositories/
+│           │   ├── agent-run.repository.ts
+│           │   ├── integration-log.repository.ts
+│           │   ├── llm-invocation.repository.ts
+│           │   └── dead-letter.repository.ts
+│           └── telemetry/
+│               ├── prometheus.adapter.ts
+│               ├── otel.adapter.ts
+│               └── structured-logger.adapter.ts
 ├── infra/
-│   ├── db/postgres/
-│   ├── db/mysql/
+│   ├── db/
+│   │   ├── postgres/
+│   │   │   ├── postgres.module.ts
+│   │   │   ├── prisma.service.ts
+│   │   │   ├── migrations/
+│   │   │   ├── seeds/
+│   │   │   └── schema/
+│   │   └── mysql/
+│   │       ├── mysql.module.ts
+│   │       ├── mysql-client.service.ts
+│   │       └── acl-schema/
 │   ├── redis/
+│   │   ├── redis.module.ts
+│   │   ├── redis.service.ts
+│   │   ├── distributed-lock.service.ts
+│   │   ├── cache.service.ts
+│   │   └── idempotency-store.service.ts
 │   ├── queues/
+│   │   ├── bullmq.module.ts
+│   │   ├── queue-factory.service.ts
+│   │   ├── queue-metrics.service.ts
+│   │   └── worker-host.factory.ts
 │   ├── storage/
-│   ├── vector/
+│   │   ├── storage.module.ts
+│   │   ├── object-storage.service.ts
+│   │   └── signed-url.service.ts
 │   ├── llm/
+│   │   ├── llm.module.ts
+│   │   ├── openai.adapter.ts
+│   │   ├── llm-request.builder.ts
+│   │   └── llm-response.parser.ts
+│   ├── ocr/
+│   │   ├── ocr.module.ts
+│   │   ├── ocr.adapter.ts
+│   │   └── ocr-result.parser.ts
+│   ├── vector/
+│   │   ├── vector.module.ts
+│   │   ├── vector-search.adapter.ts
+│   │   ├── embedding.adapter.ts
+│   │   └── reindex.service.ts
 │   └── security/
-├── config/
+│       ├── cors.factory.ts
+│       ├── csrf.strategy.ts
+│       ├── headers.factory.ts
+│       ├── secret-manager.service.ts
+│       └── request-signature.service.ts
 ├── docs/
+│   ├── architecture/
+│   │   ├── context-diagram.md
+│   │   ├── containers-diagram.md
+│   │   ├── data-model.md
+│   │   └── pipeline.md
+│   ├── adr/
+│   │   ├── ADR-001-clean-architecture.md
+│   │   ├── ADR-002-pipeline-async.md
+│   │   ├── ADR-003-pgvector.md
+│   │   └── ADR-004-acl-legado.md
+│   ├── contracts/
+│   │   ├── api/
+│   │   ├── internal-events/
+│   │   └── publication/
+│   └── runbooks/
+│       ├── publication-backlog.md
+│       ├── dlq-reprocessing.md
+│       └── vector-reindex.md
 └── test/
+    ├── fixtures/
+    ├── factories/
     ├── unit/
     ├── integration/
     ├── contract/
     ├── e2e/
-    └── resilience/
+    ├── resilience/
+    └── load/
 ```
 
 ---
 
 ## 90. Mapeamento Arquivo a Arquivo por Responsabilidade
 
-Exemplos centrais:
+### 90.1 Bootstrap e configuração
 
-- `create-processing-job.use-case.ts`: cria job e dispara pipeline inicial;
-- `extract-questions.processor.ts`: worker de extração;
-- `classify-question.service.ts`: serviço de classificação;
-- `resolve-taxonomy-ids.use-case.ts`: resolução canônica;
-- `search-legal-basis.gateway.ts`: porta de busca legal;
-- `publish-draft.use-case.ts`: caso de uso de publicação;
-- `mysql-publication.acl-adapter.ts`: ACL do legado;
-- `correlation-context.interceptor.ts`: propagação de contexto;
-- `error-normalizer.ts`: normalização de falhas;
-- `idempotency.guard.ts`: proteção de duplicidade.
+| Arquivo | Responsabilidade |
+|---|---|
+| `main.ts` | ponto de entrada da aplicação |
+| `app.module.ts` | composição raiz dos módulos |
+| `bootstrap/app.bootstrap.ts` | inicialização global |
+| `bootstrap/logger.bootstrap.ts` | logger estruturado |
+| `bootstrap/tracing.bootstrap.ts` | tracing distribuído |
+| `bootstrap/metrics.bootstrap.ts` | métricas e collectors |
+| `bootstrap/validation.bootstrap.ts` | validation pipes globais |
+| `config/*.config.ts` | configuração tipada por domínio técnico |
+
+### 90.2 Shared transversal
+
+| Grupo | Arquivos | Responsabilidade |
+|---|---|---|
+| Constants | `shared/constants/*` | valores centrais estáveis |
+| Enums | `shared/enums/*` | padronização semântica |
+| Errors/Exceptions | `shared/errors/*`, `shared/exceptions/*` | tratamento de falhas |
+| Guards | `shared/guards/*` | autenticação, autorização, idempotência |
+| Interceptors | `shared/interceptors/*` | correlação, logs, métricas, timeout |
+| Pipes | `shared/pipes/*` | parsing/validação defensiva |
+| Helpers | `shared/helpers/*` | utilidades técnicas reutilizáveis |
+| Normalizers | `shared/normalizers/*` | normalização global |
+| Sanitizers | `shared/sanitizers/*` | sanitização e mascaramento |
+| Telemetry | `shared/telemetry/*` | abstrações operacionais |
+
+### 90.3 Módulo de ingestão
+
+| Arquivo | Responsabilidade |
+|---|---|
+| `uploads.controller.ts` | endpoint de upload |
+| `create-upload.use-case.ts` | caso de uso de criação de upload |
+| `file-checksum.service.ts` | cálculo/validação de hash |
+| `upload-policy.service.ts` | políticas de aceite |
+| `uploaded-file.entity.ts` | entidade de domínio do arquivo |
+| `uploaded-file-repository.port.ts` | contrato de persistência |
+| `object-storage.adapter.ts` | integração com storage |
+| `virus-scan.adapter.ts` | integração com scanner |
+
+### 90.4 Módulo de processamento
+
+| Arquivo | Responsabilidade |
+|---|---|
+| `processing-jobs.controller.ts` | criação e consulta de jobs |
+| `pipeline.orchestrator.ts` | orquestração macro do fluxo |
+| `reprocessing.orchestrator.ts` | replay controlado |
+| `job-state-machine.service.ts` | transições válidas |
+| `create-processing-job.use-case.ts` | criação do job |
+| `retry-processing-step.use-case.ts` | retry granular |
+| `processing-job.entity.ts` | entidade raiz do processamento |
+| `processing-job-step.entity.ts` | etapa operacional |
+| `processing-job.dispatcher.ts` | despacho de filas |
+
+### 90.5 Módulo de extração
+
+| Arquivo | Responsabilidade |
+|---|---|
+| `extract-questions.processor.ts` | worker da etapa de extração |
+| `extract-questions.use-case.ts` | regra de extração |
+| `document-segmentation.service.ts` | segmentação por páginas/blocos |
+| `question-detection.service.ts` | detecção de questões |
+| `pdf-parser.adapter.ts` | parser de PDF |
+| `ocr-provider.adapter.ts` | OCR fallback |
+| `question-source.repository.ts` | persistência de fontes extraídas |
+
+### 90.6 Módulo de classificação
+
+| Arquivo | Responsabilidade |
+|---|---|
+| `classify-question.processor.ts` | worker de classificação |
+| `classify-question.use-case.ts` | classificação da questão |
+| `classification-score.service.ts` | score/classificação |
+| `classification-policy.service.ts` | regras de classificação |
+| `classification-llm.adapter.ts` | gateway para modelo |
+
+### 90.7 Módulo de resolução
+
+| Arquivo | Responsabilidade |
+|---|---|
+| `resolve-ids.processor.ts` | worker de resolução |
+| `resolve-ids.use-case.ts` | resolução de taxonomia |
+| `taxonomy-match.service.ts` | matching e heurísticas |
+| `resolution-policy.service.ts` | política de aceitação |
+| `taxonomy-catalog.adapter.ts` | acesso ao catálogo canônico |
+| `taxonomy-cache.service.ts` | cache de taxonomia |
+
+### 90.8 Módulo de knowledge retrieval
+
+| Arquivo | Responsabilidade |
+|---|---|
+| `search-legal-basis.processor.ts` | worker de busca |
+| `search-legal-basis.use-case.ts` | pipeline de retrieval |
+| `reranking.service.ts` | rerank contextual |
+| `evidence-selection.service.ts` | seleção de evidências |
+| `pgvector-search.adapter.ts` | busca vetorial |
+| `embedding-provider.adapter.ts` | embeddings |
+| `legal-source.repository.ts` | persistência de fontes legais |
+
+### 90.9 Módulo de transformação
+
+| Arquivo | Responsabilidade |
+|---|---|
+| `adapt-true-false.processor.ts` | worker de adaptação |
+| `generate-answer-key.processor.ts` | worker de gabarito |
+| `adapt-true-false.use-case.ts` | transformação para V/F |
+| `generate-answer-key.use-case.ts` | geração de justificativa |
+| `semantic-preservation.service.ts` | preservação semântica |
+| `draft-builder.service.ts` | montagem do draft |
+| `transformation-llm.adapter.ts` | provider de transformação |
+
+### 90.10 Módulo de qualidade
+
+| Arquivo | Responsabilidade |
+|---|---|
+| `validate-draft.processor.ts` | worker de validação |
+| `validate-draft.use-case.ts` | validação central |
+| `quality-score.service.ts` | score de qualidade |
+| `validation-gate.service.ts` | gate de aprovação |
+| `hallucination-risk.service.ts` | avaliação de risco |
+
+### 90.11 Módulo de revisão
+
+| Arquivo | Responsabilidade |
+|---|---|
+| `review.controller.ts` | endpoints de revisão |
+| `prepare-manual-review.processor.ts` | worker de preparação de fila |
+| `list-review-queue.use-case.ts` | consulta da fila |
+| `claim-review-item.use-case.ts` | claim de item |
+| `submit-review.use-case.ts` | decisão do revisor |
+| `review-assignment.service.ts` | distribuição de revisão |
+| `review-sla.service.ts` | SLAs operacionais |
+
+### 90.12 Módulo de publicação
+
+| Arquivo | Responsabilidade |
+|---|---|
+| `publication.controller.ts` | endpoints de publicação |
+| `publish-draft.processor.ts` | worker de publicação |
+| `publish-draft.use-case.ts` | caso de uso de publicação |
+| `publication-payload-builder.service.ts` | payload canônico |
+| `publication-guard.service.ts` | validações finais |
+| `compensation.service.ts` | rollback/compensação lógica |
+| `mysql-publication.acl-adapter.ts` | integração com legado |
+| `publication-event.repository.ts` | trilha de publicação |
+
+### 90.13 Módulo de governança
+
+| Arquivo | Responsabilidade |
+|---|---|
+| `prompt-version.service.ts` | gestão de versão de prompts |
+| `contract-version.service.ts` | gestão de contratos |
+| `reprocessing-policy.service.ts` | política de replay |
+| `prompt-version.entity.ts` | entidade de prompt |
+| `contract-version.entity.ts` | entidade de contrato |
+| `prompt-template.store.ts` | catálogo de templates |
+
+### 90.14 Módulo de observabilidade
+
+| Arquivo | Responsabilidade |
+|---|---|
+| `audit-trail.service.ts` | registro transversal de auditoria |
+| `metrics-recorder.service.ts` | emissão de métricas |
+| `trace-propagation.service.ts` | correlação/tracing |
+| `structured-log.service.ts` | logging estruturado |
+| `agent-run.repository.ts` | persistência de agent runs |
+| `llm-invocation.repository.ts` | persistência de invocações LLM |
+| `dead-letter.repository.ts` | persistência de DLQ |
+
+### 90.15 Infraestrutura técnica comum
+
+| Arquivo | Responsabilidade |
+|---|---|
+| `prisma.service.ts` | acesso Postgres |
+| `mysql-client.service.ts` | cliente legado |
+| `distributed-lock.service.ts` | locks distribuídos |
+| `cache.service.ts` | abstração de cache |
+| `idempotency-store.service.ts` | store de idempotência |
+| `queue-factory.service.ts` | fábrica de filas |
+| `worker-host.factory.ts` | bootstrap de workers |
+| `llm-request.builder.ts` | construção segura de request LLM |
+| `llm-response.parser.ts` | parsing defensivo de resposta |
+| `request-signature.service.ts` | assinatura/verificação |
+| `secret-manager.service.ts` | acesso a segredos |
 
 ---
 
@@ -1729,23 +2565,79 @@ Exemplos centrais:
 
 ### 92.1 Fase 1 — Fundação da Plataforma
 
-**Objetivo:** preparar infraestrutura de execução, observabilidade básica, segurança e upload.
+**Objetivo:** estabelecer base técnica, segurança, configuração e upload confiável.
+
+**Pastas/arquivos que nascem:**
+
+- `bootstrap/*`
+- `config/*`
+- `shared/constants/*`
+- `shared/enums/*`
+- `shared/errors/*`
+- `shared/exceptions/*`
+- `shared/guards/*`
+- `shared/interceptors/*`
+- `shared/pipes/*`
+- `modules/auth/*`
+- `modules/health/*`
+- `modules/ingestion/*`
+- `infra/db/*`
+- `infra/redis/*`
+- `infra/storage/*`
 
 ### 92.2 Fase 2 — Núcleo de Pipeline
 
-**Objetivo:** estabelecer jobs, filas, persistência de estado e orquestração.
+**Objetivo:** introduzir processamento assíncrono, estados, filas e reprocessamento.
+
+**Pastas/arquivos que nascem:**
+
+- `modules/processing/*`
+- `infra/queues/*`
+- `modules/extraction/interfaces/queue/*`
+- `shared/helpers/retry-policy.helper.ts`
+- `shared/enums/job-*.enum.ts`
 
 ### 92.3 Fase 3 — Agentes Inteligentes
 
-**Objetivo:** incorporar extração avançada, classificação, resolução, busca e transformação.
+**Objetivo:** incorporar classificação, resolução, retrieval, transformação e validação.
+
+**Pastas/arquivos que nascem:**
+
+- `modules/classification/*`
+- `modules/resolution/*`
+- `modules/knowledge-retrieval/*`
+- `modules/transformation/*`
+- `modules/quality/*`
+- `infra/llm/*`
+- `infra/vector/*`
+- `infra/ocr/*`
 
 ### 92.4 Fase 4 — Publicação Segura
 
-**Objetivo:** revisão, ACL, publicação controlada e auditoria forte.
+**Objetivo:** revisão humana, ACL, publicação e auditoria forte.
+
+**Pastas/arquivos que nascem:**
+
+- `modules/review/*`
+- `modules/publication/*`
+- `modules/audit/*`
+- `infra/db/mysql/*`
+- `shared/guards/idempotency.guard.ts`
+- `infra/security/request-signature.service.ts`
 
 ### 92.5 Fase 5 — Operação e Hardening
 
-**Objetivo:** elevar maturidade operacional, SLOs, testes de estresse, contingência e governança.
+**Objetivo:** consolidar telemetria madura, segurança avançada, testes e runbooks.
+
+**Pastas/arquivos que nascem/evoluem:**
+
+- `modules/observability/*`
+- `docs/runbooks/*`
+- `test/resilience/*`
+- `test/load/*`
+- `bootstrap/shutdown.bootstrap.ts`
+- `config/feature-flags.config.ts`
+- `infra/security/*`
 
 ---
 
@@ -1765,31 +2657,36 @@ Exemplos centrais:
 
 | Risco | Impacto | Mitigação |
 |---|---|---|
-| OCR ruim | perda de extração | fallback OCR + revisão |
-| classificação ambígua | taxonomia incorreta | resolução híbrida + fila manual |
-| alucinação de IA | publicação incorreta | validation gate + revisão |
-| indisponibilidade do legado | atraso de publicação | breaker + retry + fila de compensação |
-| saturação de filas | lentidão global | bulkheads + autoscaling |
-| regressão de prompts | queda de qualidade | versionamento + replay controlado |
+| estrutura genérica demais | acoplamento e confusão | modularização por contexto + camadas |
+| shared virar dumping ground | perda de coesão | critérios rígidos de transversalidade |
+| excesso de adapters sem contrato | fragilidade de integração | ports explícitas |
+| crescimento desordenado de enums | inconsistência semântica | catálogo central versionado |
+| helpers sem governança | duplicação e bugs | revisão arquitetural periódica |
 
 ---
 
 ## 95. Runbooks Operacionais
 
-### Runbook 1 — Fila de publicação saturada
+### Runbook 1 — Falha estrutural em módulo de fila
 
-1. verificar backlog e taxa de erro;
-2. checar ACL e MySQL principal;
-3. inspecionar circuit breaker;
-4. pausar ingestão se necessário;
-5. reprocessar lotes seguros.
+1. verificar fila, worker e dependências Redis;
+2. validar se o processor foi carregado pelo bootstrap;
+3. checar lock pendente e idempotência;
+4. inspecionar métricas e logs por `queueName` e `jobId`.
 
-### Runbook 2 — Aumento de DLQ
+### Runbook 2 — Inconsistência de taxonomia
 
-1. agrupar por erro normalizado;
-2. identificar etapa predominante;
-3. validar mudança recente de prompt/modelo;
-4. executar replay controlado.
+1. revisar `resolution` e `taxonomy-cache.service.ts`;
+2. comparar aliases, score e método de matching;
+3. validar catálogo canônico e invalidar cache;
+4. reprocessar etapa de resolução.
+
+### Runbook 3 — Duplicidade de publicação
+
+1. verificar `publication_events` e `idempotency_keys`;
+2. inspecionar lock de publicação;
+3. confirmar replay ou retry duplicado;
+4. executar compensação lógica se necessário.
 
 ---
 
@@ -1802,26 +2699,26 @@ A escalabilidade ocorre por:
 - particionamento lógico por job/draft;
 - tuning de vector search;
 - cache seletivo de taxonomia e fontes frequentes;
-- evolução do pipeline para execução parcial paralela por questão.
+- evolução do pipeline para execução parcial paralela por questão;
+- clareza estrutural suficiente para modularização futura por serviços.
 
 ---
 
 ## 97. Próximos Passos
 
-1. consolidar contratos e enums iniciais;
-2. fechar modelo relacional operacional;
-3. implementar upload seguro e criação de job;
-4. construir pipeline mínimo com extração e status;
-5. adicionar classificação e resolução de IDs;
-6. integrar busca legal e adaptação V/F;
-7. implantar revisão/publicação controlada;
-8. concluir hardening operacional.
+1. congelar catálogo inicial de enums globais;
+2. fechar contratos base de upload, job, draft e publicação;
+3. consolidar tree view definitiva da Fase 1;
+4. mapear migrations iniciais do Postgres;
+5. implementar `processing`, `ingestion` e `shared` primeiro;
+6. adicionar `classification`, `resolution` e `knowledge-retrieval`;
+7. concluir `review`, `publication` e `observability`;
+8. formalizar ADRs de decisões críticas.
 
 ---
 
 ## 98. Conclusão
 
-A plataforma proposta estrutura o problema de geração de questões com IA como um **pipeline enterprise modular, auditável, resiliente e orientado a governança**, separando claramente processamento operacional, enriquecimento semântico, controle de qualidade e publicação em sistema legado.
+A estrutura proposta organiza o projeto de forma **modular, escalável, auditável e sustentável**, permitindo que o serviço de geração de questões com IA evolua sem perder governança, observabilidade, segurança e clareza arquitetural.
 
-A combinação de **NestJS + PostgreSQL + Redis + filas + vector search + ACL + observabilidade forte** permite construir um serviço apto para ambiente produtivo real, com evolução incremental, forte controle de risco e base adequada para operação em larga escala.
-
+A tree view completa, associada à separação por responsabilidades, enums globais, normalizadores, sanitizadores, guards, interceptors, adapters, ports e módulos de domínio, cria uma base coerente para implementação enterprise real, evitando truncamento estrutural e reduzindo o risco de crescimento desordenado do código.
