@@ -432,12 +432,19 @@ A dependência aponta sempre para o centro:
 %%{init: {
   "theme": "base",
   "themeVariables": {
-    "primaryColor": "#e0f2fe",
-    "primaryTextColor": "#0f172a",
-    "primaryBorderColor": "#0284c7",
-    "lineColor": "#475569",
-    "secondaryColor": "#dcfce7",
-    "tertiaryColor": "#fef3c7",
+    "background": "#020617",
+    "primaryColor": "#0f172a",
+    "primaryTextColor": "#e5e7eb",
+    "primaryBorderColor": "#60a5fa",
+    "lineColor": "#94a3b8",
+    "secondaryColor": "#111827",
+    "secondaryTextColor": "#e5e7eb",
+    "secondaryBorderColor": "#34d399",
+    "tertiaryColor": "#1e293b",
+    "tertiaryTextColor": "#f8fafc",
+    "noteBkgColor": "#1e293b",
+    "noteTextColor": "#e2e8f0",
+    "noteBorderColor": "#fbbf24",
     "fontSize": "14px"
   }
 }}%%
@@ -458,10 +465,10 @@ flowchart TD
     M --> N
     N --> O[📜 Auditoria e Evento de Publicação]
 
-    classDef input fill:#dbeafe,stroke:#2563eb,color:#0f172a;
-    classDef process fill:#dcfce7,stroke:#16a34a,color:#052e16;
-    classDef decision fill:#fef3c7,stroke:#d97706,color:#78350f;
-    classDef output fill:#ede9fe,stroke:#7c3aed,color:#2e1065;
+    classDef input fill:#0f172a,stroke:#60a5fa,color:#e5e7eb,stroke-width:2px;
+    classDef process fill:#111827,stroke:#34d399,color:#e5e7eb,stroke-width:2px;
+    classDef decision fill:#1e293b,stroke:#fbbf24,color:#f8fafc,stroke-width:2px;
+    classDef output fill:#111827,stroke:#a78bfa,color:#f3f4f6,stroke-width:2px;
 
     class A,B,C,D input;
     class E,F,G,H,I,J,K process;
@@ -477,10 +484,29 @@ flowchart TD
 %%{init: {
   "theme": "base",
   "themeVariables": {
-    "primaryColor": "#f8fafc",
-    "primaryTextColor": "#111827",
+    "background": "#020617",
+    "primaryColor": "#0f172a",
+    "primaryTextColor": "#e5e7eb",
     "primaryBorderColor": "#475569",
-    "lineColor": "#64748b",
+    "lineColor": "#94a3b8",
+    "secondaryColor": "#111827",
+    "secondaryTextColor": "#e2e8f0",
+    "secondaryBorderColor": "#60a5fa",
+    "tertiaryColor": "#1e293b",
+    "tertiaryTextColor": "#f8fafc",
+    "actorBkg": "#111827",
+    "actorTextColor": "#f8fafc",
+    "actorBorder": "#60a5fa",
+    "actorLineColor": "#94a3b8",
+    "signalColor": "#cbd5e1",
+    "signalTextColor": "#e5e7eb",
+    "labelBoxBkgColor": "#1e293b",
+    "labelBoxBorderColor": "#475569",
+    "labelTextColor": "#f3f4f6",
+    "loopTextColor": "#f8fafc",
+    "noteBkgColor": "#0f172a",
+    "noteTextColor": "#e2e8f0",
+    "noteBorderColor": "#a78bfa",
     "fontSize": "14px"
   }
 }}%%
@@ -762,12 +788,29 @@ O modelo futuro separa três dimensões:
 %%{init: {
   "theme": "base",
   "themeVariables": {
-    "primaryColor": "#dbeafe",
-    "primaryTextColor": "#0f172a",
-    "primaryBorderColor": "#2563eb",
-    "lineColor": "#475569",
-    "secondaryColor": "#ecfeff",
-    "tertiaryColor": "#f8fafc",
+    "background": "#020617",
+    "primaryColor": "#0f172a",
+    "primaryTextColor": "#e5e7eb",
+    "primaryBorderColor": "#60a5fa",
+    "lineColor": "#94a3b8",
+    "secondaryColor": "#111827",
+    "secondaryTextColor": "#e2e8f0",
+    "secondaryBorderColor": "#34d399",
+    "tertiaryColor": "#1e293b",
+    "tertiaryTextColor": "#f8fafc",
+    "noteBkgColor": "#1e293b",
+    "noteTextColor": "#e2e8f0",
+    "noteBorderColor": "#a78bfa",
+    "actorBkg": "#0f172a",
+    "actorTextColor": "#e5e7eb",
+    "actorBorder": "#60a5fa",
+    "actorLineColor": "#94a3b8",
+    "signalColor": "#cbd5e1",
+    "signalTextColor": "#e5e7eb",
+    "labelBoxBkgColor": "#111827",
+    "labelBoxBorderColor": "#475569",
+    "labelTextColor": "#e5e7eb",
+    "loopTextColor": "#f8fafc",
     "fontSize": "14px"
   }
 }}%%
@@ -826,12 +869,19 @@ erDiagram
 %%{init: {
   "theme": "base",
   "themeVariables": {
-    "primaryColor": "#ede9fe",
-    "primaryTextColor": "#111827",
-    "primaryBorderColor": "#7c3aed",
-    "lineColor": "#334155",
-    "secondaryColor": "#dcfce7",
-    "tertiaryColor": "#fff7ed",
+    "background": "#020617",
+    "primaryColor": "#111827",
+    "primaryTextColor": "#f3f4f6",
+    "primaryBorderColor": "#a78bfa",
+    "lineColor": "#94a3b8",
+    "secondaryColor": "#0f172a",
+    "secondaryTextColor": "#e5e7eb",
+    "secondaryBorderColor": "#34d399",
+    "tertiaryColor": "#1e293b",
+    "tertiaryTextColor": "#f8fafc",
+    "noteBkgColor": "#1e293b",
+    "noteTextColor": "#e2e8f0",
+    "noteBorderColor": "#fbbf24",
     "fontSize": "14px"
   }
 }}%%
@@ -1759,12 +1809,19 @@ A API é dividida em cinco grupos principais:
 %%{init: {
   "theme": "base",
   "themeVariables": {
-    "primaryColor": "#ecfccb",
-    "primaryTextColor": "#1f2937",
-    "primaryBorderColor": "#65a30d",
-    "lineColor": "#475569",
-    "secondaryColor": "#dbeafe",
-    "tertiaryColor": "#ede9fe",
+    "background": "#020617",
+    "primaryColor": "#0f172a",
+    "primaryTextColor": "#e5e7eb",
+    "primaryBorderColor": "#34d399",
+    "lineColor": "#94a3b8",
+    "secondaryColor": "#111827",
+    "secondaryTextColor": "#e2e8f0",
+    "secondaryBorderColor": "#60a5fa",
+    "tertiaryColor": "#1e293b",
+    "tertiaryTextColor": "#f8fafc",
+    "noteBkgColor": "#1e293b",
+    "noteTextColor": "#e2e8f0",
+    "noteBorderColor": "#fbbf24",
     "fontSize": "14px"
   }
 }}%%
@@ -1780,6 +1837,16 @@ flowchart LR
     I --> J[(🐘 PostgreSQL / Redis / Storage / ACL)]
     J --> K[📊 Logs + Metrics + Traces]
     K --> L[✅ Response Presenter]
+
+    classDef borderA fill:#0f172a,stroke:#60a5fa,color:#e5e7eb,stroke-width:2px;
+    classDef borderB fill:#111827,stroke:#34d399,color:#e5e7eb,stroke-width:2px;
+    classDef borderC fill:#1e293b,stroke:#a78bfa,color:#f8fafc,stroke-width:2px;
+    classDef borderD fill:#111827,stroke:#fbbf24,color:#f8fafc,stroke-width:2px;
+
+    class A,B,C,D,E borderA;
+    class F,G,H,I borderB;
+    class J borderC;
+    class K,L borderD;
 ```
 
 ---
