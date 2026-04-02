@@ -429,34 +429,92 @@ A dependência aponta sempre para o centro:
 ## 16. Fluxograma Geral da Aplicação
 
 ```mermaid
+%%{init: {
+  "theme": "base",
+  "themeVariables": {
+    "primaryColor": "#e0f2fe",
+    "primaryTextColor": "#0f172a",
+    "primaryBorderColor": "#0284c7",
+    "lineColor": "#475569",
+    "secondaryColor": "#dcfce7",
+    "tertiaryColor": "#fef3c7",
+    "fontSize": "14px"
+  }
+}}%%
 flowchart TD
-    A[Upload PDF] --> B[Validação de Upload]
-    B --> C[Criar Job]
-    C --> D[Extrair Conteúdo]
-    D --> E[Classificar Questões]
-    E --> F[Resolver IDs]
-    F --> G[Buscar Base Legal]
-    G --> H[Adaptar para V/F]
-    H --> I[Gerar Gabarito Comentado]
-    I --> J[Validar Qualidade]
-    J --> K{Aprovada?}
-    K -- Não --> L[Fila de Revisão Humana]
-    K -- Sim --> M[Publicação Controlada]
-    L --> M
-    M --> N[Auditoria e Evento de Publicação]
+    A[📄 Upload PDF] --> B[🛡️ Validação de Upload]
+    B --> C[🧾 Persistência do Arquivo]
+    C --> D[🧠 Criação do Job]
+    D --> E[🔎 Extração de Conteúdo]
+    E --> F[🏷️ Classificação]
+    F --> G[🧩 Resolução de IDs]
+    G --> H[📚 Busca Semântica e Legal]
+    H --> I[✍️ Adaptação para V/F]
+    I --> J[✅ Geração de Gabarito]
+    J --> K[🧪 Validação de Qualidade]
+    K --> L{🎯 Gate de Aprovação}
+    L -- Revisão --> M[👤 Fila de Revisão Humana]
+    L -- Aprovado --> N[🚀 Publicação Controlada]
+    M --> N
+    N --> O[📜 Auditoria e Evento de Publicação]
+
+    classDef input fill:#dbeafe,stroke:#2563eb,color:#0f172a;
+    classDef process fill:#dcfce7,stroke:#16a34a,color:#052e16;
+    classDef decision fill:#fef3c7,stroke:#d97706,color:#78350f;
+    classDef output fill:#ede9fe,stroke:#7c3aed,color:#2e1065;
+
+    class A,B,C,D input;
+    class E,F,G,H,I,J,K process;
+    class L decision;
+    class M,N,O output;
 ```
 
 ---
 
 ## 17. Fluxo Macro do Sistema
 
-1. O usuário autenticado envia o PDF.
-2. O sistema valida tamanho, MIME, assinatura e checksum.
-3. O artefato é persistido em object storage e metadados em banco.
-4. Um `processing_job` é criado com correlação global.
-5. Cada etapa gera `processing_job_steps` e `agent_runs`.
-6. Drafts são produzidos, enriquecidos, validados e colocados em revisão ou publicação.
-7. Publicação gera evento auditável e sincronização controlada com a base principal.
+```mermaid
+%%{init: {
+  "theme": "base",
+  "themeVariables": {
+    "primaryColor": "#f8fafc",
+    "primaryTextColor": "#111827",
+    "primaryBorderColor": "#475569",
+    "lineColor": "#64748b",
+    "fontSize": "14px"
+  }
+}}%%
+sequenceDiagram
+    autonumber
+    participant U as 👤 Usuário/Admin
+    participant API as 🌐 API NestJS
+    participant ST as 🗂️ Storage
+    participant DB as 🐘 PostgreSQL
+    participant Q as 📬 Filas
+    participant W as ⚙️ Workers
+    participant ACL as 🔐 ACL Legado
+    participant LG as 🗃️ MySQL Principal
+
+    U->>API: Envia PDF e metadados
+    API->>ST: Armazena arquivo
+    API->>DB: Persiste uploaded_files
+    API->>DB: Cria processing_jobs
+    API->>Q: Publica evento inicial
+    Q->>W: Dispara etapa de extração
+    W->>DB: Registra step/run/output
+    W->>Q: Encadeia próximas etapas
+    Q->>W: Classificação, resolução, busca, adaptação, validação
+    W->>DB: Persiste drafts, fontes e scores
+    alt Requer revisão
+        W->>DB: Enfileira manual_review_queue
+    else Aprovado
+        W->>ACL: Publicação canônica
+        ACL->>LG: Grava na base principal
+        ACL->>DB: Registra publication_events
+    end
+    DB-->>API: Status rastreável
+    API-->>U: Consulta job/draft/publicação
+```
 
 ---
 
@@ -701,10 +759,63 @@ O modelo futuro separa três dimensões:
 ## 30. Diagrama ER do Modelo Atual
 
 ```mermaid
+%%{init: {
+  "theme": "base",
+  "themeVariables": {
+    "primaryColor": "#dbeafe",
+    "primaryTextColor": "#0f172a",
+    "primaryBorderColor": "#2563eb",
+    "lineColor": "#475569",
+    "secondaryColor": "#ecfeff",
+    "tertiaryColor": "#f8fafc",
+    "fontSize": "14px"
+  }
+}}%%
 erDiagram
+    uploaded_files {
+        uuid id PK
+        varchar original_name
+        varchar storage_path
+        varchar checksum_sha256
+        varchar mime_type
+        bigint file_size_bytes
+        varchar upload_status
+    }
+
+    processing_jobs {
+        uuid id PK
+        uuid uploaded_file_id FK
+        uuid correlation_id UK
+        varchar status
+        varchar current_step
+        smallint priority
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    processing_job_steps {
+        uuid id PK
+        uuid processing_job_id FK
+        varchar step_name
+        varchar status
+        integer attempt_number
+        timestamp started_at
+        timestamp finished_at
+    }
+
+    question_drafts {
+        uuid id PK
+        uuid processing_job_id FK
+        varchar draft_status
+        text original_statement
+        text adapted_statement
+        varchar answer_key
+        numeric quality_score
+    }
+
     uploaded_files ||--o{ processing_jobs : "origina"
     processing_jobs ||--o{ processing_job_steps : "possui"
-    processing_jobs ||--o{ question_drafts : "produz"
+    processing_jobs ||--o{ question_drafts : "gera"
 ```
 
 ---
@@ -712,103 +823,537 @@ erDiagram
 ## 31. Diagrama ER do Modelo Futuro
 
 ```mermaid
+%%{init: {
+  "theme": "base",
+  "themeVariables": {
+    "primaryColor": "#ede9fe",
+    "primaryTextColor": "#111827",
+    "primaryBorderColor": "#7c3aed",
+    "lineColor": "#334155",
+    "secondaryColor": "#dcfce7",
+    "tertiaryColor": "#fff7ed",
+    "fontSize": "14px"
+  }
+}}%%
 erDiagram
-    uploaded_files ||--o{ processing_jobs : has
-    processing_jobs ||--o{ processing_job_steps : has
-    processing_jobs ||--o{ agent_runs : executes
-    processing_jobs ||--o{ question_drafts : produces
-    question_drafts ||--o{ question_sources : references
-    question_drafts ||--o{ draft_filters : classified_by
-    question_drafts ||--o{ draft_sub_matters : classified_by
-    question_drafts ||--o{ manual_review_queue : enters
-    question_drafts ||--o{ publication_events : publishes
-    vector_documents ||--o{ vector_chunks : chunks
-    agent_runs ||--o{ llm_invocations : invokes
-    processing_jobs ||--o{ integration_logs : logs
-    processing_jobs ||--o{ dead_letter_events : may_fail
+    uploaded_files {
+        uuid id PK
+        varchar upload_status
+        varchar checksum_sha256
+    }
+
+    processing_jobs {
+        uuid id PK
+        uuid uploaded_file_id FK
+        uuid correlation_id UK
+        varchar status
+        varchar current_step
+    }
+
+    processing_job_steps {
+        uuid id PK
+        uuid processing_job_id FK
+        varchar step_name
+        varchar status
+    }
+
+    question_drafts {
+        uuid id PK
+        uuid processing_job_id FK
+        varchar draft_status
+        numeric quality_score
+        boolean is_ready_for_publication
+    }
+
+    question_sources {
+        uuid id PK
+        uuid question_draft_id FK
+        varchar source_type
+        numeric relevance_score
+    }
+
+    draft_filters {
+        uuid id PK
+        uuid question_draft_id FK
+        bigint filter_id
+    }
+
+    draft_sub_matters {
+        uuid id PK
+        uuid question_draft_id FK
+        bigint sub_matter_id
+    }
+
+    agent_runs {
+        uuid id PK
+        uuid processing_job_id FK
+        uuid question_draft_id FK
+        varchar agent_name
+        varchar status
+    }
+
+    llm_invocations {
+        uuid id PK
+        uuid agent_run_id FK
+        varchar provider_name
+        varchar model_name
+        varchar status
+    }
+
+    integration_logs {
+        uuid id PK
+        uuid processing_job_id FK
+        varchar integration_name
+        varchar status
+    }
+
+    manual_review_queue {
+        uuid id PK
+        uuid question_draft_id FK
+        varchar status
+        varchar decision
+    }
+
+    publication_events {
+        uuid id PK
+        uuid question_draft_id FK
+        varchar action
+        varchar status
+    }
+
+    vector_documents {
+        uuid id PK
+        varchar document_type
+        varchar ingestion_status
+    }
+
+    vector_chunks {
+        uuid id PK
+        uuid vector_document_id FK
+        integer chunk_index
+    }
+
+    idempotency_keys {
+        uuid id PK
+        varchar scope
+        varchar status
+    }
+
+    dead_letter_events {
+        uuid id PK
+        varchar source_queue
+        varchar failure_category
+    }
+
+    uploaded_files ||--o{ processing_jobs : "origina"
+    processing_jobs ||--o{ processing_job_steps : "possui"
+    processing_jobs ||--o{ question_drafts : "produz"
+    question_drafts ||--o{ question_sources : "referencia"
+    question_drafts ||--o{ draft_filters : "classifica"
+    question_drafts ||--o{ draft_sub_matters : "classifica"
+    question_drafts ||--o{ manual_review_queue : "entra"
+    question_drafts ||--o{ publication_events : "publica"
+    processing_jobs ||--o{ agent_runs : "executa"
+    agent_runs ||--o{ llm_invocations : "invoca"
+    processing_jobs ||--o{ integration_logs : "registra"
+    vector_documents ||--o{ vector_chunks : "fragmenta"
 ```
 
 ---
 
 ## 32. Dicionário de Banco de Dados
 
+> Todas as tabelas abaixo são propostas para o banco operacional do serviço de IA em PostgreSQL, com exceção de metadados transitórios de cache/lock que permanecem em Redis. As colunas foram definidas para implementação real, observabilidade forte, auditoria, idempotência e reprocessamento controlado.
+
+### Convenções gerais de modelagem
+
+- chaves primárias em `UUID`;
+- colunas temporais em `TIMESTAMP WITH TIME ZONE` quando aplicável;
+- `JSONB` para metadados estruturados e payloads sanitizados;
+- índices específicos em colunas de consulta operacional intensa;
+- status controlados por enums de aplicação;
+- campos de auditoria explícitos em tabelas críticas;
+- hashes persistidos para deduplicação, idempotência e rastreabilidade.
+
 ### 32.1 `processing_jobs`
 
-| Campo | Tipo | Regra |
-|---|---|---|
-| id | UUID | PK |
-| correlation_id | UUID | índice único |
-| uploaded_file_id | UUID | FK |
-| status | VARCHAR(50) | índice |
-| current_step | VARCHAR(100) | índice |
-| priority | SMALLINT | default 5 |
-| created_by_user_id | BIGINT | nullable |
-| started_at | TIMESTAMP | nullable |
-| finished_at | TIMESTAMP | nullable |
-| failure_reason | TEXT | nullable |
-| metadata_json | JSONB | sanitizado |
-| created_at | TIMESTAMP | obrigatório |
-| updated_at | TIMESTAMP | obrigatório |
+| Coluna | Tipo | Null | Default | Índice | Descrição |
+|---|---|---:|---|---|---|
+| `id` | UUID | Não | `gen_random_uuid()` | PK | Identificador único do job de processamento. |
+| `correlation_id` | UUID | Não | — | UK | Identificador transversal para correlacionar upload, job, steps, revisão e publicação. |
+| `uploaded_file_id` | UUID | Não | — | IDX/FK | Referência ao arquivo de origem em `uploaded_files`. |
+| `status` | VARCHAR(50) | Não | `'PENDING'` | IDX | Estado global do job. |
+| `current_step` | VARCHAR(100) | Sim | `NULL` | IDX | Etapa corrente do pipeline no momento da consulta. |
+| `priority` | SMALLINT | Não | `5` | IDX | Prioridade operacional do job para roteamento de fila. |
+| `process_mode` | VARCHAR(50) | Não | `'standard'` | — | Modo de execução, como `standard`, `strict`, `high-confidence`. |
+| `review_policy` | VARCHAR(50) | Não | `'auto_if_confident'` | — | Política de revisão aplicada ao job. |
+| `requested_by_user_id` | BIGINT | Sim | `NULL` | IDX | Usuário/ator que solicitou o processamento. |
+| `source_system` | VARCHAR(100) | Sim | `NULL` | — | Sistema de origem do job, útil para integrações futuras. |
+| `job_group_key` | VARCHAR(150) | Sim | `NULL` | IDX | Chave lógica para agrupamento operacional ou particionamento. |
+| `is_reprocessing` | BOOLEAN | Não | `false` | — | Indica se o job foi criado como reprocessamento. |
+| `reprocessing_reason` | TEXT | Sim | `NULL` | — | Motivo declarado para reprocessamento. |
+| `input_snapshot_json` | JSONB | Sim | `NULL` | GIN opcional | Snapshot sanitizado da intenção original de processamento. |
+| `metadata_json` | JSONB | Sim | `NULL` | GIN opcional | Metadados adicionais de controle, semântica ou operação. |
+| `started_at` | TIMESTAMPTZ | Sim | `NULL` | IDX | Momento efetivo de início do job. |
+| `finished_at` | TIMESTAMPTZ | Sim | `NULL` | IDX | Momento de conclusão, falha terminal ou cancelamento. |
+| `last_heartbeat_at` | TIMESTAMPTZ | Sim | `NULL` | IDX | Último heartbeat operacional para detectar jobs órfãos. |
+| `failure_code` | VARCHAR(100) | Sim | `NULL` | — | Código normalizado da falha terminal, quando houver. |
+| `failure_reason` | TEXT | Sim | `NULL` | — | Motivo textual da falha terminal, sanitizado. |
+| `created_at` | TIMESTAMPTZ | Não | `now()` | IDX | Data de criação do registro. |
+| `updated_at` | TIMESTAMPTZ | Não | `now()` | IDX | Data da última atualização. |
+
+**Índices recomendados**
+
+- `UK_processing_jobs_correlation_id`
+- `IDX_processing_jobs_status_created_at`
+- `IDX_processing_jobs_uploaded_file_id`
+- `IDX_processing_jobs_requested_by_user_id`
+- `IDX_processing_jobs_priority_status`
+
+**Observações de modelagem**
+
+- `correlation_id` não substitui `id`; ele existe para unificar trilhas distribuídas.
+- `current_step` é denormalizado para acelerar painéis e consultas operacionais.
+- `last_heartbeat_at` reduz risco de job “preso” sem diagnóstico.
 
 ### 32.2 `processing_job_steps`
 
-Armazena histórico de cada etapa, tempos, tentativas, payload hash, input/output resumidos e erro normalizado.
+| Coluna | Tipo | Null | Default | Índice | Descrição |
+|---|---|---:|---|---|---|
+| `id` | UUID | Não | `gen_random_uuid()` | PK | Identificador único da etapa executada. |
+| `processing_job_id` | UUID | Não | — | IDX/FK | Referência ao job pai. |
+| `step_name` | VARCHAR(100) | Não | — | IDX | Nome canônico da etapa: `extract`, `classify`, `resolve-ids`, etc. |
+| `status` | VARCHAR(50) | Não | `'NOT_STARTED'` | IDX | Estado atual da etapa. |
+| `attempt_number` | INTEGER | Não | `1` | — | Número da tentativa corrente. |
+| `max_attempts` | INTEGER | Não | `1` | — | Máximo configurado de tentativas. |
+| `queue_name` | VARCHAR(100) | Sim | `NULL` | IDX | Fila responsável pela execução. |
+| `worker_name` | VARCHAR(150) | Sim | `NULL` | — | Worker lógico que executou a etapa. |
+| `input_hash` | VARCHAR(128) | Sim | `NULL` | IDX | Hash do input normalizado da etapa. |
+| `input_snapshot_json` | JSONB | Sim | `NULL` | — | Resumo sanitizado do input da etapa. |
+| `output_snapshot_json` | JSONB | Sim | `NULL` | — | Resumo sanitizado do output da etapa. |
+| `step_metadata_json` | JSONB | Sim | `NULL` | — | Metadados técnicos adicionais. |
+| `started_at` | TIMESTAMPTZ | Sim | `NULL` | IDX | Início da tentativa da etapa. |
+| `finished_at` | TIMESTAMPTZ | Sim | `NULL` | IDX | Finalização da tentativa. |
+| `duration_ms` | BIGINT | Sim | `NULL` | IDX | Duração total da tentativa em milissegundos. |
+| `next_retry_at` | TIMESTAMPTZ | Sim | `NULL` | IDX | Próxima janela elegível de retry. |
+| `failure_code` | VARCHAR(100) | Sim | `NULL` | — | Código normalizado de erro da tentativa. |
+| `failure_reason` | TEXT | Sim | `NULL` | — | Descrição sanitizada da falha. |
+| `fallback_used` | BOOLEAN | Não | `false` | — | Indica se houve fallback nessa tentativa. |
+| `fallback_name` | VARCHAR(100) | Sim | `NULL` | — | Nome do fallback aplicado. |
+| `created_at` | TIMESTAMPTZ | Não | `now()` | IDX | Data de criação. |
+| `updated_at` | TIMESTAMPTZ | Não | `now()` | IDX | Data de atualização. |
 
 ### 32.3 `uploaded_files`
 
-Armazena nome lógico, path físico, checksum SHA-256, MIME validado, tamanho, status de antivírus, status de parsing e metadados de origem.
+| Coluna | Tipo | Null | Default | Índice | Descrição |
+|---|---|---:|---|---|---|
+| `id` | UUID | Não | `gen_random_uuid()` | PK | Identificador do arquivo enviado. |
+| `storage_bucket` | VARCHAR(150) | Não | — | — | Bucket/container físico de armazenamento. |
+| `storage_path` | VARCHAR(500) | Não | — | UK | Caminho único do objeto no storage. |
+| `original_name` | VARCHAR(255) | Não | — | — | Nome original enviado pelo usuário. |
+| `sanitized_name` | VARCHAR(255) | Não | — | — | Nome lógico sanitizado para exibição segura. |
+| `mime_type` | VARCHAR(100) | Não | — | IDX | MIME validado do arquivo. |
+| `detected_extension` | VARCHAR(20) | Não | — | — | Extensão real detectada após validação. |
+| `file_size_bytes` | BIGINT | Não | — | IDX | Tamanho do arquivo em bytes. |
+| `checksum_sha256` | VARCHAR(64) | Não | — | UK | Hash SHA-256 do binário recebido. |
+| `upload_status` | VARCHAR(50) | Não | `'UPLOADED'` | IDX | Estado do upload no pipeline de ingestão. |
+| `scan_status` | VARCHAR(50) | Não | `'PENDING'` | IDX | Situação do antivírus/scan de malware. |
+| `scan_provider` | VARCHAR(100) | Sim | `NULL` | — | Ferramenta/serviço responsável pelo scan. |
+| `scan_result_json` | JSONB | Sim | `NULL` | — | Resultado sanitizado do scanner. |
+| `is_encrypted_pdf` | BOOLEAN | Não | `false` | — | Indica se o PDF está protegido/criptografado. |
+| `page_count` | INTEGER | Sim | `NULL` | — | Total de páginas estimado após parsing. |
+| `language_hint` | VARCHAR(20) | Sim | `NULL` | — | Idioma declarado ou inferido. |
+| `uploaded_by_user_id` | BIGINT | Sim | `NULL` | IDX | Ator responsável pelo upload. |
+| `source_ip_hash` | VARCHAR(128) | Sim | `NULL` | — | Hash do IP de origem para auditoria mínima. |
+| `origin_channel` | VARCHAR(100) | Sim | `NULL` | — | Canal de origem: painel, API interna, integração. |
+| `retention_until` | TIMESTAMPTZ | Sim | `NULL` | IDX | Data prevista para retenção do artefato. |
+| `created_at` | TIMESTAMPTZ | Não | `now()` | IDX | Data de criação. |
+| `updated_at` | TIMESTAMPTZ | Não | `now()` | IDX | Data de atualização. |
 
 ### 32.4 `question_drafts`
 
-Entidade central do conteúdo gerado, com texto original, texto adaptado, tipo V/F, gabarito, justificativa, score de qualidade, versão de prompt e flags de publicação.
+| Coluna | Tipo | Null | Default | Índice | Descrição |
+|---|---|---:|---|---|---|
+| `id` | UUID | Não | `gen_random_uuid()` | PK | Identificador do draft de questão gerado. |
+| `processing_job_id` | UUID | Não | — | IDX/FK | Referência ao job que produziu o draft. |
+| `source_question_external_id` | VARCHAR(150) | Sim | `NULL` | IDX | ID externo da questão, se reconhecido na origem. |
+| `draft_status` | VARCHAR(50) | Não | `'RAW'` | IDX | Estado do draft no pipeline de transformação. |
+| `source_page_number` | INTEGER | Sim | `NULL` | — | Página do PDF de onde a questão foi extraída. |
+| `source_question_number` | VARCHAR(50) | Sim | `NULL` | — | Numeração reconhecida da questão original. |
+| `original_statement` | TEXT | Não | — | — | Enunciado original extraído do PDF. |
+| `original_alternatives_json` | JSONB | Sim | `NULL` | — | Alternativas originais, quando existirem. |
+| `adapted_statement` | TEXT | Sim | `NULL` | — | Enunciado reescrito no formato V/F. |
+| `statement_type` | VARCHAR(30) | Não | `'TRUE_FALSE'` | — | Tipo de assertiva suportado pelo draft. |
+| `expected_answer_key` | VARCHAR(10) | Sim | `NULL` | — | Resposta V/F produzida pelo pipeline. |
+| `answer_commentary` | TEXT | Sim | `NULL` | — | Gabarito comentado técnico/pedagógico. |
+| `legal_basis_summary` | TEXT | Sim | `NULL` | — | Resumo textual da fundamentação legal. |
+| `pedagogical_notes` | TEXT | Sim | `NULL` | — | Observações pedagógicas auxiliares. |
+| `quality_score` | NUMERIC(5,2) | Sim | `NULL` | IDX | Score consolidado de qualidade. |
+| `clarity_score` | NUMERIC(5,2) | Sim | `NULL` | — | Score de clareza textual. |
+| `legal_grounding_score` | NUMERIC(5,2) | Sim | `NULL` | — | Score de aderência/fundamentação legal. |
+| `consistency_score` | NUMERIC(5,2) | Sim | `NULL` | — | Score de consistência interna/semântica. |
+| `hallucination_risk_level` | VARCHAR(20) | Sim | `NULL` | IDX | Nível de risco de alucinação. |
+| `requires_manual_review` | BOOLEAN | Não | `false` | IDX | Indica necessidade de revisão humana. |
+| `is_ready_for_publication` | BOOLEAN | Não | `false` | IDX | Draft apto para publicação controlada. |
+| `published_at` | TIMESTAMPTZ | Sim | `NULL` | IDX | Momento da publicação confirmada. |
+| `active_prompt_version` | VARCHAR(50) | Sim | `NULL` | — | Versão do prompt principal usada na geração. |
+| `active_model_version` | VARCHAR(100) | Sim | `NULL` | — | Modelo/versão usado na geração principal. |
+| `draft_metadata_json` | JSONB | Sim | `NULL` | GIN opcional | Metadados adicionais de enriquecimento e pipeline. |
+| `created_at` | TIMESTAMPTZ | Não | `now()` | IDX | Data de criação. |
+| `updated_at` | TIMESTAMPTZ | Não | `now()` | IDX | Data de atualização. |
 
 ### 32.5 `question_sources`
 
-Relação entre draft e evidências: página do PDF, chunk legal, norma, artigo, fonte institucional e score de relevância.
+| Coluna | Tipo | Null | Default | Índice | Descrição |
+|---|---|---:|---|---|---|
+| `id` | UUID | Não | `gen_random_uuid()` | PK | Identificador da fonte associada ao draft. |
+| `question_draft_id` | UUID | Não | — | IDX/FK | Draft referenciado. |
+| `source_type` | VARCHAR(50) | Não | — | IDX | Tipo da fonte: `PDF_PAGE`, `LEGAL_CHUNK`, `NORMATIVE_ARTICLE`, etc. |
+| `source_reference` | VARCHAR(255) | Não | — | — | Referência textual principal da fonte. |
+| `document_title` | VARCHAR(255) | Sim | `NULL` | — | Título do documento de origem. |
+| `document_version` | VARCHAR(100) | Sim | `NULL` | — | Versão/vigência do documento quando aplicável. |
+| `page_number` | INTEGER | Sim | `NULL` | — | Página relevante da fonte documental. |
+| `article_reference` | VARCHAR(100) | Sim | `NULL` | — | Artigo/inciso/parágrafo/ítem normativo. |
+| `excerpt_text` | TEXT | Sim | `NULL` | — | Trecho utilizado como evidência. |
+| `excerpt_hash` | VARCHAR(128) | Sim | `NULL` | IDX | Hash do trecho para deduplicação. |
+| `source_url` | TEXT | Sim | `NULL` | — | URL institucional da fonte, quando existir. |
+| `jurisdiction_code` | VARCHAR(50) | Sim | `NULL` | IDX | Jurisdição da norma/conteúdo. |
+| `relevance_score` | NUMERIC(5,2) | Sim | `NULL` | IDX | Relevância da fonte para o draft. |
+| `selection_reason` | TEXT | Sim | `NULL` | — | Motivo resumido da seleção da evidência. |
+| `is_primary_grounding` | BOOLEAN | Não | `false` | — | Indica se a fonte é fundamento principal. |
+| `metadata_json` | JSONB | Sim | `NULL` | — | Metadados auxiliares da evidência. |
+| `created_at` | TIMESTAMPTZ | Não | `now()` | IDX | Data de criação. |
 
 ### 32.6 `draft_filters`
 
-Relação N:N entre draft e filtros/assuntos/classificações complementares.
+| Coluna | Tipo | Null | Default | Índice | Descrição |
+|---|---|---:|---|---|---|
+| `id` | UUID | Não | `gen_random_uuid()` | PK | Identificador da relação draft-filtro. |
+| `question_draft_id` | UUID | Não | — | IDX/FK | Draft classificado. |
+| `filter_id` | BIGINT | Não | — | IDX | Identificador canônico do filtro na base principal. |
+| `filter_label` | VARCHAR(255) | Não | — | — | Rótulo do filtro no momento da resolução. |
+| `resolution_method` | VARCHAR(50) | Não | — | — | Método de resolução: exact, fuzzy, semantic, manual. |
+| `resolution_score` | NUMERIC(5,2) | Sim | `NULL` | — | Score de confiança da resolução. |
+| `is_primary` | BOOLEAN | Não | `false` | — | Identifica filtro primário do draft. |
+| `resolved_by_agent_run_id` | UUID | Sim | `NULL` | IDX | Agent run responsável pela resolução. |
+| `created_at` | TIMESTAMPTZ | Não | `now()` | IDX | Data de criação. |
 
 ### 32.7 `draft_sub_matters`
 
-Relação entre draft e subassuntos canônicos resolvidos.
+| Coluna | Tipo | Null | Default | Índice | Descrição |
+|---|---|---:|---|---|---|
+| `id` | UUID | Não | `gen_random_uuid()` | PK | Identificador da relação draft-subassunto. |
+| `question_draft_id` | UUID | Não | — | IDX/FK | Draft associado. |
+| `sub_matter_id` | BIGINT | Não | — | IDX | ID canônico do subassunto. |
+| `sub_matter_label` | VARCHAR(255) | Não | — | — | Rótulo resolvido no momento da classificação. |
+| `matter_id` | BIGINT | Sim | `NULL` | IDX | Matéria pai, quando aplicável. |
+| `resolution_method` | VARCHAR(50) | Não | — | — | Método de matching/resolução. |
+| `resolution_score` | NUMERIC(5,2) | Sim | `NULL` | — | Score de confiança da associação. |
+| `resolved_by_agent_run_id` | UUID | Sim | `NULL` | IDX | Execução responsável pela resolução. |
+| `created_at` | TIMESTAMPTZ | Não | `now()` | IDX | Data de criação. |
 
 ### 32.8 `agent_runs`
 
-Registra execução por agente com entrada, saída, modelo, prompt versionado, latência, custo estimado, status e fallback utilizado.
+| Coluna | Tipo | Null | Default | Índice | Descrição |
+|---|---|---:|---|---|---|
+| `id` | UUID | Não | `gen_random_uuid()` | PK | Identificador da execução do agente. |
+| `processing_job_id` | UUID | Não | — | IDX/FK | Job associado. |
+| `question_draft_id` | UUID | Sim | `NULL` | IDX/FK | Draft associado, quando granular por questão. |
+| `processing_step_id` | UUID | Sim | `NULL` | IDX/FK | Etapa operacional relacionada. |
+| `agent_name` | VARCHAR(100) | Não | — | IDX | Nome canônico do agente executado. |
+| `agent_version` | VARCHAR(50) | Sim | `NULL` | — | Versão lógica do agente/prompting strategy. |
+| `status` | VARCHAR(50) | Não | `'PENDING'` | IDX | Status da execução do agente. |
+| `provider_name` | VARCHAR(100) | Sim | `NULL` | — | Provedor técnico utilizado, quando houver. |
+| `model_name` | VARCHAR(100) | Sim | `NULL` | — | Modelo específico utilizado. |
+| `input_hash` | VARCHAR(128) | Sim | `NULL` | IDX | Hash do input normalizado. |
+| `input_snapshot_json` | JSONB | Sim | `NULL` | — | Resumo sanitizado do input. |
+| `output_snapshot_json` | JSONB | Sim | `NULL` | — | Resumo sanitizado do output. |
+| `confidence_score` | NUMERIC(5,2) | Sim | `NULL` | — | Score de confiança retornado ou inferido. |
+| `cost_estimate_usd` | NUMERIC(12,6) | Sim | `NULL` | — | Custo estimado da execução. |
+| `retry_count` | INTEGER | Não | `0` | — | Quantidade de retries da execução. |
+| `fallback_used` | BOOLEAN | Não | `false` | — | Indica uso de fallback. |
+| `fallback_name` | VARCHAR(100) | Sim | `NULL` | — | Nome do fallback aplicado. |
+| `started_at` | TIMESTAMPTZ | Sim | `NULL` | IDX | Início da execução. |
+| `finished_at` | TIMESTAMPTZ | Sim | `NULL` | IDX | Fim da execução. |
+| `duration_ms` | BIGINT | Sim | `NULL` | IDX | Duração em milissegundos. |
+| `failure_code` | VARCHAR(100) | Sim | `NULL` | — | Código de erro normalizado. |
+| `failure_reason` | TEXT | Sim | `NULL` | — | Erro sanitizado. |
+| `trace_id` | VARCHAR(64) | Sim | `NULL` | IDX | Trace distribuído correlacionado. |
+| `created_at` | TIMESTAMPTZ | Não | `now()` | IDX | Data de criação. |
 
 ### 32.9 `llm_invocations`
 
-Registra invocação granular de provedor de LLM, incluindo provider, model, timeout, tokens, resposta truncada sanitizada, erro, retry e trace id.
+| Coluna | Tipo | Null | Default | Índice | Descrição |
+|---|---|---:|---|---|---|
+| `id` | UUID | Não | `gen_random_uuid()` | PK | Identificador da invocação ao modelo. |
+| `agent_run_id` | UUID | Não | — | IDX/FK | Execução do agente relacionada. |
+| `provider_name` | VARCHAR(100) | Não | — | IDX | Nome do provider de IA. |
+| `model_name` | VARCHAR(100) | Não | — | IDX | Modelo utilizado. |
+| `temperature` | NUMERIC(4,3) | Sim | `NULL` | — | Temperatura aplicada. |
+| `max_tokens` | INTEGER | Sim | `NULL` | — | Limite configurado de tokens. |
+| `prompt_version` | VARCHAR(50) | Sim | `NULL` | — | Versão do prompt utilizada. |
+| `request_payload_hash` | VARCHAR(128) | Sim | `NULL` | IDX | Hash do payload enviado ao modelo. |
+| `request_payload_json` | JSONB | Sim | `NULL` | — | Payload sanitizado da requisição. |
+| `response_payload_json` | JSONB | Sim | `NULL` | — | Payload sanitizado de resposta. |
+| `status` | VARCHAR(50) | Não | `'PENDING'` | IDX | Estado da invocação. |
+| `input_tokens` | INTEGER | Sim | `NULL` | — | Tokens de entrada consumidos. |
+| `output_tokens` | INTEGER | Sim | `NULL` | — | Tokens de saída consumidos. |
+| `total_tokens` | INTEGER | Sim | `NULL` | IDX | Total de tokens utilizados. |
+| `duration_ms` | BIGINT | Sim | `NULL` | IDX | Duração da chamada. |
+| `timeout_ms` | INTEGER | Sim | `NULL` | — | Timeout configurado. |
+| `retry_count` | INTEGER | Não | `0` | — | Número de retries na chamada. |
+| `failure_code` | VARCHAR(100) | Sim | `NULL` | — | Código normalizado de falha. |
+| `failure_reason` | TEXT | Sim | `NULL` | — | Motivo sanitizado de falha. |
+| `trace_id` | VARCHAR(64) | Sim | `NULL` | IDX | Trace distribuído correlacionado. |
+| `span_id` | VARCHAR(64) | Sim | `NULL` | — | Span da chamada. |
+| `created_at` | TIMESTAMPTZ | Não | `now()` | IDX | Data de criação. |
 
 ### 32.10 `integration_logs`
 
-Registra chamadas externas: ACL MySQL, base legal, storage, OCR, embeddings e provedores auxiliares.
+| Coluna | Tipo | Null | Default | Índice | Descrição |
+|---|---|---:|---|---|---|
+| `id` | UUID | Não | `gen_random_uuid()` | PK | Identificador do log de integração. |
+| `processing_job_id` | UUID | Sim | `NULL` | IDX/FK | Job relacionado. |
+| `question_draft_id` | UUID | Sim | `NULL` | IDX/FK | Draft relacionado, quando aplicável. |
+| `integration_name` | VARCHAR(100) | Não | — | IDX | Nome canônico da integração. |
+| `integration_type` | VARCHAR(50) | Não | — | IDX | Tipo: HTTP, DB, STORAGE, OCR, VECTOR, AUTH. |
+| `target_system` | VARCHAR(100) | Não | — | — | Sistema/serviço de destino. |
+| `operation_name` | VARCHAR(150) | Não | — | — | Operação específica executada. |
+| `request_reference` | VARCHAR(255) | Sim | `NULL` | IDX | ID externo/request id da integração. |
+| `status` | VARCHAR(50) | Não | `'PENDING'` | IDX | Estado do log de integração. |
+| `http_status_code` | INTEGER | Sim | `NULL` | IDX | Código HTTP, quando existir. |
+| `request_payload_json` | JSONB | Sim | `NULL` | — | Payload sanitizado enviado. |
+| `response_payload_json` | JSONB | Sim | `NULL` | — | Payload sanitizado recebido. |
+| `duration_ms` | BIGINT | Sim | `NULL` | IDX | Duração da chamada. |
+| `retry_count` | INTEGER | Não | `0` | — | Número de tentativas. |
+| `circuit_breaker_state` | VARCHAR(20) | Sim | `NULL` | — | Estado do breaker durante a chamada. |
+| `failure_code` | VARCHAR(100) | Sim | `NULL` | — | Código normalizado de falha. |
+| `failure_reason` | TEXT | Sim | `NULL` | — | Descrição sanitizada da falha. |
+| `trace_id` | VARCHAR(64) | Sim | `NULL` | IDX | Trace distribuído correlacionado. |
+| `created_at` | TIMESTAMPTZ | Não | `now()` | IDX | Data de criação. |
 
 ### 32.11 `manual_review_queue`
 
-Controla fila de revisão com prioridade, motivo, score, decisão, operador, SLA e comentário de revisão.
+| Coluna | Tipo | Null | Default | Índice | Descrição |
+|---|---|---:|---|---|---|
+| `id` | UUID | Não | `gen_random_uuid()` | PK | Identificador do item de revisão. |
+| `question_draft_id` | UUID | Não | — | IDX/FK | Draft em revisão. |
+| `status` | VARCHAR(50) | Não | `'QUEUED'` | IDX | Estado da revisão manual. |
+| `review_reason_code` | VARCHAR(100) | Não | — | IDX | Motivo principal que levou o draft à revisão. |
+| `review_reason_text` | TEXT | Sim | `NULL` | — | Explicação textual sanitizada do motivo. |
+| `priority` | SMALLINT | Não | `5` | IDX | Prioridade operacional de revisão. |
+| `assigned_reviewer_user_id` | BIGINT | Sim | `NULL` | IDX | Revisor responsável, quando atribuído. |
+| `claimed_at` | TIMESTAMPTZ | Sim | `NULL` | IDX | Momento em que o item foi assumido. |
+| `sla_due_at` | TIMESTAMPTZ | Sim | `NULL` | IDX | Prazo operacional da revisão. |
+| `decision` | VARCHAR(50) | Sim | `NULL` | IDX | Decisão final do revisor. |
+| `decision_comment` | TEXT | Sim | `NULL` | — | Comentário técnico do revisor. |
+| `returned_to_step` | VARCHAR(100) | Sim | `NULL` | — | Etapa para a qual o item foi devolvido, se houve retorno. |
+| `decision_by_user_id` | BIGINT | Sim | `NULL` | IDX | Usuário que concluiu a revisão. |
+| `decision_at` | TIMESTAMPTZ | Sim | `NULL` | IDX | Momento da decisão final. |
+| `created_at` | TIMESTAMPTZ | Não | `now()` | IDX | Data de criação. |
+| `updated_at` | TIMESTAMPTZ | Não | `now()` | IDX | Data de atualização. |
 
 ### 32.12 `publication_events`
 
-Auditoria de publicação, tentativa, rollback, compensação e resposta da base principal.
+| Coluna | Tipo | Null | Default | Índice | Descrição |
+|---|---|---:|---|---|---|
+| `id` | UUID | Não | `gen_random_uuid()` | PK | Identificador do evento de publicação. |
+| `question_draft_id` | UUID | Não | — | IDX/FK | Draft objeto da publicação. |
+| `action` | VARCHAR(50) | Não | — | IDX | Ação executada: prepare, publish, confirm, rollback, compensate. |
+| `status` | VARCHAR(50) | Não | — | IDX | Estado do evento de publicação. |
+| `canonical_payload_json` | JSONB | Sim | `NULL` | — | Payload canônico enviado à ACL. |
+| `external_publication_id` | VARCHAR(150) | Sim | `NULL` | IDX | Identificador retornado pelo sistema principal. |
+| `target_system` | VARCHAR(100) | Não | `'main-mysql'` | — | Sistema de destino da publicação. |
+| `idempotency_key` | VARCHAR(255) | Sim | `NULL` | IDX | Chave de idempotência da publicação. |
+| `request_payload_hash` | VARCHAR(128) | Sim | `NULL` | IDX | Hash do payload de publicação. |
+| `response_snapshot_json` | JSONB | Sim | `NULL` | — | Resposta sanitizada da integração. |
+| `retry_count` | INTEGER | Não | `0` | — | Número de tentativas da publicação. |
+| `compensation_applied` | BOOLEAN | Não | `false` | — | Indica aplicação de compensação lógica. |
+| `failure_code` | VARCHAR(100) | Sim | `NULL` | — | Código normalizado de falha. |
+| `failure_reason` | TEXT | Sim | `NULL` | — | Motivo textual sanitizado da falha. |
+| `triggered_by_user_id` | BIGINT | Sim | `NULL` | IDX | Usuário que iniciou a publicação, se manual. |
+| `trace_id` | VARCHAR(64) | Sim | `NULL` | IDX | Trace associado à publicação. |
+| `created_at` | TIMESTAMPTZ | Não | `now()` | IDX | Data de criação. |
 
 ### 32.13 `vector_documents`
 
-Documento lógico indexado, origem, hash, versão, idioma e status de ingestão vetorial.
+| Coluna | Tipo | Null | Default | Índice | Descrição |
+|---|---|---:|---|---|---|
+| `id` | UUID | Não | `gen_random_uuid()` | PK | Identificador do documento vetorial lógico. |
+| `document_type` | VARCHAR(50) | Não | — | IDX | Tipo documental: lei, decreto, jurisprudência, manual etc. |
+| `source_system` | VARCHAR(100) | Sim | `NULL` | — | Sistema/origem do documento. |
+| `external_reference` | VARCHAR(255) | Sim | `NULL` | IDX | Referência externa do documento. |
+| `title` | VARCHAR(500) | Não | — | IDX | Título do documento. |
+| `jurisdiction_code` | VARCHAR(50) | Sim | `NULL` | IDX | Jurisdição associada ao conteúdo. |
+| `effective_date` | DATE | Sim | `NULL` | IDX | Data de vigência da norma/documento. |
+| `revocation_date` | DATE | Sim | `NULL` | IDX | Data de revogação, se aplicável. |
+| `language_code` | VARCHAR(10) | Não | `'pt-BR'` | — | Idioma do documento. |
+| `content_hash` | VARCHAR(128) | Não | — | UK | Hash do conteúdo para deduplicação/reindexação. |
+| `storage_reference` | VARCHAR(500) | Sim | `NULL` | — | Referência ao local de armazenamento do documento integral. |
+| `ingestion_status` | VARCHAR(50) | Não | `'PENDING'` | IDX | Status da ingestão vetorial. |
+| `embedding_model_name` | VARCHAR(100) | Sim | `NULL` | — | Modelo usado na geração de embeddings. |
+| `metadata_json` | JSONB | Sim | `NULL` | GIN opcional | Metadados adicionais do documento. |
+| `created_at` | TIMESTAMPTZ | Não | `now()` | IDX | Data de criação. |
+| `updated_at` | TIMESTAMPTZ | Não | `now()` | IDX | Data de atualização. |
 
 ### 32.14 `vector_chunks`
 
-Chunks com embedding, hash, posição, metadata, norma associada e score interno.
+| Coluna | Tipo | Null | Default | Índice | Descrição |
+|---|---|---:|---|---|---|
+| `id` | UUID | Não | `gen_random_uuid()` | PK | Identificador do chunk vetorial. |
+| `vector_document_id` | UUID | Não | — | IDX/FK | Documento ao qual o chunk pertence. |
+| `chunk_index` | INTEGER | Não | — | IDX | Ordem do chunk dentro do documento. |
+| `chunk_text` | TEXT | Não | — | — | Texto efetivo do fragmento. |
+| `chunk_hash` | VARCHAR(128) | Não | — | UK opcional | Hash do chunk para deduplicação. |
+| `token_estimate` | INTEGER | Sim | `NULL` | — | Estimativa de tokens do chunk. |
+| `page_start` | INTEGER | Sim | `NULL` | — | Página inicial, se aplicável. |
+| `page_end` | INTEGER | Sim | `NULL` | — | Página final, se aplicável. |
+| `article_reference` | VARCHAR(100) | Sim | `NULL` | IDX | Artigo/inciso/parágrafo associado ao chunk. |
+| `embedding` | VECTOR | Sim | `NULL` | IVFFLAT/HNSW | Embedding persistido no pgvector. |
+| `embedding_model_name` | VARCHAR(100) | Sim | `NULL` | — | Modelo usado no embedding deste chunk. |
+| `metadata_json` | JSONB | Sim | `NULL` | GIN opcional | Metadados para busca híbrida e filtros. |
+| `created_at` | TIMESTAMPTZ | Não | `now()` | IDX | Data de criação. |
 
 ### 32.15 `idempotency_keys`
 
-Chaves de idempotência por endpoint/operação, hash de requisição, owner, TTL e resultado resumido.
+| Coluna | Tipo | Null | Default | Índice | Descrição |
+|---|---|---:|---|---|---|
+| `id` | UUID | Não | `gen_random_uuid()` | PK | Identificador interno do registro de idempotência. |
+| `idempotency_key` | VARCHAR(255) | Não | — | UK | Chave informada ou derivada da operação. |
+| `scope` | VARCHAR(100) | Não | — | IDX | Escopo da operação: create-job, publish-draft, callback, etc. |
+| `resource_type` | VARCHAR(100) | Sim | `NULL` | — | Tipo de recurso impactado. |
+| `resource_id` | UUID | Sim | `NULL` | IDX | Recurso efetivamente protegido. |
+| `request_hash` | VARCHAR(128) | Não | — | IDX | Hash do payload normalizado. |
+| `status` | VARCHAR(50) | Não | `'IN_PROGRESS'` | IDX | Situação da execução idempotente. |
+| `owner_actor_id` | BIGINT | Sim | `NULL` | IDX | Ator que iniciou a operação. |
+| `response_snapshot_json` | JSONB | Sim | `NULL` | — | Resumo da resposta devolvida/reaproveitada. |
+| `expires_at` | TIMESTAMPTZ | Sim | `NULL` | IDX | Expiração da proteção de idempotência. |
+| `created_at` | TIMESTAMPTZ | Não | `now()` | IDX | Data de criação. |
+| `updated_at` | TIMESTAMPTZ | Não | `now()` | IDX | Data de atualização. |
 
 ### 32.16 `dead_letter_events`
 
-Eventos falhos com payload sanitizado, motivo, stack resumida, tentativas esgotadas e ação sugerida.
+| Coluna | Tipo | Null | Default | Índice | Descrição |
+|---|---|---:|---|---|---|
+| `id` | UUID | Não | `gen_random_uuid()` | PK | Identificador do evento em DLQ. |
+| `source_queue` | VARCHAR(100) | Não | — | IDX | Fila de origem do evento falho. |
+| `source_job_id` | UUID | Sim | `NULL` | IDX/FK | Job relacionado ao evento falho. |
+| `source_step_name` | VARCHAR(100) | Sim | `NULL` | IDX | Etapa do pipeline associada. |
+| `question_draft_id` | UUID | Sim | `NULL` | IDX/FK | Draft relacionado, quando houver granularidade por questão. |
+| `failure_category` | VARCHAR(100) | Não | — | IDX | Categoria normalizada da falha. |
+| `failure_code` | VARCHAR(100) | Não | — | IDX | Código de erro terminal. |
+| `failure_reason` | TEXT | Sim | `NULL` | — | Motivo sanitizado da falha. |
+| `attempt_count` | INTEGER | Não | `0` | — | Total de tentativas executadas antes da DLQ. |
+| `payload_snapshot_json` | JSONB | Sim | `NULL` | — | Payload sanitizado que falhou. |
+| `headers_snapshot_json` | JSONB | Sim | `NULL` | — | Metadados/headers sanitizados do evento. |
+| `stack_snapshot` | TEXT | Sim | `NULL` | — | Resumo controlado do stack trace. |
+| `suggested_action` | VARCHAR(150) | Sim | `NULL` | — | Ação recomendada: replay, manual-review, discard, inspect. |
+| `resolved` | BOOLEAN | Não | `false` | IDX | Indica se o item de DLQ já foi tratado. |
+| `resolved_by_user_id` | BIGINT | Sim | `NULL` | IDX | Ator que tratou o item. |
+| `resolved_at` | TIMESTAMPTZ | Sim | `NULL` | IDX | Momento de resolução. |
+| `resolution_notes` | TEXT | Sim | `NULL` | — | Nota técnica de resolução. |
+| `trace_id` | VARCHAR(64) | Sim | `NULL` | IDX | Trace distribuído correlacionado. |
+| `created_at` | TIMESTAMPTZ | Não | `now()` | IDX | Data de criação. |
 
 ---
 
@@ -1118,35 +1663,124 @@ A API expõe plano de controle e consulta operacional. O processamento pesado é
 
 ## 55. API — Mapeamento Completo de Rotas
 
-### 55.1 Upload e jobs
+A API é dividida em cinco grupos principais:
 
-| Método | URI | Nome | Handler | Auth | Observações |
-|---|---|---|---|---|---|
-| POST | `/api/v1/uploads` | `uploads.create` | `UploadsController.create` | privada | upload de PDF |
-| POST | `/api/v1/processing-jobs` | `processing-jobs.create` | `ProcessingJobsController.create` | privada | cria job a partir de upload |
-| GET | `/api/v1/processing-jobs/:jobId` | `processing-jobs.get` | `ProcessingJobsController.getById` | privada | status geral |
-| GET | `/api/v1/processing-jobs/:jobId/steps` | `processing-jobs.steps` | `ProcessingJobsController.listSteps` | privada | histórico de etapas |
-| POST | `/api/v1/processing-jobs/:jobId/retry` | `processing-jobs.retry` | `ProcessingJobsController.retry` | admin | retry total |
-| POST | `/api/v1/processing-jobs/:jobId/steps/:stepName/retry` | `processing-jobs.step.retry` | `ProcessingJobsController.retryStep` | admin | retry por etapa |
+- borda de ingestão e criação de jobs;
+- borda de consulta operacional;
+- borda de revisão/publicação;
+- borda de auditoria e observabilidade;
+- borda interna de health, metrics e callbacks técnicos.
 
-### 55.2 Drafts e revisão
+### 55.1 Convenções de segurança e middleware por categoria
 
-| Método | URI | Nome | Handler | Auth |
-|---|---|---|---|---|
-| GET | `/api/v1/question-drafts` | `question-drafts.list` | `QuestionDraftsController.list` | privada |
-| GET | `/api/v1/question-drafts/:draftId` | `question-drafts.get` | `QuestionDraftsController.getById` | privada |
-| PATCH | `/api/v1/question-drafts/:draftId` | `question-drafts.update` | `QuestionDraftsController.update` | revisor/admin |
-| POST | `/api/v1/question-drafts/:draftId/submit-review` | `question-drafts.submit-review` | `QuestionDraftsController.submitReview` | revisor/admin |
-| POST | `/api/v1/question-drafts/:draftId/publish` | `question-drafts.publish` | `QuestionDraftsController.publish` | admin |
+| Categoria | Middleware base | Autenticação | Autorização |
+|---|---|---|---|
+| Públicas internas | request-id, correlation, logging | opcional/rede interna | allowlist |
+| Privadas operacionais | request-id, correlation, logging, validation, rate-limit | JWT/session | role/scope |
+| Administrativas | request-id, correlation, logging, validation, idempotency | JWT forte | admin/ops |
+| Internas assíncronas | request-id, correlation, logging, signature-check | service token / signature | system scope |
 
-### 55.3 Operação e observabilidade
+### 55.2 Rotas de uploads
 
-| Método | URI | Nome | Handler | Auth |
-|---|---|---|---|---|
-| GET | `/api/v1/health/live` | `health.live` | `HealthController.live` | pública interna |
-| GET | `/api/v1/health/ready` | `health.ready` | `HealthController.ready` | pública interna |
-| GET | `/api/v1/metrics` | `metrics.scrape` | `MetricsController.scrape` | interna |
-| GET | `/api/v1/audit/publication-events` | `audit.publication-events` | `AuditController.listPublicationEvents` | admin |
+| Método | URI | Nome | Controller/Handler | Action | Request DTO | Response DTO | Middleware chain | Auth | Autorização | Side effects |
+|---|---|---|---|---|---|---|---|---|---|---|
+| POST | `/api/v1/uploads` | `uploads.create` | `UploadsController` | `create()` | `UploadMetadataRequest` + multipart file | `CreateUploadResponse` | correlation, auth, roles, rate-limit, validation | privada | operator/admin | grava arquivo, cria `uploaded_files`, dispara scan |
+| GET | `/api/v1/uploads/:uploadId` | `uploads.get` | `UploadsController` | `getById()` | `ParseUuidPipe` | `UploadStatusResponse` | correlation, auth, roles | privada | operator/admin | leitura operacional |
+| GET | `/api/v1/uploads/:uploadId/download-metadata` | `uploads.download-metadata` | `UploadsController` | `getDownloadMetadata()` | `ParseUuidPipe` | `UploadStatusResponse` | correlation, auth, roles | privada | operator/admin | consulta metadados de storage |
+
+### 55.3 Rotas de processing jobs
+
+| Método | URI | Nome | Controller/Handler | Action | Request DTO | Response DTO | Middleware chain | Auth | Autorização | Side effects |
+|---|---|---|---|---|---|---|---|---|---|---|
+| POST | `/api/v1/processing-jobs` | `processing-jobs.create` | `ProcessingJobsController` | `create()` | `CreateProcessingJobRequest` | `ProcessingJobResponse` | correlation, auth, roles, validation, idempotency | privada | operator/admin | cria `processing_jobs`, step inicial, publica fila |
+| GET | `/api/v1/processing-jobs` | `processing-jobs.list` | `ProcessingJobsController` | `list()` | query params paginados | `PaginatedProcessingJobsResponse` | correlation, auth, roles, sanitize-query | privada | operator/admin | consulta operacional |
+| GET | `/api/v1/processing-jobs/:jobId` | `processing-jobs.get` | `ProcessingJobsController` | `getById()` | `ParseUuidPipe` | `ProcessingJobResponse` | correlation, auth, roles | privada | operator/admin | consulta status completo |
+| GET | `/api/v1/processing-jobs/:jobId/steps` | `processing-jobs.steps` | `ProcessingJobsController` | `listSteps()` | `ParseUuidPipe` | `ProcessingJobStepsResponse` | correlation, auth, roles | privada | operator/admin | histórico de etapas |
+| GET | `/api/v1/processing-jobs/:jobId/agent-runs` | `processing-jobs.agent-runs` | `ProcessingJobsController` | `listAgentRuns()` | `ParseUuidPipe` | `PaginatedAgentRunsResponse` | correlation, auth, roles | privada | operator/admin | consulta execuções dos agentes |
+| POST | `/api/v1/processing-jobs/:jobId/retry` | `processing-jobs.retry` | `ProcessingJobsController` | `retryJob()` | `RetryJobRequest` | `ProcessingJobResponse` | correlation, auth, roles, validation, idempotency | privada | admin/ops | cria replay total do job |
+| POST | `/api/v1/processing-jobs/:jobId/steps/:stepName/retry` | `processing-jobs.step.retry` | `ProcessingJobsController` | `retryStep()` | `RetryStepRequest` | `ProcessingJobResponse` | correlation, auth, roles, validation, idempotency, parse-step | privada | admin/ops | reprocessa etapa específica |
+| POST | `/api/v1/processing-jobs/:jobId/cancel` | `processing-jobs.cancel` | `ProcessingJobsController` | `cancel()` | `ParseUuidPipe` | `ProcessingJobResponse` | correlation, auth, roles, idempotency | privada | admin/ops | cancela job elegível |
+
+### 55.4 Rotas de drafts
+
+| Método | URI | Nome | Controller/Handler | Action | Request DTO | Response DTO | Middleware chain | Auth | Autorização | Side effects |
+|---|---|---|---|---|---|---|---|---|---|---|
+| GET | `/api/v1/question-drafts` | `question-drafts.list` | `QuestionDraftsController` | `list()` | filtros paginados | `PaginatedQuestionDraftsResponse` | correlation, auth, roles, sanitize-query | privada | operator/reviewer/admin | consulta drafts |
+| GET | `/api/v1/question-drafts/:draftId` | `question-drafts.get` | `QuestionDraftsController` | `getById()` | `ParseUuidPipe` | `QuestionDraftResponse` | correlation, auth, roles | privada | operator/reviewer/admin | consulta detalhada |
+| GET | `/api/v1/question-drafts/:draftId/sources` | `question-drafts.sources` | `QuestionDraftsController` | `listSources()` | `ParseUuidPipe` | `QuestionDraftSourcesResponse` | correlation, auth, roles | privada | operator/reviewer/admin | consulta evidências |
+| PATCH | `/api/v1/question-drafts/:draftId` | `question-drafts.update` | `QuestionDraftsController` | `update()` | `UpdateQuestionDraftRequest` | `QuestionDraftResponse` | correlation, auth, roles, validation, idempotency | privada | reviewer/admin | atualiza draft manualmente |
+| POST | `/api/v1/question-drafts/:draftId/revalidate` | `question-drafts.revalidate` | `QuestionDraftsController` | `revalidate()` | `ParseUuidPipe` | `QuestionDraftResponse` | correlation, auth, roles, idempotency | privada | reviewer/admin | reenvia draft à validação |
+| POST | `/api/v1/question-drafts/:draftId/publish` | `question-drafts.publish` | `QuestionDraftsController` | `publish()` | `PublishDraftRequest` | `PublicationResponse` | correlation, auth, roles, validation, idempotency, distributed-lock | privada | admin/publisher | publica draft via ACL |
+
+### 55.5 Rotas de revisão humana
+
+| Método | URI | Nome | Controller/Handler | Action | Request DTO | Response DTO | Middleware chain | Auth | Autorização | Side effects |
+|---|---|---|---|---|---|---|---|---|---|---|
+| GET | `/api/v1/review-queue` | `review.list` | `ReviewController` | `listQueue()` | filtros paginados | `PaginatedReviewItemsResponse` | correlation, auth, roles, sanitize-query | privada | reviewer/admin | consulta fila |
+| POST | `/api/v1/review-queue/:reviewItemId/claim` | `review.claim` | `ReviewController` | `claim()` | `ParseUuidPipe` | `ReviewItemResponse` | correlation, auth, roles, idempotency, distributed-lock | privada | reviewer/admin | atribui item ao revisor |
+| POST | `/api/v1/review-queue/:reviewItemId/submit` | `review.submit` | `ReviewController` | `submit()` | `SubmitReviewRequest` | `ReviewItemResponse` | correlation, auth, roles, validation, idempotency | privada | reviewer/admin | decide revisão e pode reencaminhar etapa |
+| POST | `/api/v1/review-queue/:reviewItemId/release` | `review.release` | `ReviewController` | `release()` | `ParseUuidPipe` | `ReviewItemResponse` | correlation, auth, roles, idempotency | privada | reviewer/admin | devolve item à fila |
+
+### 55.6 Rotas de publicação e auditoria
+
+| Método | URI | Nome | Controller/Handler | Action | Request DTO | Response DTO | Middleware chain | Auth | Autorização | Side effects |
+|---|---|---|---|---|---|---|---|---|---|---|
+| GET | `/api/v1/publication-events` | `publication-events.list` | `PublicationController` | `listEvents()` | filtros paginados | `PaginatedPublicationEventsResponse` | correlation, auth, roles, sanitize-query | privada | admin/ops | consulta trilha |
+| GET | `/api/v1/publication-events/:eventId` | `publication-events.get` | `PublicationController` | `getById()` | `ParseUuidPipe` | `PublicationEventResponse` | correlation, auth, roles | privada | admin/ops | consulta detalhada |
+| POST | `/api/v1/publication-events/:eventId/replay` | `publication-events.replay` | `PublicationController` | `replay()` | `ParseUuidPipe` | `PublicationResponse` | correlation, auth, roles, idempotency | privada | admin/ops | reenvia publicação elegível |
+| GET | `/api/v1/audit/publication-events` | `audit.publication-events` | `AuditController` | `listPublicationEvents()` | filtros | `PaginatedAuditEventsResponse` | correlation, auth, roles | privada | admin/auditor | consulta de auditoria |
+| GET | `/api/v1/audit/integration-logs` | `audit.integration-logs` | `AuditController` | `listIntegrationLogs()` | filtros | `PaginatedIntegrationLogsResponse` | correlation, auth, roles | privada | admin/ops/auditor | troubleshooting |
+| GET | `/api/v1/audit/dead-letter-events` | `audit.dead-letter-events` | `AuditController` | `listDeadLetterEvents()` | filtros | `PaginatedDeadLetterEventsResponse` | correlation, auth, roles | privada | admin/ops | consulta DLQ |
+
+### 55.7 Rotas operacionais, health e observabilidade
+
+| Método | URI | Nome | Controller/Handler | Action | Request DTO | Response DTO | Middleware chain | Auth | Autorização | Side effects |
+|---|---|---|---|---|---|---|---|---|---|---|
+| GET | `/api/v1/health/live` | `health.live` | `HealthController` | `live()` | — | `HealthResponse` | correlation, internal-route | pública interna | allowlist | liveness |
+| GET | `/api/v1/health/ready` | `health.ready` | `HealthController` | `ready()` | — | `HealthResponse` | correlation, internal-route | pública interna | allowlist | readiness |
+| GET | `/api/v1/metrics` | `metrics.scrape` | `MetricsController` | `scrape()` | — | text/plain | internal-route, signature-check | interna | observability scope | export Prometheus |
+| GET | `/api/v1/system/queues` | `system.queues` | `SystemController` | `listQueues()` | — | `QueuesStatusResponse` | correlation, auth, roles | privada | ops/admin | status das filas |
+| GET | `/api/v1/system/workers` | `system.workers` | `SystemController` | `listWorkers()` | — | `WorkersStatusResponse` | correlation, auth, roles | privada | ops/admin | status dos workers |
+
+### 55.8 Erros esperados por família de rota
+
+| Família | Erros frequentes |
+|---|---|
+| Uploads | `INVALID_FILE_TYPE`, `FILE_TOO_LARGE`, `MALWARE_DETECTED`, `UPLOAD_STORAGE_FAILURE` |
+| Jobs | `JOB_NOT_FOUND`, `INVALID_JOB_STATE`, `STEP_RETRY_NOT_ALLOWED`, `IDEMPOTENCY_CONFLICT` |
+| Drafts | `DRAFT_NOT_FOUND`, `DRAFT_NOT_EDITABLE`, `VALIDATION_FAILED`, `PUBLICATION_NOT_ALLOWED` |
+| Review | `REVIEW_ITEM_NOT_FOUND`, `REVIEW_ALREADY_CLAIMED`, `REVIEW_DECISION_INVALID` |
+| Publication | `PUBLICATION_CONFLICT`, `ACL_UNAVAILABLE`, `LEGACY_CONTRACT_MISMATCH` |
+| System | `FORBIDDEN_INTERNAL_ROUTE`, `METRICS_EXPORT_DISABLED` |
+
+### 55.9 Fluxo request → middleware → aplicação → domínio → infraestrutura → response
+
+```mermaid
+%%{init: {
+  "theme": "base",
+  "themeVariables": {
+    "primaryColor": "#ecfccb",
+    "primaryTextColor": "#1f2937",
+    "primaryBorderColor": "#65a30d",
+    "lineColor": "#475569",
+    "secondaryColor": "#dbeafe",
+    "tertiaryColor": "#ede9fe",
+    "fontSize": "14px"
+  }
+}}%%
+flowchart LR
+    A[🌐 HTTP Request] --> B[🧾 Request ID / Correlation]
+    B --> C[🛡️ Auth + Roles + Guards]
+    C --> D[🧹 Sanitizers + Pipes + Validation]
+    D --> E[🎯 Controller]
+    E --> F[📦 Use Case / Orchestrator]
+    F --> G[🧠 Domain Services / Policies]
+    G --> H[🔌 Ports]
+    H --> I[🏗️ Infra Adapters]
+    I --> J[(🐘 PostgreSQL / Redis / Storage / ACL)]
+    J --> K[📊 Logs + Metrics + Traces]
+    K --> L[✅ Response Presenter]
+```
 
 ---
 
@@ -2722,3 +3356,4 @@ A escalabilidade ocorre por:
 A estrutura proposta organiza o projeto de forma **modular, escalável, auditável e sustentável**, permitindo que o serviço de geração de questões com IA evolua sem perder governança, observabilidade, segurança e clareza arquitetural.
 
 A tree view completa, associada à separação por responsabilidades, enums globais, normalizadores, sanitizadores, guards, interceptors, adapters, ports e módulos de domínio, cria uma base coerente para implementação enterprise real, evitando truncamento estrutural e reduzindo o risco de crescimento desordenado do código.
+
