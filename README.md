@@ -1628,14 +1628,88 @@ Estruturas sugeridas:
 
 ## 49. Estratégia de Validação de Payloads
 
-Validação em quatro níveis:
+A validação de payloads deve ocorrer em múltiplas fronteiras, com profundidade crescente conforme o dado avança no sistema. O objetivo não é apenas rejeitar entrada inválida, mas impedir propagação de ambiguidade, inconsistência semântica, risco operacional e corrupção de estado.
 
-1. borda HTTP;
-2. borda de fila;
-3. contrato entre agentes;
-4. invariantes de domínio.
+### 49.1 Camadas de validação
 
-Ferramentas possíveis: `class-validator`, `zod`, contratos JSON schema versionados.
+1. **Borda HTTP**
+   - validação sintática;
+   - presença de campos obrigatórios;
+   - limites de tamanho;
+   - regex de formato;
+   - enums aceitos;
+   - nulabilidade controlada;
+   - sanitização de strings e query params.
+
+2. **Borda de fila**
+   - validação do envelope do evento;
+   - integridade de `jobId`, `draftId`, `correlationId`;
+   - compatibilidade de versão do contrato;
+   - hash e idempotência quando aplicável.
+
+3. **Aplicação**
+   - validação de coerência entre campos;
+   - regras de fluxo;
+   - estado elegível para a operação;
+   - política de autorização por contexto.
+
+4. **Domínio**
+   - invariantes;
+   - consistência semântica;
+   - regras de negócio não negociáveis;
+   - proteção contra transições inválidas.
+
+### 49.2 Tipos de validação obrigatória
+
+| Categoria | Exemplos |
+|---|---|
+| Estrutural | tipo incorreto, campo obrigatório ausente, payload malformado |
+| Semântica | `reviewPolicy` incompatível com `processMode`, publicação de draft não aprovado |
+| Operacional | retry de etapa inexistente, status incompatível, item já em processamento |
+| Segurança | strings com caracteres de controle, headers inválidos, payload excessivo |
+| Governança | versão de contrato ausente, enum desatualizado, prompt version inválida |
+
+### 49.3 Estratégia técnica sugerida
+
+- `class-validator` e `class-transformer` para borda HTTP simples;
+- `zod` ou `JSON Schema` para contratos internos mais rígidos;
+- validadores de domínio explícitos para invariantes críticas;
+- validadores de regex centralizados em `shared/validators`;
+- `ParseUuidPipe`, `ParseStepNamePipe`, `StrictValidationPipe` e sanitizers globais.
+
+### 49.4 Exemplo de matriz de validação por endpoint
+
+| Endpoint | Validação obrigatória |
+|---|---|
+| `POST /api/v1/uploads` | MIME, extensão real, tamanho, checksum opcional, multipart válido |
+| `POST /api/v1/processing-jobs` | `uploadedFileId` UUID, `processMode` enum, `reviewPolicy` enum, idempotency key |
+| `POST /api/v1/processing-jobs/:jobId/steps/:stepName/retry` | UUID válido, step enum válido, job em estado elegível |
+| `PATCH /api/v1/question-drafts/:draftId` | draft editável, campos permitidos, limites textuais, status compatível |
+| `POST /api/v1/question-drafts/:draftId/publish` | draft aprovado, lock livre, payload canônico íntegro |
+
+### 49.5 Erros padronizados de validação
+
+```json
+{
+  "error": {
+    "code": "VALIDATION_ERROR",
+    "message": "Payload inválido para a operação solicitada.",
+    "details": [
+      {
+        "field": "processMode",
+        "reason": "Valor não suportado. Use: standard, strict, high-confidence."
+      },
+      {
+        "field": "uploadedFileId",
+        "reason": "UUID inválido."
+      }
+    ],
+    "requestId": "6a9f9e78-c388-4c9a-a39c-d5bfe9c7a2e1",
+    "correlationId": "0dd4d7ad-4ef6-4c03-a950-5465d6fbc8ce",
+    "timestamp": "2026-04-01T18:42:11.322Z"
+  }
+}
+```
 
 ---
 
@@ -1895,23 +1969,405 @@ flowchart LR
 
 ## 57. API — Contratos JSON de Entrada e Saída
 
-### 57.1 Criar job
+Os contratos JSON devem ser explícitos, versionáveis, testáveis e semanticamente estáveis. Toda resposta relevante deve incluir dados de correlação operacional suficientes para troubleshooting e auditoria.
+
+### 57.1 Envelope de resposta de sucesso
 
 ```json
 {
-  "uploadedFileId": "uuid",
-  "processMode": "standard",
-  "reviewPolicy": "auto_if_confident"
+  "data": {},
+  "meta": {
+    "requestId": "6a9f9e78-c388-4c9a-a39c-d5bfe9c7a2e1",
+    "correlationId": "0dd4d7ad-4ef6-4c03-a950-5465d6fbc8ce",
+    "timestamp": "2026-04-01T18:42:11.322Z",
+    "apiVersion": "v1"
+  },
+  "links": {}
 }
 ```
 
-### 57.2 Resposta
+### 57.2 Envelope de erro padronizado
 
 ```json
 {
-  "jobId": "uuid",
-  "correlationId": "uuid",
-  "status": "PENDING"
+  "error": {
+    "code": "DRAFT_NOT_EDITABLE",
+    "message": "O draft atual não permite edição nesta etapa do fluxo.",
+    "category": "BUSINESS_RULE",
+    "details": [
+      {
+        "field": "draftStatus",
+        "reason": "Draft em estado PUBLISHED não pode ser alterado manualmente."
+      }
+    ],
+    "requestId": "6a9f9e78-c388-4c9a-a39c-d5bfe9c7a2e1",
+    "correlationId": "0dd4d7ad-4ef6-4c03-a950-5465d6fbc8ce",
+    "timestamp": "2026-04-01T18:42:11.322Z"
+  }
+}
+```
+
+### 57.3 Contrato de criação de upload
+
+**Request**
+
+```json
+{
+  "sourceLabel": "Prova TJDFT 2025 - bloco A",
+  "languageHint": "pt-BR",
+  "originChannel": "admin-panel",
+  "metadata": {
+    "examBoard": "CESPE",
+    "estimatedYear": 2025,
+    "examContext": "Direito Administrativo"
+  }
+}
+```
+
+**Response**
+
+```json
+{
+  "data": {
+    "uploadId": "4d43d1b5-b2ec-4aa5-af40-3430de3cf20d",
+    "status": "UPLOADED",
+    "scanStatus": "PENDING",
+    "storage": {
+      "bucket": "ai-question-gen-prod",
+      "path": "uploads/2026/04/01/4d43d1b5-b2ec-4aa5-af40-3430de3cf20d.pdf"
+    },
+    "file": {
+      "originalName": "prova-tjdft-2025.pdf",
+      "sanitizedName": "prova-tjdft-2025.pdf",
+      "mimeType": "application/pdf",
+      "sizeBytes": 2844931,
+      "checksumSha256": "2e6c8c8f9ce9d1c0f7f0a9d8c2bba4b10f30d2f3a188af8a3dfc93bfa2f6e4f1"
+    }
+  },
+  "meta": {
+    "requestId": "5ecf7f62-8a74-4b07-80c0-4203dba7318f",
+    "correlationId": "8e797d80-84f1-46d9-a2e6-0b3c16da1f25",
+    "timestamp": "2026-04-01T18:45:00.211Z",
+    "apiVersion": "v1"
+  },
+  "links": {
+    "self": "/api/v1/uploads/4d43d1b5-b2ec-4aa5-af40-3430de3cf20d"
+  }
+}
+```
+
+### 57.4 Contrato de criação de processing job
+
+**Request**
+
+```json
+{
+  "uploadedFileId": "4d43d1b5-b2ec-4aa5-af40-3430de3cf20d",
+  "processMode": "standard",
+  "reviewPolicy": "auto_if_confident",
+  "priority": 5,
+  "options": {
+    "enableOcrFallback": true,
+    "enableManualReviewFallback": true,
+    "publicationMode": "manual",
+    "targetStatementType": "TRUE_FALSE"
+  }
+}
+```
+
+**Response**
+
+```json
+{
+  "data": {
+    "jobId": "5b9b39ab-7d1d-4db6-b2a1-29de2d6d9a01",
+    "correlationId": "970af8cd-6374-4c0c-9f0a-f129c13c6d44",
+    "status": "PENDING",
+    "currentStep": "extract",
+    "priority": 5,
+    "processMode": "standard",
+    "reviewPolicy": "auto_if_confident",
+    "isReprocessing": false,
+    "uploadedFileId": "4d43d1b5-b2ec-4aa5-af40-3430de3cf20d",
+    "createdAt": "2026-04-01T18:46:41.102Z"
+  },
+  "meta": {
+    "requestId": "e8b6f502-5e34-45fb-93da-87864b13f56b",
+    "correlationId": "970af8cd-6374-4c0c-9f0a-f129c13c6d44",
+    "timestamp": "2026-04-01T18:46:41.110Z",
+    "apiVersion": "v1"
+  },
+  "links": {
+    "self": "/api/v1/processing-jobs/5b9b39ab-7d1d-4db6-b2a1-29de2d6d9a01",
+    "steps": "/api/v1/processing-jobs/5b9b39ab-7d1d-4db6-b2a1-29de2d6d9a01/steps"
+  }
+}
+```
+
+### 57.5 Contrato de consulta detalhada de processing job
+
+**Response**
+
+```json
+{
+  "data": {
+    "jobId": "5b9b39ab-7d1d-4db6-b2a1-29de2d6d9a01",
+    "correlationId": "970af8cd-6374-4c0c-9f0a-f129c13c6d44",
+    "status": "VALIDATING",
+    "currentStep": "validate",
+    "priority": 5,
+    "processMode": "standard",
+    "reviewPolicy": "auto_if_confident",
+    "uploadedFileId": "4d43d1b5-b2ec-4aa5-af40-3430de3cf20d",
+    "progress": {
+      "totalSteps": 8,
+      "completedSteps": 7,
+      "failedSteps": 0,
+      "percent": 87.5
+    },
+    "timestamps": {
+      "startedAt": "2026-04-01T18:46:42.010Z",
+      "lastHeartbeatAt": "2026-04-01T18:48:11.554Z",
+      "finishedAt": null
+    },
+    "summary": {
+      "draftsGenerated": 14,
+      "draftsPendingReview": 2,
+      "draftsReadyForPublication": 9,
+      "draftsRejected": 3
+    }
+  },
+  "meta": {
+    "requestId": "9bc1f311-39bc-4051-94b8-d8b2a8a0fe82",
+    "correlationId": "970af8cd-6374-4c0c-9f0a-f129c13c6d44",
+    "timestamp": "2026-04-01T18:48:11.556Z",
+    "apiVersion": "v1"
+  },
+  "links": {
+    "steps": "/api/v1/processing-jobs/5b9b39ab-7d1d-4db6-b2a1-29de2d6d9a01/steps",
+    "agentRuns": "/api/v1/processing-jobs/5b9b39ab-7d1d-4db6-b2a1-29de2d6d9a01/agent-runs"
+  }
+}
+```
+
+### 57.6 Contrato de listagem de steps do job
+
+**Response**
+
+```json
+{
+  "data": [
+    {
+      "stepName": "extract",
+      "status": "SUCCEEDED",
+      "attemptNumber": 1,
+      "queueName": "q.extraction",
+      "workerName": "extraction-worker",
+      "durationMs": 4820,
+      "startedAt": "2026-04-01T18:46:42.010Z",
+      "finishedAt": "2026-04-01T18:46:46.830Z",
+      "fallbackUsed": false,
+      "failure": null
+    },
+    {
+      "stepName": "classify",
+      "status": "SUCCEEDED",
+      "attemptNumber": 1,
+      "queueName": "q.classification",
+      "workerName": "classification-worker",
+      "durationMs": 2311,
+      "startedAt": "2026-04-01T18:46:46.980Z",
+      "finishedAt": "2026-04-01T18:46:49.291Z",
+      "fallbackUsed": false,
+      "failure": null
+    },
+    {
+      "stepName": "validate",
+      "status": "IN_PROGRESS",
+      "attemptNumber": 1,
+      "queueName": "q.validation",
+      "workerName": "validation-worker",
+      "durationMs": null,
+      "startedAt": "2026-04-01T18:48:05.100Z",
+      "finishedAt": null,
+      "fallbackUsed": false,
+      "failure": null
+    }
+  ],
+  "meta": {
+    "requestId": "8cb8e617-3a7f-4c4c-84d6-f7cf0da7996a",
+    "correlationId": "970af8cd-6374-4c0c-9f0a-f129c13c6d44",
+    "timestamp": "2026-04-01T18:48:11.556Z",
+    "apiVersion": "v1"
+  }
+}
+```
+
+### 57.7 Contrato de draft detalhado
+
+**Response**
+
+```json
+{
+  "data": {
+    "draftId": "7bb1b1ce-669d-42d2-aefe-a7d0d0db4d4f",
+    "jobId": "5b9b39ab-7d1d-4db6-b2a1-29de2d6d9a01",
+    "status": "VALIDATED",
+    "source": {
+      "pageNumber": 12,
+      "questionNumber": "34",
+      "originalStatement": "De acordo com a Lei 8.112, a remoção de servidor poderá ocorrer a pedido, independentemente do interesse da administração, nas hipóteses previstas em lei."
+    },
+    "transformation": {
+      "statementType": "TRUE_FALSE",
+      "adaptedStatement": "A remoção de servidor público poderá ocorrer a pedido, independentemente do interesse da administração, apenas nas hipóteses expressamente previstas em lei.",
+      "expectedAnswerKey": "TRUE",
+      "answerCommentary": "A assertiva é verdadeira porque a legislação admite remoção a pedido sem interesse da administração em hipóteses específicas, como acompanhamento de cônjuge e motivo de saúde, conforme disciplina legal aplicável."
+    },
+    "classification": {
+      "matterId": 18,
+      "matterLabel": "Direito Administrativo",
+      "subMatterIds": [1812, 1819],
+      "filters": [
+        {
+          "filterId": 91,
+          "label": "Servidores Públicos",
+          "score": 0.96,
+          "method": "semantic"
+        }
+      ]
+    },
+    "legalGrounding": {
+      "summary": "Lei 8.112/1990, dispositivos sobre remoção do servidor.",
+      "sources": [
+        {
+          "type": "NORMATIVE_ARTICLE",
+          "reference": "Lei 8.112/1990 - art. 36",
+          "relevanceScore": 0.98,
+          "isPrimaryGrounding": true
+        }
+      ]
+    },
+    "quality": {
+      "qualityScore": 94.2,
+      "clarityScore": 92.0,
+      "consistencyScore": 95.1,
+      "legalGroundingScore": 97.3,
+      "hallucinationRiskLevel": "LOW",
+      "requiresManualReview": false,
+      "isReadyForPublication": true
+    },
+    "versions": {
+      "promptVersion": "adapt-v3.4.1",
+      "modelVersion": "gpt-x-enterprise-2026-03"
+    },
+    "timestamps": {
+      "createdAt": "2026-04-01T18:47:01.004Z",
+      "updatedAt": "2026-04-01T18:48:07.811Z",
+      "publishedAt": null
+    }
+  },
+  "meta": {
+    "requestId": "2f6c2678-4d79-4b9f-88fc-8d629d8d7ed7",
+    "correlationId": "970af8cd-6374-4c0c-9f0a-f129c13c6d44",
+    "timestamp": "2026-04-01T18:48:20.991Z",
+    "apiVersion": "v1"
+  }
+}
+```
+
+### 57.8 Contrato de submit de revisão humana
+
+**Request**
+
+```json
+{
+  "decision": "APPROVED_WITH_EDITS",
+  "decisionComment": "Texto ajustado para reduzir risco de ambiguidade sobre a expressão 'apenas'.",
+  "updatedDraft": {
+    "adaptedStatement": "A remoção de servidor público poderá ocorrer a pedido, independentemente do interesse da administração, nas hipóteses expressamente previstas em lei.",
+    "answerCommentary": "A assertiva é verdadeira porque a legislação prevê hipóteses específicas de remoção a pedido sem necessidade de interesse da administração, observadas as condições legais aplicáveis."
+  },
+  "returnedToStep": null
+}
+```
+
+**Response**
+
+```json
+{
+  "data": {
+    "reviewItemId": "0f2154bb-a49b-4161-b880-5dc8f132b58b",
+    "draftId": "7bb1b1ce-669d-42d2-aefe-a7d0d0db4d4f",
+    "status": "REVIEWED",
+    "decision": "APPROVED_WITH_EDITS",
+    "decisionByUserId": 3012,
+    "decisionAt": "2026-04-01T19:02:11.001Z"
+  },
+  "meta": {
+    "requestId": "628d0b6c-460e-4d36-a0af-4d9b2d57f43f",
+    "correlationId": "970af8cd-6374-4c0c-9f0a-f129c13c6d44",
+    "timestamp": "2026-04-01T19:02:11.011Z",
+    "apiVersion": "v1"
+  }
+}
+```
+
+### 57.9 Contrato de publicação
+
+**Request**
+
+```json
+{
+  "publicationMode": "manual",
+  "targetSystem": "main-mysql",
+  "force": false,
+  "auditReason": "Publicação aprovada após validação automática e revisão editorial opcional."
+}
+```
+
+**Response**
+
+```json
+{
+  "data": {
+    "publicationEventId": "2a0e6383-7d2f-4cba-8b58-0dd815de8b90",
+    "draftId": "7bb1b1ce-669d-42d2-aefe-a7d0d0db4d4f",
+    "status": "SENT",
+    "action": "publish",
+    "targetSystem": "main-mysql",
+    "idempotencyKey": "publish:7bb1b1ce-669d-42d2-aefe-a7d0d0db4d4f:v1",
+    "createdAt": "2026-04-01T19:03:41.612Z"
+  },
+  "meta": {
+    "requestId": "64546430-8017-4118-8f5e-fc405182e7ab",
+    "correlationId": "970af8cd-6374-4c0c-9f0a-f129c13c6d44",
+    "timestamp": "2026-04-01T19:03:41.621Z",
+    "apiVersion": "v1"
+  }
+}
+```
+
+### 57.10 Contrato interno entre agentes
+
+```json
+{
+  "eventName": "draft.validation.requested",
+  "eventVersion": "1.0.0",
+  "occurredAt": "2026-04-01T18:48:05.100Z",
+  "correlationId": "970af8cd-6374-4c0c-9f0a-f129c13c6d44",
+  "requestId": "system-generated",
+  "payload": {
+    "jobId": "5b9b39ab-7d1d-4db6-b2a1-29de2d6d9a01",
+    "draftId": "7bb1b1ce-669d-42d2-aefe-a7d0d0db4d4f",
+    "stepName": "validate",
+    "attemptNumber": 1,
+    "inputHash": "a39ef0f9ac6ca114c42dcf8dce2b04b48de3347d0a87f6b1b5b23ef28d7fca12",
+    "options": {
+      "strictMode": true,
+      "allowFallbackToReview": true
+    }
+  }
 }
 ```
 
@@ -1919,30 +2375,297 @@ flowchart LR
 
 ## 58. API — Exemplos de Requests e Responses
 
+### 58.1 Exemplo HTTP — criação de processing job
+
 ```http
 POST /api/v1/processing-jobs
-Idempotency-Key: 2b2f6af4-8a45-4d92-a7f5-2e8d3487b111
 Authorization: Bearer <token>
 Content-Type: application/json
+Idempotency-Key: 7bc44c15-a783-4f18-98f7-a74d7f7a0d92
+X-Correlation-Id: 970af8cd-6374-4c0c-9f0a-f129c13c6d44
 ```
 
 ```json
 {
-  "uploadedFileId": "550e8400-e29b-41d4-a716-446655440000",
+  "uploadedFileId": "4d43d1b5-b2ec-4aa5-af40-3430de3cf20d",
   "processMode": "standard",
-  "reviewPolicy": "auto_if_confident"
+  "reviewPolicy": "auto_if_confident",
+  "priority": 5,
+  "options": {
+    "enableOcrFallback": true,
+    "enableManualReviewFallback": true,
+    "publicationMode": "manual",
+    "targetStatementType": "TRUE_FALSE"
+  }
 }
 ```
 
+**Response 202**
+
 ```json
 {
-  "jobId": "5b9b39ab-7d1d-4db6-b2a1-29de2d6d9a01",
-  "correlationId": "970af8cd-6374-4c0c-9f0a-f129c13c6d44",
-  "status": "PENDING",
+  "data": {
+    "jobId": "5b9b39ab-7d1d-4db6-b2a1-29de2d6d9a01",
+    "correlationId": "970af8cd-6374-4c0c-9f0a-f129c13c6d44",
+    "status": "PENDING",
+    "currentStep": "extract"
+  },
+  "meta": {
+    "requestId": "e8b6f502-5e34-45fb-93da-87864b13f56b",
+    "correlationId": "970af8cd-6374-4c0c-9f0a-f129c13c6d44",
+    "timestamp": "2026-04-01T18:46:41.110Z",
+    "apiVersion": "v1"
+  },
   "links": {
     "self": "/api/v1/processing-jobs/5b9b39ab-7d1d-4db6-b2a1-29de2d6d9a01"
   }
 }
+```
+
+### 58.2 Exemplo de erro de validação
+
+**Response 422**
+
+```json
+{
+  "error": {
+    "code": "VALIDATION_ERROR",
+    "message": "Payload inválido para criação do job.",
+    "category": "INPUT_VALIDATION",
+    "details": [
+      {
+        "field": "reviewPolicy",
+        "reason": "Valor inválido. Use: auto_if_confident, always_manual, never_manual."
+      },
+      {
+        "field": "priority",
+        "reason": "Valor deve estar entre 1 e 10."
+      }
+    ],
+    "requestId": "0cdb13d1-bb85-4fa3-968d-9e77a2e6e0bf",
+    "correlationId": "970af8cd-6374-4c0c-9f0a-f129c13c6d44",
+    "timestamp": "2026-04-01T18:46:12.221Z"
+  }
+}
+```
+
+### 58.3 Exemplo de erro de regra de negócio
+
+**Response 409**
+
+```json
+{
+  "error": {
+    "code": "STEP_RETRY_NOT_ALLOWED",
+    "message": "A etapa solicitada não pode ser reprocessada no estado atual do job.",
+    "category": "BUSINESS_RULE",
+    "details": [
+      {
+        "field": "status",
+        "reason": "Jobs em estado CANCELLED não aceitam retry de etapa."
+      }
+    ],
+    "requestId": "1e94038d-0898-45c4-84cb-f483d20e4dcb",
+    "correlationId": "970af8cd-6374-4c0c-9f0a-f129c13c6d44",
+    "timestamp": "2026-04-01T18:51:10.445Z"
+  }
+}
+```
+
+### 58.4 Exemplo de erro de idempotência
+
+**Response 409**
+
+```json
+{
+  "error": {
+    "code": "IDEMPOTENCY_CONFLICT",
+    "message": "Já existe uma operação em andamento para esta chave de idempotência.",
+    "category": "CONCURRENCY_CONTROL",
+    "details": [
+      {
+        "field": "Idempotency-Key",
+        "reason": "Uma requisição equivalente ainda está em processamento."
+      }
+    ],
+    "requestId": "492f8d62-58e9-4b34-9a10-bfc5071c5e0c",
+    "correlationId": "970af8cd-6374-4c0c-9f0a-f129c13c6d44",
+    "timestamp": "2026-04-01T18:46:42.921Z"
+  }
+}
+```
+
+### 58.5 Exemplo de erro de integração com legado
+
+**Response 503**
+
+```json
+{
+  "error": {
+    "code": "ACL_UNAVAILABLE",
+    "message": "A integração de publicação com a base principal está temporariamente indisponível.",
+    "category": "INTEGRATION_FAILURE",
+    "details": [
+      {
+        "field": "targetSystem",
+        "reason": "Circuit breaker aberto para a ACL de publicação."
+      }
+    ],
+    "requestId": "fc776240-0040-4306-ad9d-e1542d30ea35",
+    "correlationId": "970af8cd-6374-4c0c-9f0a-f129c13c6d44",
+    "timestamp": "2026-04-01T19:03:42.932Z"
+  }
+}
+```
+
+### 58.6 Exemplo de payload de teste para contrato interno
+
+```json
+{
+  "eventName": "question.classification.requested",
+  "eventVersion": "1.0.0",
+  "occurredAt": "2026-04-01T18:46:47.000Z",
+  "correlationId": "970af8cd-6374-4c0c-9f0a-f129c13c6d44",
+  "payload": {
+    "jobId": "5b9b39ab-7d1d-4db6-b2a1-29de2d6d9a01",
+    "draftId": "7bb1b1ce-669d-42d2-aefe-a7d0d0db4d4f",
+    "sourcePageNumber": 12,
+    "statementText": "A remoção de servidor poderá ocorrer a pedido nas hipóteses legais.",
+    "language": "pt-BR"
+  }
+}
+```
+
+### 58.7 Exemplo de response paginada
+
+```json
+{
+  "data": [
+    {
+      "draftId": "7bb1b1ce-669d-42d2-aefe-a7d0d0db4d4f",
+      "status": "VALIDATED",
+      "qualityScore": 94.2,
+      "requiresManualReview": false
+    },
+    {
+      "draftId": "ed8d8365-0b0f-49bc-aa8e-1d52db9f00ef",
+      "status": "NEEDS_REVIEW",
+      "qualityScore": 71.6,
+      "requiresManualReview": true
+    }
+  ],
+  "meta": {
+    "requestId": "14e8f74c-5daf-40b4-bfd4-707f1e1b3575",
+    "correlationId": "970af8cd-6374-4c0c-9f0a-f129c13c6d44",
+    "timestamp": "2026-04-01T19:05:11.334Z",
+    "apiVersion": "v1",
+    "pagination": {
+      "page": 1,
+      "pageSize": 20,
+      "totalItems": 2,
+      "totalPages": 1
+    }
+  }
+}
+```
+
+### 58.8 Matriz de cenários de teste para payloads e responses
+
+| Cenário | Entrada | Resultado esperado |
+|---|---|---|
+| criação de job válida | payload completo e enums válidos | `202 Accepted` + `jobId` |
+| UUID inválido | `uploadedFileId` malformado | `422 VALIDATION_ERROR` |
+| enum inválido | `reviewPolicy=smartest` | `422 VALIDATION_ERROR` |
+| job já em processamento equivalente | mesma `Idempotency-Key` | `409 IDEMPOTENCY_CONFLICT` |
+| retry de step em job cancelado | `POST retry-step` | `409 STEP_RETRY_NOT_ALLOWED` |
+| publicação sem aprovação | draft `NEEDS_REVIEW` | `409 PUBLICATION_NOT_ALLOWED` |
+| ACL indisponível | breaker aberto | `503 ACL_UNAVAILABLE` |
+
+### 58.9 Exemplos de testes automatizados
+
+#### Exemplo de teste de validação HTTP
+
+```ts
+it('deve retornar 422 quando reviewPolicy for inválida', async () => {
+  await request(app.getHttpServer())
+    .post('/api/v1/processing-jobs')
+    .set('Authorization', `Bearer ${token}`)
+    .set('Idempotency-Key', '8eb3f39f-c67f-49af-a3d4-8bd516ad08b7')
+    .send({
+      uploadedFileId: '4d43d1b5-b2ec-4aa5-af40-3430de3cf20d',
+      processMode: 'standard',
+      reviewPolicy: 'invalid-policy',
+      priority: 5
+    })
+    .expect(422)
+    .expect(({ body }) => {
+      expect(body.error.code).toBe('VALIDATION_ERROR');
+      expect(body.error.details[0].field).toBe('reviewPolicy');
+    });
+});
+```
+
+#### Exemplo de teste de contrato de response
+
+```ts
+it('deve retornar envelope padronizado ao criar job', async () => {
+  const response = await request(app.getHttpServer())
+    .post('/api/v1/processing-jobs')
+    .set('Authorization', `Bearer ${token}`)
+    .set('Idempotency-Key', 'c1e5c786-c6bd-4555-8ea4-8f3d49057b2d')
+    .send({
+      uploadedFileId: '4d43d1b5-b2ec-4aa5-af40-3430de3cf20d',
+      processMode: 'standard',
+      reviewPolicy: 'auto_if_confident',
+      priority: 5
+    })
+    .expect(202);
+
+  expect(response.body.data.jobId).toBeDefined();
+  expect(response.body.meta.requestId).toBeDefined();
+  expect(response.body.meta.correlationId).toBeDefined();
+  expect(response.body.links.self).toContain('/api/v1/processing-jobs/');
+});
+```
+
+#### Exemplo de teste de regra de negócio
+
+```ts
+it('não deve publicar draft que ainda exige revisão', async () => {
+  const draftId = 'ed8d8365-0b0f-49bc-aa8e-1d52db9f00ef';
+
+  await request(app.getHttpServer())
+    .post(`/api/v1/question-drafts/${draftId}/publish`)
+    .set('Authorization', `Bearer ${adminToken}`)
+    .set('Idempotency-Key', '01f5ca0d-4f0c-4d1c-a73c-c17ee7e8fdb9')
+    .send({ publicationMode: 'manual', targetSystem: 'main-mysql', force: false })
+    .expect(409)
+    .expect(({ body }) => {
+      expect(body.error.code).toBe('PUBLICATION_NOT_ALLOWED');
+    });
+});
+```
+
+#### Exemplo de teste de contrato interno de evento
+
+```ts
+it('deve validar o contrato do evento draft.validation.requested', () => {
+  const payload = {
+    eventName: 'draft.validation.requested',
+    eventVersion: '1.0.0',
+    occurredAt: '2026-04-01T18:48:05.100Z',
+    correlationId: '970af8cd-6374-4c0c-9f0a-f129c13c6d44',
+    payload: {
+      jobId: '5b9b39ab-7d1d-4db6-b2a1-29de2d6d9a01',
+      draftId: '7bb1b1ce-669d-42d2-aefe-a7d0d0db4d4f',
+      stepName: 'validate',
+      attemptNumber: 1,
+      inputHash: 'a39ef0f9ac6ca114c42dcf8dce2b04b48de3347d0a87f6b1b5b23ef28d7fca12'
+    }
+  };
+
+  expect(() => draftValidationRequestedSchema.parse(payload)).not.toThrow();
+});
 ```
 
 ---
@@ -2232,29 +2955,179 @@ Toda ação relevante deve produzir trilha com:
 
 ## 82. Estratégia de Testes
 
+A estratégia de testes deve refletir a arquitetura e proteger especialmente contratos, fluxos assíncronos, qualidade de payloads, transições de estado e publicação controlada.
+
 ### 82.1 Testes Unitários
 
-Domínio, normalizadores, validadores, políticas e mappers.
+Escopo:
+
+- entidades e value objects;
+- serviços de domínio;
+- normalizers e sanitizers;
+- mappers;
+- validadores;
+- policies de transição;
+- helpers de idempotência, retry e parsing.
+
+**Exemplos de casos**
+
+- normalização Unicode e colapso de whitespace;
+- regex de UUID e `stepName`;
+- bloqueio de transição inválida `PUBLISHED -> RAW`;
+- cálculo de score e critérios de revisão.
 
 ### 82.2 Testes de Integração
 
-Repositórios, Redis, filas, object storage, ACL, vector search.
+Escopo:
+
+- repositórios Postgres;
+- Redis e locks distribuídos;
+- filas BullMQ;
+- object storage;
+- ACL do legado;
+- adapters de embeddings/OCR/LLM mockados ou stubados.
+
+**Exemplos de casos**
+
+- persistência correta de `processing_jobs` e `processing_job_steps`;
+- lock de publicação impedindo dupla execução;
+- gravação de `publication_events` após integração bem-sucedida;
+- inserção de item em `manual_review_queue` após validação insuficiente.
 
 ### 82.3 Testes de Contrato
 
-HTTP, eventos de fila, DTOs internos e ACL de publicação.
+Escopo:
+
+- request/response HTTP;
+- envelopes de erro;
+- contratos internos de evento;
+- payload canônico de publicação;
+- respostas da ACL.
+
+**Exemplos de casos**
+
+- schema do `POST /api/v1/processing-jobs`;
+- response envelope com `meta.requestId` e `meta.correlationId`;
+- evento `draft.validation.requested` compatível com `v1.0.0`;
+- publicação canônica contendo campos mandatórios e enums aceitos pelo legado.
 
 ### 82.4 Testes End-to-End
 
-Upload → pipeline → revisão → publicação.
+Fluxos completos:
+
+- upload → criação do job → extração → classificação → resolução → validação;
+- upload → pipeline → revisão humana → publicação;
+- falha em integração → retry → fallback → DLQ;
+- reprocessamento por etapa e por job.
+
+**Exemplos de casos**
+
+- geração de drafts e consulta posterior via API;
+- aprovação de draft e publicação confirmada;
+- rejeição de draft e retorno ao step adequado;
+- replay de publicação após indisponibilidade transitória.
 
 ### 82.5 Testes de Resiliência
 
-Timeouts, retries, breaker, fallback, DLQ, replay.
+Escopo:
+
+- timeouts;
+- retries;
+- circuit breaker;
+- fallback;
+- DLQ;
+- concorrência e idempotência.
+
+**Exemplos de casos**
+
+- timeout do provider de LLM levando a retry com backoff;
+- abertura do breaker na ACL após falhas consecutivas;
+- fallback para busca lexical quando vector search falha;
+- item enviado à DLQ após esgotamento das tentativas;
+- publicação duplicada bloqueada por lock + idempotência.
 
 ### 82.6 Testes de Carga e Stress
 
-Saturação de filas, burst de uploads, latência de agentes, throughput por worker.
+Escopo:
+
+- upload concorrente;
+- filas críticas;
+- latência por worker;
+- throughput do pipeline;
+- saturação controlada de revisão/publicação.
+
+**Exemplos de casos**
+
+- 500 uploads em burst controlado;
+- 10 mil drafts validados em lote;
+- saturação de `q.validation` e comportamento de backpressure;
+- degradação progressiva com manutenção de health/readiness adequados.
+
+### 82.7 Matriz de cobertura mínima sugerida
+
+| Componente | Unit | Integration | Contract | E2E | Resilience |
+|---|---|---|---|---|---|
+| Uploads | Sim | Sim | Sim | Sim | Não |
+| Processing Jobs | Sim | Sim | Sim | Sim | Sim |
+| Drafts | Sim | Sim | Sim | Sim | Sim |
+| Review | Sim | Sim | Sim | Sim | Não |
+| Publication | Sim | Sim | Sim | Sim | Sim |
+| ACL Legado | Não | Sim | Sim | Sim | Sim |
+| Eventos internos | Sim | Sim | Sim | Sim | Sim |
+
+### 82.8 Exemplos adicionais de validações automatizadas
+
+#### Teste de parser/pipe de step
+
+```ts
+describe('ParseStepNamePipe', () => {
+  it('deve aceitar step válido', () => {
+    expect(pipe.transform('resolve-ids')).toBe('resolve-ids');
+  });
+
+  it('deve rejeitar step inválido', () => {
+    expect(() => pipe.transform('resolve_ids')).toThrow();
+  });
+});
+```
+
+#### Teste de idempotência de publicação
+
+```ts
+it('deve retornar conflito ao repetir publicação com a mesma chave durante execução ativa', async () => {
+  const key = 'publish:7bb1b1ce-669d-42d2-aefe-a7d0d0db4d4f:v1';
+
+  await Promise.allSettled([
+    request(app.getHttpServer())
+      .post('/api/v1/question-drafts/7bb1b1ce-669d-42d2-aefe-a7d0d0db4d4f/publish')
+      .set('Authorization', `Bearer ${adminToken}`)
+      .set('Idempotency-Key', key)
+      .send({ publicationMode: 'manual', targetSystem: 'main-mysql', force: false }),
+    request(app.getHttpServer())
+      .post('/api/v1/question-drafts/7bb1b1ce-669d-42d2-aefe-a7d0d0db4d4f/publish')
+      .set('Authorization', `Bearer ${adminToken}`)
+      .set('Idempotency-Key', key)
+      .send({ publicationMode: 'manual', targetSystem: 'main-mysql', force: false })
+      .expect(409)
+  ]);
+});
+```
+
+#### Teste de contrato de erro padronizado
+
+```ts
+it('toda resposta de erro deve possuir envelope padronizado', async () => {
+  const response = await request(app.getHttpServer())
+    .get('/api/v1/processing-jobs/invalid-uuid')
+    .set('Authorization', `Bearer ${token}`)
+    .expect(422);
+
+  expect(response.body.error.code).toBeDefined();
+  expect(response.body.error.message).toBeDefined();
+  expect(response.body.error.requestId).toBeDefined();
+  expect(response.body.error.timestamp).toBeDefined();
+});
+```
 
 ---
 
