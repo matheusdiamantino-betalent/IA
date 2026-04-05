@@ -1,4 +1,8 @@
-# 🔐 Arquitetura de Federação de Autenticação
+# 🔐 Arquitetura de Autenticação Delegada
+## Reaproveitamento do Auth da API Principal (AdonisJS) na API de IA de Questions (NestJS)
+
+> **Status atual:** Documento técnico em evolução para a **Fase 1** do projeto.  
+> O desenho abaixo está **alinhado com o código real validado até aqui**, mas ainda pode receber refinamentos conforme avançarmos na implementação.
 ## Reaproveitamento do Auth da API Principal (AdonisJS) na API de IA (NestJS)
 
 ---
@@ -148,7 +152,9 @@ Mas ela **não deve** assumir a responsabilidade de autenticar por conta própri
 
 A arquitetura adotada será de:
 
-## **Federação de autenticação com introspecção controlada**
+## **Autenticação delegada com introspecção controlada**
+
+> **Nota técnica:** embora o termo “federação” possa ser usado em sentido amplo, o desenho que estamos implementando é, de forma mais precisa, uma arquitetura de **auth delegada**, na qual a **API principal é a autoridade de autenticação** e a **API de IA consome o contexto autenticado via introspecção**.
 
 ### Papéis de cada sistema
 
@@ -164,6 +170,26 @@ A arquitetura adotada será de:
 ---
 
 # 5. 🛰️ Visão executiva da solução
+
+## Objetivo da solução na prática
+
+A **API de IA de Questions** será um serviço especializado em:
+
+- ingestão de documentos;
+- processamento e extração;
+- geração assistida por IA;
+- revisão e pipeline de questões;
+- operações internas do fluxo de construção de banco de questões.
+
+Porém, **ela não terá login próprio**.
+
+Ela dependerá da **sessão/token administrativo já emitido pela app principal**, garantindo que o acesso ao domínio de IA continue subordinado ao mesmo contexto administrativo da plataforma principal.
+
+## Resultado arquitetural desejado
+
+```text
+A mesma identidade administrativa da app principal controla o acesso à API de IA.
+```
 
 ```mermaid
 %%{init: {
@@ -230,7 +256,8 @@ flowchart TD
     J --> K[🛡️ AuthGuard extrai token]
     K --> L[🔄 AuthService chama API Principal]
 
-    L --> M[🌐 GET /api/v1/auth/me ou /api/v1/profile]
+    L --> M[🌐 GET /api/v1/profile hoje
+ou GET /api/v1/auth/me recomendado]
     M --> N[🛡️ Middleware auth:admin]
     N --> O[🔍 AuthMiddleware.authenticate]
     O --> P[🧪 auth.use admin.check]
@@ -289,7 +316,8 @@ sequenceDiagram
 
     F->>I: Request com Authorization Bearer token
     I->>I: AuthGuard extrai token
-    I->>P: GET /api/v1/auth/me
+    I->>P: GET /api/v1/profile (estado atual)
+    Note over I,P: Futuro recomendado: GET /api/v1/auth/me
     P->>P: middleware auth:admin
     P->>R: auth.use('admin').check()
     R-->>P: Token válido / inválido
@@ -373,11 +401,38 @@ flowchart LR
 
 # 8. 📦 Contratos de payload
 
+A integração correta depende de contratos claros, estáveis e desacoplados do modelo interno do legado.
+
+## Objetivo desta seção
+
+Definir:
+
+- **qual payload existe hoje**;
+- **qual payload devemos expor idealmente**;
+- **qual payload a API de IA deve usar internamente**.
+
+Isso evita que a IA fique acoplada ao retorno cru do Adonis.
+
 A integração correta depende de contratos claros.
 
 ---
 
 ## 8.1 Payload real esperado da API principal
+
+### Estado atual validado
+
+Hoje, com base no `AuthController.show`, o comportamento validado é:
+
+```ts
+const user = auth.user as Admin
+return response.ok(
+  await Admin.query().preload('roles').where('id', user.id).first()
+)
+```
+
+Ou seja, **a API principal hoje devolve o `Admin` carregado com `roles`**.
+
+Esse retorno pode variar dependendo do `Admin.ts`, serialização, colunas visíveis e shape da relação `roles`, mas conceitualmente esse é o contrato atual.
 
 ### Exemplo completo de resposta da introspecção
 
@@ -406,6 +461,12 @@ A integração correta depende de contratos claros.
 ---
 
 ## 8.2 Payload ideal recomendado para exposição externa
+
+### Recomendação arquitetural
+
+A API de IA **não deve depender do shape cru do model `Admin`**.
+
+O ideal é criar um payload externo mais estável, orientado a integração entre serviços.
 
 O ideal é que a API principal normalize o payload e exponha algo mais estável para a API de IA.
 
@@ -473,10 +534,30 @@ export interface ExternalAdminProfile {
 
 # 9. 🌐 Endpoint de introspecção recomendado
 
+Esta é uma das partes mais importantes do desenho.
+
+## Estado atual vs estado recomendado
+
+### Estado atual já utilizável
+Hoje, o endpoint que já pode servir de base para introspecção é:
+
+```http
+GET /api/v1/profile
+```
+
+Ele já resolve o usuário autenticado via `auth:admin` e carrega `roles`.
+
+### Estado recomendado para evolução correta
+Arquiteturalmente, o ideal é **não acoplar a API de IA ao endpoint de profile administrativo**.
+
+Por isso, a recomendação é criar um endpoint dedicado exclusivamente para introspecção de identidade.
+
 Hoje, o endpoint `GET /api/v1/profile` já pode servir como base de introspecção.  
 Porém, arquiteturalmente, o ideal é criar um endpoint dedicado.
 
 ## 9.1 Rota recomendada
+
+### Recomendação de rota dedicada
 
 ```ts
 Route.get('/auth/me', 'AuthController.me').middleware(['auth:admin'])
@@ -514,6 +595,24 @@ public async me({ response, auth }: HttpContextContract) {
 ---
 
 # 10. 🧱 Arquitetura do módulo auth da API de IA
+
+A API de IA precisa de um módulo de auth **delegado**, e não de um sistema de identidade novo.
+
+## Princípio de implementação
+
+O módulo `auth` da IA deve ser responsável apenas por:
+
+- receber o token;
+- validar esse token contra a app principal;
+- construir um `AuthenticatedUser` interno;
+- aplicar autorização por scopes.
+
+Ele **não deve**:
+
+- emitir token;
+- persistir sessão administrativa;
+- manter login próprio;
+- reimplementar o guard do Adonis.
 
 A API de IA precisa de um módulo de auth **federado**, e não de um sistema de identidade novo.
 
@@ -703,6 +802,17 @@ Padroniza formatos diferentes de resposta da API principal.
 
 # 12. 🔐 Regras de segurança
 
+A integração entre a API principal e a API de IA lida diretamente com o **perímetro administrativo da plataforma**.
+
+Isso significa que qualquer erro de modelagem aqui pode abrir brechas em:
+
+- geração de conteúdo;
+- processamento de documentos;
+- revisão e publicação de questões;
+- rotas administrativas da camada de IA.
+
+Portanto, esta seção é mandatória.
+
 A integração de auth entre sistemas é uma superfície crítica.  
 Portanto, o desenho precisa seguir regras explícitas de segurança.
 
@@ -857,6 +967,8 @@ Isso reduz complexidade e evita mascarar problemas de integração logo no iníc
 
 # 15. 🚫 Anti-padrões a evitar
 
+Abaixo estão os principais erros que **não devem acontecer** nesta integração.
+
 ## 15.1 Não criar login próprio na API de IA
 
 Errado porque fragmenta identidade.
@@ -881,7 +993,20 @@ Errado porque contamina o domínio interno da API de IA.
 
 # 16. ✅ Decisão final
 
+## Veredito arquitetural
+
+Para o cenário da **IA de Questions**, o reaproveitamento do auth da app principal foi desenhado corretamente.
+
+O que estamos construindo faz sentido porque:
+
+- o domínio de IA pertence ao mesmo contexto administrativo;
+- o usuário administrativo já existe e já está autenticado;
+- o sistema atual já possui identidade, roles e validação de token;
+- a IA precisa apenas **consumir esse contexto com segurança**.
+
 ## Arquitetura final aprovada
+
+### O que está oficialmente decidido para a Fase 1
 
 - **Login continua na API principal**;
 - **Token continua sendo emitido pela API principal**;
@@ -900,26 +1025,50 @@ Frontend → API IA → API Principal → Redis → Contexto Autenticado → IA
 
 # 17. 🚀 Próximos passos
 
-Após aprovar este desenho, a sequência recomendada é:
+A implementação deve seguir de forma incremental, respeitando o estágio atual da construção.
+
+## Fase 1 — objetivo real desta entrega
+
+Nesta fase, o objetivo não é construir um IAM complexo.  
+O objetivo é **habilitar o acesso administrativo seguro à API de IA**, reaproveitando corretamente a autenticação da app principal.
 
 ## Na API Principal
-- criar endpoint `GET /api/v1/auth/me`;
+- manter o login administrativo existente como autoridade oficial;
+- usar `GET /api/v1/profile` como base inicial de introspecção;
+- criar `GET /api/v1/auth/me` como endpoint dedicado recomendado;
 - padronizar o payload de resposta;
 - garantir preload consistente de roles.
 
 ## Na API de IA
-- criar módulo `auth` completo;
+- criar o módulo `auth` completo;
 - implementar `AuthGuard`;
 - implementar `ScopesGuard`;
 - criar `AuthenticatedUserMapper`;
 - criar `ROLE_SCOPE_MAP`;
+- proteger endpoints críticos da IA;
 - escrever testes de integração ponta a ponta.
+
+## Evolução futura recomendada
+- adicionar cache curto de introspecção, se necessário;
+- adicionar métricas detalhadas de auth provider;
+- endurecer auditoria de operações críticas;
+- evoluir autorização por escopos finos por caso de uso.
 
 ---
 
 # 🧾 Conclusão executiva
 
-A arquitetura correta para reaproveitamento de autenticação entre a API principal e a API de IA é uma arquitetura de **federação de autenticação com introspecção controlada**.
+O desenho atual está **coerente com o código real que foi mapeado** e **faz sentido para o que estamos construindo**.
+
+A integração entre a app principal e a API de IA de Questions deve seguir o modelo de **autenticação delegada com introspecção**, usando a app principal como autoridade de identidade e a IA como consumidora de contexto autenticado.
+
+## O que isso garante na prática
+
+- a IA não duplica login;
+- a IA não duplica identidade;
+- a IA não duplica emissão de token;
+- a IA continua subordinada ao mesmo perímetro administrativo da plataforma principal;
+- a autorização da IA evolui de forma própria e sustentável.
 
 Essa abordagem garante:
 
@@ -931,5 +1080,5 @@ Essa abordagem garante:
 
 ## Em uma frase final
 
-> A API de IA deve operar como um sistema federado de autenticação, **confiando exclusivamente na API principal como fonte de verdade da identidade administrativa**.
+> A API de IA de Questions deve operar como um serviço administrativo especializado, **reaproveitando com segurança a autenticação já existente da app principal**, sem duplicar identidade, sem reinventar auth e sem quebrar a coerência arquitetural da plataforma.
 
