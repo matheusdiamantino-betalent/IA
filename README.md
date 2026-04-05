@@ -241,16 +241,16 @@ A Fase 1 não representa um protótipo descartável. Ela representa a base perma
 | Fase | Nome | Status | Objetivo central |
 |---|---|---|---|
 | 1 | Fundação Segura | 🟢 Em andamento | Estruturar base técnica, integrações, segurança e modularidade |
-| 2 | Agentes Básicos | ⚪ Planejada | Introduzir extração, classificação, resolução e busca |
-| 3 | Agentes Avançados | ⚪ Planejada | Adicionar adaptação, gabarito, validação e orquestração |
-| 4 | API e Processamento Assíncrono | ⚪ Planejada | Expor pipeline e operar com jobs e filas |
-| 4B | Front-end Admin | ⚪ Planejada | Oferecer superfície humana de operação |
-| Pré-MVP | CI/CD e Testes | ⚪ Planejada | Garantir lançabilidade mínima |
-| MVP | Processamento de Questões | ⚪ Planejada | Entregar primeira versão operacional utilizável |
-| 5 | Materiais Didáticos | ⚪ Planejada | Ingestão, chunking e indexação vetorial |
-| 6 | Monitoramento | ⚪ Planejada | Consolidar métricas, dashboards e tracing |
-| 7 | Qualidade Final | ⚪ Planejada | Hardening, otimização e testes completos |
-| Produção | Versão Completa | ⚪ Planejada | Operação plena e sustentável em escala |
+| 2 | Agentes Básicos | 🟡 Em planejamento | Introduzir extração, classificação, resolução e busca |
+| 3 | Agentes Avançados | 🟡 Em planejamento | Adicionar adaptação, gabarito, validação e orquestração |
+| 4 | API e Processamento Assíncrono | 🟡 Em planejamento | Expor pipeline e operar com jobs e filas |
+| 4B | Front-end Admin | 🟡 Em planejamento | Oferecer superfície humana de operação |
+| Pré-MVP | CI/CD e Testes | 🟡 Em planejamento | Garantir lançabilidade mínima |
+| MVP | Processamento de Questões | 🟡 Em planejamento | Entregar primeira versão operacional utilizável |
+| 5 | Materiais Didáticos | 🟡 Em planejamento | Ingestão, chunking e indexação vetorial |
+| 6 | Monitoramento | 🟡 Em planejamento | Consolidar métricas, dashboards e tracing |
+| 7 | Qualidade Final | 🟡 Em planejamento | Hardening, otimização e testes completos |
+| Produção | Versão Completa | 🟡 Em planejamento | Operação plena e sustentável em escala |
 
 ## Fluxograma executivo do roadmap
 
@@ -270,34 +270,58 @@ A Fase 1 não representa um protótipo descartável. Ela representa a base perma
   }
 }}%%
 flowchart LR
-    A["🚀 Início"] --> B["🧱 Fase 1\nFundação Segura\nStatus: Em andamento"]
-    B --> C["🤖 Fase 2\nAgentes Básicos\nStatus: Planejada"]
-    C --> D["🧠 Fase 3\nAgentes Avançados\nStatus: Planejada"]
-    D --> E["📡 Fase 4\nAPI e Processamento Assíncrono\nStatus: Planejada"]
-    E --> F["🖥️ Fase 4B\nFront-end Admin\nStatus: Planejada"]
-    F --> G["🧪 Pré-MVP\nCI/CD e Testes\nStatus: Planejada"]
-    G --> H["🎯 MVP\nProcessamento de Questões\nStatus: Planejada"]
-    H --> I["📚 Fase 5\nMateriais Didáticos\nStatus: Planejada"]
-    I --> J["📈 Fase 6\nMonitoramento\nStatus: Planejada"]
-    J --> K["🛡️ Fase 7\nQualidade Final\nStatus: Planejada"]
-    K --> L["🏁 Produção\nVersão Completa\nStatus: Planejada"]
+    A["🚀 Início"] --> B["🧱 Fase 1
+Fundação Segura
+Status: Em andamento"]
+    B --> C["🤖 Fase 2
+Agentes Básicos
+Status: Em planejamento"]
+    C --> D["🧠 Fase 3
+Agentes Avançados
+Status: Em planejamento"]
+    D --> E["📡 Fase 4
+API e Processamento Assíncrono
+Status: Em planejamento"]
+    E --> F["🖥️ Fase 4B
+Front-end Admin
+Status: Em planejamento"]
+    F --> G["🧪 Pré-MVP
+CI/CD e Testes
+Status: Em planejamento"]
+    G --> H["🎯 MVP
+Processamento de Questões
+Status: Em planejamento"]
+    H --> I["📚 Fase 5
+Materiais Didáticos
+Status: Em planejamento"]
+    I --> J["📈 Fase 6
+Monitoramento
+Status: Em planejamento"]
+    J --> K["🛡️ Fase 7
+Qualidade Final
+Status: Em planejamento"]
+    K --> L["🏁 Produção
+Versão Completa
+Status: Em planejamento"]
 
     style B fill:#0f766e,stroke:#34d399,stroke-width:2px,color:#ffffff
-    style C fill:#1d4ed8,stroke:#60a5fa,stroke-width:2px,color:#ffffff
-    style D fill:#7c3aed,stroke:#a78bfa,stroke-width:2px,color:#ffffff
-    style E fill:#b45309,stroke:#f59e0b,stroke-width:2px,color:#ffffff
-    style F fill:#be123c,stroke:#fb7185,stroke-width:2px,color:#ffffff
-    style G fill:#334155,stroke:#94a3b8,stroke-width:2px,color:#ffffff
-    style H fill:#0ea5e9,stroke:#67e8f9,stroke-width:2px,color:#ffffff
-    style I fill:#2563eb,stroke:#93c5fd,stroke-width:2px,color:#ffffff
+    style C fill:#1e3a8a,stroke:#60a5fa,stroke-width:2px,color:#ffffff
+    style D fill:#581c87,stroke:#a78bfa,stroke-width:2px,color:#ffffff
+    style E fill:#9a3412,stroke:#f59e0b,stroke-width:2px,color:#ffffff
+    style F fill:#9f1239,stroke:#fb7185,stroke-width:2px,color:#ffffff
+    style G fill:#475569,stroke:#94a3b8,stroke-width:2px,color:#ffffff
+    style H fill:#0369a1,stroke:#67e8f9,stroke-width:2px,color:#ffffff
+    style I fill:#1d4ed8,stroke:#93c5fd,stroke-width:2px,color:#ffffff
     style J fill:#6d28d9,stroke:#c4b5fd,stroke-width:2px,color:#ffffff
-    style K fill:#15803d,stroke:#86efac,stroke-width:2px,color:#ffffff
+    style K fill:#166534,stroke:#86efac,stroke-width:2px,color:#ffffff
     style L fill:#111827,stroke:#cbd5e1,stroke-width:2px,color:#ffffff
 ```
 
 ---
 
 # 8. Fase 1 — Escopo em Andamento
+
+> **Status oficial:** esta é a única fase atualmente em execução. Todas as demais fases do roadmap devem ser interpretadas como **em planejamento**, servindo como direção arquitetural e não como entrega ativa.
 
 ## 🎯 Objetivo da fase
 
@@ -493,6 +517,14 @@ A arquitetura já separa, desde a fundação:
 - governança e conhecimento canônico;
 - integração controlada com legado;
 - pontos explícitos de evolução para agentes e recuperação semântica.
+
+## Complementos importantes de leitura
+
+- `API Core` representa a borda principal síncrona da solução na fase atual;
+- `Auth Adapter` é uma camada de compatibilização, não um novo provedor de identidade;
+- `Governance` concentra regras e referências canônicas que sustentam classificação, vínculo e rastreabilidade;
+- `Staging` existe para preparar revisão humana e estados intermediários sem poluir o core de questões;
+- os blocos `Agents Layer` e `Semantic Retrieval` aparecem no diagrama para explicitar compatibilidade evolutiva, não entrega atual.
 
 ---
 
@@ -698,20 +730,35 @@ Este é o fluxo operacional que representa a lógica da fundação atual da plat
   }
 }}%%
 flowchart LR
-    A["🌐 Entrada HTTP"] --> B["🛡️ Guardas de auth\ne política"]
-    B --> C["✅ Validação\ne sanitização"]
-    C --> D["🧠 Use case / service"]
-    D --> E["📚 Regra de domínio"]
-    E --> F["🐘 Persistência"]
-    F --> G["🧾 Auditoria"]
+    A["🌐 Entrada HTTP"] --> B["🛡️ Guardas de auth
+e política"]
+    B --> C["✅ Validação
+e sanitização"]
+    C --> D["🧠 Use case / application service"]
+    D --> E["📚 Regra de domínio
+e invariantes"]
+    E --> F["🐘 Persistência
+PostgreSQL"]
+    F --> G["🧾 Auditoria
+e trilha operacional"]
     G --> H["📦 Resposta padronizada"]
+
+    D -. leitura controlada .-> I["🗄️ ACL
+MySQL legado"]
+    D -. suporte transversal .-> J["⚡ Redis
+cache e coordenação futura"]
+    G -. telemetria .-> K["📈 Logs / tracing / health"]
 
     style B fill:#7c3aed,stroke:#c4b5fd,stroke-width:2px,color:#ffffff
     style C fill:#0f766e,stroke:#6ee7b7,stroke-width:2px,color:#ffffff
     style D fill:#1d4ed8,stroke:#93c5fd,stroke-width:2px,color:#ffffff
+    style E fill:#0369a1,stroke:#7dd3fc,stroke-width:2px,color:#ffffff
     style F fill:#334155,stroke:#cbd5e1,stroke-width:2px,color:#ffffff
     style G fill:#be123c,stroke:#fda4af,stroke-width:2px,color:#ffffff
-    style H fill:#0369a1,stroke:#7dd3fc,stroke-width:2px,color:#ffffff
+    style H fill:#0f766e,stroke:#6ee7b7,stroke-width:2px,color:#ffffff
+    style I fill:#9a3412,stroke:#fdba74,stroke-width:2px,color:#ffffff
+    style J fill:#b91c1c,stroke:#fca5a5,stroke-width:2px,color:#ffffff
+    style K fill:#6d28d9,stroke:#c4b5fd,stroke-width:2px,color:#ffffff
 ```
 
 ## Leitura da fase atual
@@ -724,7 +771,16 @@ Mesmo sem o pipeline completo, a Fase 1 já precisa garantir:
 - domínio coeso;
 - persistência consistente;
 - auditoria mínima;
-- previsibilidade de resposta.
+- previsibilidade de resposta;
+- integração legada sem contaminação semântica;
+- observabilidade básica desde a borda até a persistência.
+
+## O que este fluxo evidencia
+
+- o caminho principal atual é síncrono e controlado;
+- Redis aparece como capacidade fundacional e não como operação assíncrona madura;
+- o acesso ao legado ocorre por ACL e nunca diretamente pelo domínio canônico;
+- auditoria e telemetria não são apêndices, e sim partes do fluxo mínimo confiável.
 
 ---
 
@@ -748,36 +804,62 @@ O fluxo abaixo mostra a progressão arquitetural completa da solução, mantendo
   }
 }}%%
 flowchart TD
-    START["🧱 Fundação\nFase 1"] --> A["🤖 Extração"]
-    A --> B["🏷️ Classificação"]
-    B --> C["🧭 Resolução\nde identificadores"]
-    C --> D["🔎 Busca contextual"]
-    D --> E["🧠 Adaptação"]
-    E --> F["📝 Geração de\ngabarito"]
-    F --> G["🧪 Validação"]
-    G --> H["🎛️ Orquestração"]
-    H --> I["📡 API + filas + jobs"]
-    I --> J["🖥️ Revisão humana"]
-    J --> K["🚀 Operação MVP"]
-    K --> L["📚 Materiais didáticos\ne busca semântica"]
-    L --> M["📈 Monitoramento maduro"]
-    M --> N["🛡️ Hardening final"]
+    START["🧱 Fundação
+Fase 1
+Em andamento"] --> A["🤖 Fase 2
+Extração e classificação
+Em planejamento"]
+    A --> B["🧭 Fase 2
+Resolução e busca
+Em planejamento"]
+    B --> C["🧠 Fase 3
+Adaptação
+Em planejamento"]
+    C --> D["📝 Fase 3
+Gabarito e justificativa
+Em planejamento"]
+    D --> E["🧪 Fase 3
+Validação
+Em planejamento"]
+    E --> F["🎛️ Fase 3
+Orquestração
+Em planejamento"]
+    F --> G["📡 Fase 4
+API + filas + jobs
+Em planejamento"]
+    G --> H["🖥️ Fase 4B
+Operação humana
+Em planejamento"]
+    H --> I["🎯 MVP
+Processamento de questões
+Em planejamento"]
+    I --> J["📚 Fase 5
+Materiais didáticos e vetores
+Em planejamento"]
+    J --> K["📈 Fase 6
+Monitoramento maduro
+Em planejamento"]
+    K --> L["🛡️ Fase 7
+Hardening final
+Em planejamento"]
+    L --> M["🏁 Produção
+Versão completa
+Em planejamento"]
 
     style START fill:#0f766e,stroke:#6ee7b7,stroke-width:2px,color:#ffffff
     style A fill:#1d4ed8,stroke:#93c5fd,stroke-width:2px,color:#ffffff
-    style B fill:#7c3aed,stroke:#c4b5fd,stroke-width:2px,color:#ffffff
-    style C fill:#0369a1,stroke:#7dd3fc,stroke-width:2px,color:#ffffff
-    style D fill:#164e63,stroke:#67e8f9,stroke-width:2px,color:#ffffff
-    style E fill:#6d28d9,stroke:#c4b5fd,stroke-width:2px,color:#ffffff
-    style F fill:#b45309,stroke:#fdba74,stroke-width:2px,color:#ffffff
-    style G fill:#be123c,stroke:#fda4af,stroke-width:2px,color:#ffffff
-    style H fill:#334155,stroke:#cbd5e1,stroke-width:2px,color:#ffffff
-    style I fill:#0ea5e9,stroke:#67e8f9,stroke-width:2px,color:#ffffff
-    style J fill:#1e293b,stroke:#cbd5e1,stroke-width:2px,color:#ffffff
-    style K fill:#059669,stroke:#86efac,stroke-width:2px,color:#ffffff
-    style L fill:#2563eb,stroke:#93c5fd,stroke-width:2px,color:#ffffff
-    style M fill:#6d28d9,stroke:#c4b5fd,stroke-width:2px,color:#ffffff
-    style N fill:#111827,stroke:#cbd5e1,stroke-width:2px,color:#ffffff
+    style B fill:#0369a1,stroke:#7dd3fc,stroke-width:2px,color:#ffffff
+    style C fill:#6d28d9,stroke:#c4b5fd,stroke-width:2px,color:#ffffff
+    style D fill:#b45309,stroke:#fdba74,stroke-width:2px,color:#ffffff
+    style E fill:#be123c,stroke:#fda4af,stroke-width:2px,color:#ffffff
+    style F fill:#334155,stroke:#cbd5e1,stroke-width:2px,color:#ffffff
+    style G fill:#0ea5e9,stroke:#67e8f9,stroke-width:2px,color:#ffffff
+    style H fill:#1e293b,stroke:#cbd5e1,stroke-width:2px,color:#ffffff
+    style I fill:#059669,stroke:#86efac,stroke-width:2px,color:#ffffff
+    style J fill:#2563eb,stroke:#93c5fd,stroke-width:2px,color:#ffffff
+    style K fill:#7c3aed,stroke:#c4b5fd,stroke-width:2px,color:#ffffff
+    style L fill:#166534,stroke:#86efac,stroke-width:2px,color:#ffffff
+    style M fill:#111827,stroke:#cbd5e1,stroke-width:2px,color:#ffffff
 ```
 
 ## Observação de leitura
@@ -1200,7 +1282,9 @@ A fase atual é a construção da base correta do produto. É nessa etapa que se
 - a segurança por padrão;
 - a observabilidade mínima necessária.
 
-Quando essa fundação estiver consistente, as fases seguintes poderão evoluir sobre uma base previsível, auditável e tecnicamente sustentável.
+As demais fases permanecem **em planejamento**, compondo o roadmap de evolução da solução e orientando as decisões arquiteturais da fundação atual.
+
+Quando essa fundação estiver consistente, as etapas seguintes poderão evoluir sobre uma base previsível, auditável e tecnicamente sustentável.
 
 <div align="center">
 
