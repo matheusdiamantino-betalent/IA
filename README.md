@@ -28,6 +28,8 @@ Projeto estruturado para crescimento incremental com foco em **segurança**, **m
 
 # 📚 Sumário
 
+- [0. Mapa Executivo das Fases](#0-mapa-executivo-das-fases)
+
 - [1. Visão Executiva](#1-visão-executiva)
 - [2. Status Atual do Projeto](#2-status-atual-do-projeto)
 - [3. Decisão Arquitetural Oficial](#3-decisão-arquitetural-oficial)
@@ -52,6 +54,305 @@ Projeto estruturado para crescimento incremental com foco em **segurança**, **m
 - [22. Critérios de Pronto da Fase 1](#22-critérios-de-pronto-da-fase-1)
 - [23. Stack Técnica](#23-stack-técnica)
 - [24. Conclusão](#24-conclusão)
+
+---
+
+# 0. Mapa Executivo das Fases
+
+A imagem de planejamento define corretamente a evolução do produto em **fases incrementais**, com entregas progressivas até o lançamento de produção.  
+A arquitetura da plataforma deve refletir esse roadmap com precisão, deixando claro:
+
+- **o que já é fundação estrutural**;
+- **o que entra como MVP operacional**;
+- **o que pertence à expansão pós-MVP**;
+- **o que é observabilidade, qualidade e endurecimento final**.
+
+## 🧭 Leitura correta do roadmap
+
+O fluxo das fases é o seguinte:
+
+1. **Fase 1 — Infraestrutura**
+2. **Fase 2 — Agentes Básicos**
+3. **Fase 3 — Agentes Avançados**
+4. **Fase 4 — API e Processamento Assíncrono**
+5. **Fase 4B — Front-end Admin**
+6. **Pré-MVP — CI/CD e Testes**
+7. **🚀 Launch MVP — Processamento de Questões**
+8. **Fase 5 — Materiais Didáticos**
+9. **Fase 6 — Monitoramento**
+10. **Fase 7 — Qualidade Final**
+11. **🎉 Launch Produção — Versão Completa**
+
+## 🎯 Interpretação arquitetural correta
+
+A arquitetura precisa ser entendida em **dois planos diferentes**:
+
+### Plano A — Estado atual de implementação
+O projeto está **concentrado na fundação e nos primeiros blocos operacionais**, com foco em construir a base correta.
+
+### Plano B — Arquitetura alvo já decidida
+A estrutura já precisa nascer **compatível com todas as fases futuras**, mesmo que elas ainda não estejam implementadas agora.
+
+> Em outras palavras: **a fundação deve respeitar o roadmap inteiro, mesmo que a implementação atual ainda esteja nos estágios iniciais.**
+
+---
+
+## 🗺️ Fluxograma Executivo de Evolução
+
+```mermaid
+%%{init: {
+  "theme": "base",
+  "themeVariables": {
+    "background": "#050816",
+    "primaryColor": "#111827",
+    "primaryTextColor": "#e5e7eb",
+    "primaryBorderColor": "#38bdf8",
+    "secondaryColor": "#0f172a",
+    "secondaryTextColor": "#e5e7eb",
+    "tertiaryColor": "#111827",
+    "tertiaryTextColor": "#e5e7eb",
+    "lineColor": "#94a3b8"
+  }
+}}%%
+flowchart TD
+    START(["🚩 Início do Projeto"])
+    F1["FASE 1
+Infraestrutura"]
+    F2["FASE 2
+Agentes Básicos"]
+    F3["FASE 3
+Agentes Avançados"]
+    F4["FASE 4
+API + Processamento Assíncrono"]
+    F4B["FASE 4B
+Front-end Admin"]
+    PRE["PRÉ-MVP
+CI/CD + Testes"]
+    MVP(["🚀 Launch MVP
+Processamento de Questões"])
+    F5["FASE 5
+Materiais Didáticos"]
+    F6["FASE 6
+Monitoramento"]
+    F7["FASE 7
+Qualidade Final"]
+    PROD(["🎉 Launch Produção
+Versão Completa"])
+
+    START --> F1 --> F2 --> F3 --> F4 --> F4B --> PRE --> MVP --> F5 --> F6 --> F7 --> PROD
+```
+
+---
+
+## 📦 Mapeamento técnico por fase
+
+### 🟦 FASE 1 — Infraestrutura *(fundação da plataforma)*
+
+**Objetivo:** estabelecer a base técnica e operacional mínima correta.
+
+#### Entregas esperadas
+- Setup **NestJS + TypeScript**;
+- **PostgreSQL + PGVector**;
+- **MySQL connection** para integração com base existente;
+- **Redis + cache**;
+- base inicial de **legislação / conhecimento primário**.
+
+#### Papel arquitetural
+Essa fase não entrega ainda o produto final, mas cria os **alicerces obrigatórios** para:
+
+- agentes;
+- pipeline assíncrono;
+- busca semântica;
+- integração com legado;
+- operação segura.
+
+#### Leitura correta
+A Fase 1 é a **camada fundacional**.  
+Ela deve ser refletida no README como a **fase prioritária da implementação atual**.
+
+---
+
+### 🟪 FASE 2 — Agentes Básicos
+
+**Objetivo:** introduzir os primeiros componentes automatizados do pipeline.
+
+#### Entregas esperadas
+- **PDF Extraction Agent**;
+- **Classification Agent**;
+- **ID Resolution Agent**;
+- **Search Agent**.
+
+#### Papel arquitetural
+Essa fase representa o início do pipeline inteligente, mas ainda com foco em **blocos utilitários e funcionais**, não em coordenação sofisticada.
+
+#### Responsabilidade sistêmica
+- extração de conteúdo;
+- enriquecimento de metadados;
+- resolução de identidade/códigos;
+- busca contextual em fontes estruturadas e web.
+
+---
+
+### 🟧 FASE 3 — Agentes Avançados
+
+**Objetivo:** introduzir inteligência editorial e validação semântica.
+
+#### Entregas esperadas
+- **Adaptation Agent**;
+- **Answer Key Agent**;
+- **Validation Agent**;
+- **Orchestrator Agent**.
+
+#### Papel arquitetural
+Essa fase adiciona as camadas que aproximam a solução de um **pipeline editorial inteligente**, capaz de:
+
+- reformular questões;
+- gerar justificativas;
+- validar coerência;
+- coordenar a execução dos blocos anteriores.
+
+#### Importante
+Mesmo sendo uma fase posterior, a arquitetura da Fase 1 já deve nascer **compatível com essa evolução**.
+
+---
+
+### 🟩 FASE 4 — API e Processamento Assíncrono
+
+**Objetivo:** transformar o pipeline em um sistema operacional escalável.
+
+#### Entregas esperadas
+- **REST API endpoints**;
+- **Bull / BullMQ queues**;
+- **Job status e progress tracking**.
+
+#### Papel arquitetural
+Essa fase consolida o produto como sistema de execução assíncrona, com:
+
+- jobs persistidos;
+- filas;
+- status de processamento;
+- desacoplamento entre request e execução longa.
+
+---
+
+### 🟥 FASE 4B — Front-end Admin
+
+**Objetivo:** fornecer a superfície operacional humana do MVP.
+
+#### Entregas esperadas
+- dashboard principal;
+- upload e listagem;
+- interface de validação;
+- edição manual;
+- métricas e logs operacionais.
+
+#### Papel arquitetural
+Essa fase representa a entrada do **operador humano** no ciclo, permitindo:
+
+- revisão;
+- validação;
+- correção;
+- observação de performance.
+
+---
+
+### 🟨 PRÉ-MVP — CI/CD e Testes
+
+**Objetivo:** endurecer a entrega antes do primeiro lançamento funcional.
+
+#### Entregas esperadas
+- testes unitários básicos;
+- pipeline de CI/CD;
+- deploy.
+
+#### Papel arquitetural
+Essa fase formaliza o caminho de release e garante que o MVP seja lançável com previsibilidade.
+
+---
+
+### 🚀 Launch MVP — Processamento de Questões
+
+**Marco:** primeira versão operacional funcional do produto.
+
+#### O que significa tecnicamente
+Nesse ponto, a plataforma já deve ser capaz de:
+
+- receber insumo;
+- processar questões;
+- aplicar pipeline básico/avançado;
+- expor operação mínima utilizável.
+
+---
+
+### 🟦 FASE 5 — Materiais Didáticos
+
+**Objetivo:** expandir a plataforma para trabalhar com materiais-base e busca semântica.
+
+#### Entregas esperadas
+- upload de PDFs didáticos;
+- chunking inteligente;
+- indexação vetorial;
+- API de busca semântica.
+
+#### Papel arquitetural
+Essa fase expande a plataforma de **processamento de questões** para **plataforma de conhecimento contextualizado**.
+
+---
+
+### 🟪 FASE 6 — Monitoramento
+
+**Objetivo:** consolidar observabilidade operacional madura.
+
+#### Entregas esperadas
+- métricas e dashboards;
+- logs estruturados.
+
+#### Papel arquitetural
+Essa fase transforma o sistema em um produto **operável em escala com visibilidade real**.
+
+---
+
+### 🟩 FASE 7 — Qualidade Final
+
+**Objetivo:** endurecimento final antes da versão completa de produção.
+
+#### Entregas esperadas
+- testes automatizados;
+- otimização de performance;
+- deploy final.
+
+#### Papel arquitetural
+Essa fase representa o **hardening final** da plataforma.
+
+---
+
+### 🎉 Launch Produção — Versão Completa
+
+**Marco final:** plataforma operacional completa com pipeline, operação, observabilidade e qualidade endurecida.
+
+---
+
+## 🧠 Relação correta entre roadmap e arquitetura
+
+A arquitetura precisa refletir esse roadmap da seguinte forma:
+
+### O que deve existir já na base
+- boundaries corretos;
+- auth integrada;
+- persistência adequada;
+- cache;
+- contratos internos;
+- compatibilidade com filas;
+- estrutura para agentes;
+- suporte futuro a busca vetorial.
+
+### O que não deve ser tratado como “já pronto”
+- pipeline completo;
+- todos os agentes em produção;
+- front-end operacional completo;
+- monitoramento maduro;
+- camada final de qualidade;
+- versão completa de produção.
 
 ---
 
