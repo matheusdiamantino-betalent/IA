@@ -1,8 +1,41 @@
 # Plataforma de Questões com IA
 
-Arquitetura backend orientada a domínio para geração, governança, revisão e publicação controlada de questões, construída com foco em **segurança**, **auditabilidade**, **modularidade**, **resiliência** e **evolução incremental**.
+<div align="center">
 
-> **Status atual:** **Fase 1 — Fundação Segura**
+![Status](https://img.shields.io/badge/status-Fase%201%20%E2%80%94%20Funda%C3%A7%C3%A3o%20Segura-0f766e?style=for-the-badge&logo=shield&logoColor=white)
+![Arquitetura](https://img.shields.io/badge/architecture-Modular%20Monolith-1d4ed8?style=for-the-badge&logo=stackshare&logoColor=white)
+![Backend](https://img.shields.io/badge/backend-NestJS%20%2B%20TypeScript-e11d48?style=for-the-badge&logo=nestjs&logoColor=white)
+![Database](https://img.shields.io/badge/database-PostgreSQL-334155?style=for-the-badge&logo=postgresql&logoColor=white)
+![Cache](https://img.shields.io/badge/cache-Redis-b91c1c?style=for-the-badge&logo=redis&logoColor=white)
+![Observability](https://img.shields.io/badge/observability-Logs%20%2B%20Tracing%20%2B%20Metrics-7c3aed?style=for-the-badge&logo=datadog&logoColor=white)
+![Security](https://img.shields.io/badge/security-Secure%20by%20Default-065f46?style=for-the-badge&logo=vercel&logoColor=white)
+
+</div>
+
+<br />
+
+> Plataforma backend orientada a domínio para **governança, criação, staging, revisão futura e publicação controlada de questões**, projetada com foco em **segurança**, **auditabilidade**, **modularidade**, **resiliência operacional** e **evolução incremental por fases**.
+
+---
+
+## 📌 Status Atual do Projeto
+
+> **O projeto encontra-se oficialmente na `FASE 1 — Fundação Segura`.**
+>
+> A arquitetura completa da plataforma já foi decidida, porém a implementação atual está **deliberadamente limitada ao núcleo estrutural**, assegurando que a evolução para ingestão, IA, revisão editorial e publicação aconteça **sem reescrita do core**, **sem acoplamento indevido** e **sem dívida arquitetural prematura**.
+
+### O que isso significa na prática
+
+A plataforma **ainda não está operando como pipeline completo de IA**.  
+Neste momento, ela estabelece a camada correta para suportar:
+
+- identidade e acesso;
+- controle de domínio;
+- taxonomia e organização de conteúdo;
+- CRUD governado de questões;
+- staging antes de fluxos futuros de revisão/publicação;
+- observabilidade mínima e auditabilidade;
+- padrões técnicos permanentes de arquitetura.
 
 ---
 
@@ -35,14 +68,37 @@ Arquitetura backend orientada a domínio para geração, governança, revisão e
 
 # 1. Visão Geral
 
-A plataforma foi concebida como uma **base operacional governada para produção de questões**, preparada para evoluir até um pipeline completo com ingestão de conteúdo, recuperação contextual, agentes especializados, revisão humana e publicação controlada.
+A plataforma foi concebida como uma **base operacional governada para produção de questões**, preparada para evoluir até um pipeline completo com:
 
-O estágio atual do projeto implementa exclusivamente a **fundação estrutural e segura** da solução.  
-Isso significa que a arquitetura final já está definida, mas a implementação corrente contempla apenas o **núcleo operacional mínimo e correto** para sustentar a evolução das próximas fases.
+- ingestão de conteúdo;
+- recuperação contextual;
+- agentes especializados;
+- revisão humana;
+- publicação controlada;
+- observabilidade e governança ponta a ponta.
 
-A decisão central desta arquitetura é simples:
+A implementação atual existe para garantir que a base da solução seja **estruturalmente correta antes da automação pesada**.
 
-> **nenhuma automação de IA pode operar com segurança e governança sem um núcleo sólido de autenticação, autorização, domínio, rastreabilidade, staging e observabilidade.**
+Em termos arquiteturais, a Fase 1 entrega o que mais importa no início de uma plataforma desse tipo:
+
+- **fronteiras internas fortes**;
+- **segurança por padrão**;
+- **consistência de domínio**;
+- **modelo evolutivo seguro**;
+- **capacidade de auditoria**;
+- **preparação real para pipeline futuro**.
+
+### Decisão central da arquitetura
+
+> **IA nunca deve operar diretamente sobre o coração editorial e operacional sem um núcleo seguro, rastreável, versionável e governado.**
+
+Essa decisão evita:
+
+- contaminação da base principal;
+- automação sem controle;
+- acoplamento entre domínio e vendor;
+- crescimento técnico desordenado;
+- perda de governança operacional.
 
 ---
 
@@ -76,7 +132,7 @@ O projeto encontra-se na **Fase 1 — Fundação Segura**.
 Nesta etapa, o sistema **ainda não é a plataforma completa de IA**.  
 Ele representa o **núcleo arquitetural e operacional** sobre o qual as capacidades avançadas serão adicionadas de forma controlada.
 
-A Fase 1 estabelece:
+## Capacidades efetivamente pertencentes à Fase 1
 
 - identidade e acesso;
 - segregação de responsabilidades;
@@ -86,6 +142,18 @@ A Fase 1 estabelece:
 - rastreabilidade;
 - observabilidade básica;
 - contratos e padrões de evolução.
+
+## Capacidades conscientemente adiadas
+
+- ingestão documental;
+- retrieval vetorial;
+- OCR;
+- agentes especializados;
+- pipeline assíncrono multi-step;
+- revisão automatizada;
+- publicação orquestrada.
+
+Essa delimitação é **intencional e correta**. Em projetos dessa natureza, antecipar pipeline avançado sem foundation costuma produzir uma base frágil, cara de manter e difícil de operar.
 
 ---
 
@@ -154,6 +222,17 @@ A solução precisa:
 
 Microsserviços neste estágio adicionariam complexidade operacional cedo demais, sem retorno proporcional.
 
+## Resultado arquitetural esperado
+
+Ao final da evolução planejada, esta base deverá sustentar:
+
+- módulos coesos;
+- pipeline controlado;
+- integração desacoplada com providers;
+- ACL explícita para legado;
+- expansão segura para IA e revisão editorial;
+- extração futura de capacidades específicas, se economicamente justificável.
+
 ---
 
 # 6. Princípios Arquiteturais
@@ -205,21 +284,21 @@ Mesmo na Fase 1, a arquitetura já nasce preparada para a forma final da platafo
   }
 }}%%
 flowchart TB
-    user["Usuário / Operador"]
-    admin["Admin / Editorial"]
-    extdb["Base Principal / Legado"]
-    redis["Redis"]
-    postgres["PostgreSQL"]
-    obs["Observabilidade"]
+    user["👤 Usuário / Operador"]
+    admin["🛡️ Admin / Editorial"]
+    extdb["🗄️ Base Principal / Legado"]
+    redis["⚡ Redis"]
+    postgres["🐘 PostgreSQL"]
+    obs["📈 Observabilidade"]
 
-    subgraph app["Plataforma Backend"]
-        api["API Core"]
-        auth["Auth / RBAC / Policies"]
-        qdomain["Question Domain"]
-        cdomain["Catalog Domain"]
-        sdomain["Staging Domain"]
-        adomain["Audit / Governance"]
-        shared["Shared Cross-Cutting"]
+    subgraph app["🏛️ Plataforma Backend"]
+        api["🌐 API Core"]
+        auth["🔐 Auth / RBAC / Policies"]
+        qdomain["🧩 Question Domain"]
+        cdomain["🗂️ Catalog Domain"]
+        sdomain["🧪 Staging Domain"]
+        adomain["📝 Audit / Governance"]
+        shared["🧱 Shared Cross-Cutting"]
     end
 
     user --> api
@@ -241,12 +320,12 @@ flowchart TB
     api --> obs
 ```
 
-## Leitura do diagrama
+## Leitura arquitetural
 
 A Fase 1 concentra-se em:
 
-- **API Core** como ponto de entrada;
-- **Auth / RBAC** como camada de proteção;
+- **API Core** como ponto de entrada e controle;
+- **Auth / RBAC** como camada obrigatória de proteção;
 - **Question Domain** como núcleo de conteúdo;
 - **Catalog Domain** como classificação e organização;
 - **Staging Domain** como proteção editorial;
@@ -285,16 +364,16 @@ O fluxo atual é intencionalmente mais enxuto do que a arquitetura final.
   }
 }}%%
 flowchart TD
-    A["Usuário autenticado"] --> B["Autorização / Policy Guard"]
-    B --> C["Validação de payload"]
-    C --> D["Caso de uso da aplicação"]
-    D --> E["Regra de domínio"]
-    E --> F["Persistência"]
-    F --> G["Registro de auditoria"]
-    G --> H["Resposta padronizada"]
+    A["👤 Usuário autenticado"] --> B["🛡️ Autorização / Policy Guard"]
+    B --> C["🧾 Validação de payload"]
+    C --> D["⚙️ Caso de uso da aplicação"]
+    D --> E["📚 Regra de domínio"]
+    E --> F["💾 Persistência"]
+    F --> G["📝 Registro de auditoria"]
+    G --> H["📤 Resposta padronizada"]
 ```
 
-## Interpretação
+## Interpretação técnica
 
 Na Fase 1, o sistema opera como uma **plataforma governada de CRUD e staging**, e não como um pipeline de IA.
 
@@ -444,9 +523,37 @@ A estrutura abaixo representa a forma esperada do projeto na Fase 1.
 ```text
 src/
 ├── bootstrap/
+│   ├── app/
+│   ├── validation/
+│   ├── exceptions/
+│   ├── telemetry/
+│   └── security/
+│
 ├── config/
+│   ├── app/
+│   ├── database/
+│   ├── auth/
+│   ├── cache/
+│   ├── telemetry/
+│   └── security/
+│
 ├── shared/
+│   ├── constants/
+│   ├── enums/
+│   ├── types/
+│   ├── helpers/
+│   ├── exceptions/
+│   ├── validation/
+│   ├── sanitization/
+│   ├── security/
+│   └── telemetry/
+│
 ├── infra/
+│   ├── database/
+│   ├── cache/
+│   ├── logger/
+│   └── http/
+│
 ├── modules/
 │   ├── auth/
 │   ├── organizations/
@@ -454,7 +561,12 @@ src/
 │   ├── questions/
 │   ├── staging/
 │   └── audit/
+│
 ├── database/
+│   ├── migrations/
+│   ├── seeds/
+│   └── factories/
+│
 └── main.ts
 ```
 
@@ -504,6 +616,16 @@ erDiagram
     USERS ||--o{ AUDIT_LOGS : generates
 ```
 
+## Leitura do modelo
+
+Esse modelo busca garantir, já na Fase 1:
+
+- identidade e governança de autoria;
+- classificação consistente do banco de questões;
+- versionamento mínimo viável;
+- staging como estado intermediário controlado;
+- rastreabilidade de alterações.
+
 ---
 
 # 13. Segurança
@@ -551,6 +673,15 @@ A observabilidade é nativa, não opcional.
 - movimentação de staging;
 - falhas de validação;
 - erros internos relevantes.
+
+## Objetivo operacional
+
+Mesmo nesta fase inicial, a plataforma já deve permitir:
+
+- troubleshooting consistente;
+- correlação de requests;
+- rastreabilidade mínima de falhas;
+- leitura operacional confiável do comportamento do sistema.
 
 ---
 
@@ -692,6 +823,35 @@ flowchart TD
     D -- "No" --> F["403 Forbidden + Audit"]
 ```
 
+## 17.4 Evolução arquitetural prevista
+
+```mermaid
+%%{init: {
+  "theme": "base",
+  "themeVariables": {
+    "background": "#0b1220",
+    "primaryColor": "#111827",
+    "primaryTextColor": "#e5e7eb",
+    "primaryBorderColor": "#14b8a6",
+    "secondaryColor": "#0f172a",
+    "secondaryTextColor": "#e5e7eb",
+    "tertiaryColor": "#111827",
+    "tertiaryTextColor": "#e5e7eb",
+    "lineColor": "#94a3b8"
+  }
+}}%%
+flowchart LR
+    F1["Fase 1
+Foundation"] --> F2["Fase 2
+Ingestão + Conhecimento"]
+    F2 --> F3["Fase 3
+Pipeline de IA"]
+    F3 --> F4["Fase 4
+Revisão Editorial"]
+    F4 --> F5["Fase 5
+Publicação + Operação"]
+```
+
 ---
 
 # 18. Fora do Escopo da Fase 1
@@ -823,5 +983,4 @@ A partir dessa fundação, as próximas fases podem adicionar IA, automação, r
 # Licença
 
 Definição de licença conforme política do repositório.
-```
 
