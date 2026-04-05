@@ -17,28 +17,28 @@
 
 # 📚 Sumário
 
-- [1. Objetivo](#1--objetivo)
-- [2. Contexto validado](#2--contexto-validado)
-- [3. Problema arquitetural](#3--problema-arquitetural)
-- [4. Decisão arquitetural](#4--decisão-arquitetural)
-- [5. Visão executiva da solução](#5--visão-executiva-da-solução)
-- [6. Fluxo completo de autenticação](#6--fluxo-completo-de-autenticação)
-- [7. Fluxo de autorização](#7--fluxo-de-autorização)
-- [8. Contratos de payload](#8--contratos-de-payload)
-- [9. Endpoint de introspecção recomendado](#9--endpoint-de-introspecção-recomendado)
-- [10. Arquitetura do módulo auth da API de IA](#10--arquitetura-do-módulo-auth-da-api-de-ia)
-- [11. Tree view completa do módulo auth da IA](#11--tree-view-completa-do-módulo-auth-da-ia)
-- [12. Regras de segurança](#12--regras-de-segurança)
-- [13. Observabilidade e auditoria](#13--observabilidade-e-auditoria)
-- [14. Estratégia de cache](#14--estratégia-de-cache)
-- [15. Anti-padrões a evitar](#15--anti-padrões-a-evitar)
-- [16. Decisão final](#16--decisão-final)
-- [17. Próximos passos](#17--próximos-passos)
-- [18. Conclusão executiva](#18--conclusão-executiva)
+- [1. Visão Geral](#1--visão-geral)
+- [2. Contexto Técnico Validado](#2--contexto-técnico-validado)
+- [3. Problema Arquitetural](#3--problema-arquitetural)
+- [4. Decisão de Arquitetura](#4--decisão-de-arquitetura)
+- [5. Solução Proposta](#5--solução-proposta)
+- [6. Fluxo de Autenticação](#6--fluxo-de-autenticação)
+- [7. Fluxo de Autorização](#7--fluxo-de-autorização)
+- [8. Contratos de Integração](#8--contratos-de-integração)
+- [9. Endpoint de Introspecção](#9--endpoint-de-introspecção)
+- [10. Arquitetura do Módulo Auth da IA](#10--arquitetura-do-módulo-auth-da-ia)
+- [11. Estrutura de Arquivos do Módulo Auth](#11--estrutura-de-arquivos-do-módulo-auth)
+- [12. Requisitos de Segurança](#12--requisitos-de-segurança)
+- [13. Observabilidade e Auditoria](#13--observabilidade-e-auditoria)
+- [14. Estratégia de Cache](#14--estratégia-de-cache)
+- [15. Anti-padrões](#15--anti-padrões)
+- [16. Decisão Final da Fase 1](#16--decisão-final-da-fase-1)
+- [17. Próximos Passos](#17--próximos-passos)
+- [18. Conclusão Executiva](#18--conclusão-executiva)
 
 ---
 
-# 1. 🎯 Objetivo
+# 1. 🎯 Visão Geral
 
 Este documento define a arquitetura oficial para **reaproveitamento da autenticação da API principal** na nova **API de IA de Questions**, garantindo:
 
@@ -56,7 +56,7 @@ Este documento define a arquitetura oficial para **reaproveitamento da autentica
 
 ---
 
-# 2. 🧩 Contexto validado
+# 2. 🧩 Contexto Técnico Validado
 
 Com base nos arquivos da aplicação principal, o cenário atual já foi validado.
 
@@ -146,7 +146,7 @@ Mas ela **não deve** assumir a responsabilidade de autenticar por conta própri
 
 ---
 
-# 4. 🏛️ Decisão arquitetural
+# 4. 🏛️ Decisão de Arquitetura
 
 ## 4.1 Decisão oficial
 
@@ -169,7 +169,7 @@ A arquitetura adotada será de:
 
 ---
 
-# 5. 🛰️ Visão executiva da solução
+# 5. 🛰️ Solução Proposta
 
 ## 5.1 Objetivo da solução na prática
 
@@ -211,6 +211,40 @@ A mesma identidade administrativa da app principal controla o acesso à API de I
 }}%%
 flowchart LR
     FE[🖥️ Frontend Admin]
+    AP[🧩 API Principal]
+    AP2[AdonisJS]
+    RD[(🟥 Redis)]
+    RD2[(Opaque Token Store)]
+    IA[🤖 API de IA]
+    IA2[NestJS]
+
+    AP --- AP2
+    RD --- RD2
+    IA --- IA2
+
+    FE -->|Login e sessão| AP
+    AP -->|Persistência e validação de token| RD
+    FE -->|Bearer Token| IA
+    IA -->|Introspecção do usuário| AP
+    AP -->|Admin autenticado + roles| IA
+```mermaid
+%%{init: {
+  "theme": "base",
+  "themeVariables": {
+    "background": "#0b1020",
+    "primaryColor": "#111827",
+    "primaryTextColor": "#e5e7eb",
+    "primaryBorderColor": "#3b82f6",
+    "lineColor": "#60a5fa",
+    "secondaryColor": "#172033",
+    "secondaryTextColor": "#e2e8f0",
+    "tertiaryColor": "#0f172a",
+    "tertiaryTextColor": "#f8fafc",
+    "fontFamily": "Inter, ui-sans-serif, system-ui, sans-serif"
+  }
+}}%%
+flowchart LR
+    FE[🖥️ Frontend Admin]
     AP[🧩 API Principal<br/>AdonisJS]
     RD[(🟥 Redis<br/>Opaque Token Store)]
     IA[🤖 API de IA<br/>NestJS]
@@ -224,10 +258,64 @@ flowchart LR
 
 ---
 
-# 6. 🔄 Fluxo completo de autenticação
+# 6. 🔄 Fluxo de Autenticação
 
 ## 6.1 Visão funcional ponta a ponta
 
+```mermaid
+%%{init: {
+  "theme": "base",
+  "themeVariables": {
+    "background": "#0b1020",
+    "primaryColor": "#111827",
+    "primaryTextColor": "#e5e7eb",
+    "primaryBorderColor": "#22c55e",
+    "lineColor": "#22c55e",
+    "secondaryColor": "#172033",
+    "secondaryTextColor": "#e2e8f0",
+    "tertiaryColor": "#0f172a",
+    "tertiaryTextColor": "#f8fafc",
+    "fontFamily": "Inter, ui-sans-serif, system-ui, sans-serif"
+  }
+}}%%
+flowchart TD
+    A[👤 Admin faz login] --> B[📨 POST /api/v1/login]
+    B --> C[🧠 AuthController.auth]
+    C --> D[🔐 auth.use admin.attempt]
+    D --> E[🛡️ Guard admin]
+    E --> F[🟥 Redis TokenProvider]
+    F --> G[🎟️ Token opaco emitido]
+    G --> H[🖥️ Frontend recebe token]
+
+    H --> I[📡 Frontend chama API de IA]
+    I --> J[🤖 API de IA recebe request]
+    J --> K[🛡️ AuthGuard extrai token]
+    K --> L[🔄 AuthService chama API Principal]
+
+    L --> M[🌐 Introspecção]
+    M --> M1[GET /api/v1/profile hoje]
+    M --> M2[GET /api/v1/auth/me futuro]
+    M1 --> N[🛡️ Middleware auth:admin]
+    M2 --> N
+    N --> O[🔍 AuthMiddleware.authenticate]
+    O --> P[🧪 auth.use admin.check]
+    P --> Q[🟥 Redis valida token]
+
+    Q --> R{✅ Token válido?}
+    R -- Não --> S[⛔ 401 Unauthorized]
+    S --> T[🚫 IA bloqueia acesso]
+
+    R -- Sim --> U[👤 auth.user resolvido]
+    U --> V[📚 Carrega Admin e roles]
+    V --> W[📦 Payload autenticado]
+
+    W --> X[📥 IA recebe payload]
+    X --> Y[🧭 Mapper interno]
+    Y --> Z[🧠 Roles viram scopes]
+
+    Z --> AA{🔐 Tem permissão?}
+    AA -- Não --> AB[🚫 403 Forbidden]
+    AA -- Sim --> AC[⚙️ Executa caso de uso]
 ```mermaid
 %%{init: {
   "theme": "base",
@@ -370,6 +458,36 @@ Na API de IA, a recomendação é usar **scopes internos**, derivados dessas rol
     "fontFamily": "Inter, ui-sans-serif, system-ui, sans-serif"
   }
 }}%%
+flowchart TD
+    A[🎟️ Token válido] --> B[👤 Admin autenticado]
+    B --> C[📚 Roles carregadas]
+    C --> D[🧭 Mapper interno]
+    D --> E[🔐 Scopes internos]
+    E --> E1[admin]
+    E --> E2[contentcreator]
+    E --> E3[questioncreator]
+    E --> E4[seller]
+    E1 --> F[🛡️ ScopesGuard]
+    E2 --> F
+    E3 --> F
+    E4 --> F
+    F --> G[✅ Libera ou 🚫 bloqueia]
+```mermaid
+%%{init: {
+  "theme": "base",
+  "themeVariables": {
+    "background": "#0b1020",
+    "primaryColor": "#111827",
+    "primaryTextColor": "#e5e7eb",
+    "primaryBorderColor": "#a855f7",
+    "lineColor": "#a855f7",
+    "secondaryColor": "#172033",
+    "secondaryTextColor": "#e2e8f0",
+    "tertiaryColor": "#0f172a",
+    "tertiaryTextColor": "#f8fafc",
+    "fontFamily": "Inter, ui-sans-serif, system-ui, sans-serif"
+  }
+}}%%
 flowchart LR
     A[🎟️ Token válido] --> B[👤 Admin autenticado]
     B --> C[📚 Roles carregadas do banco]
@@ -400,7 +518,7 @@ flowchart LR
 
 ---
 
-# 8. 📦 Contratos de payload
+# 8. 📦 Contratos de Integração
 
 A integração correta depende de contratos claros, estáveis e desacoplados do modelo interno do legado.
 
@@ -559,7 +677,7 @@ export const ROLE_SCOPE_MAP: Record<string, string[]> = {
 
 ---
 
-# 9. 🌐 Endpoint de introspecção recomendado
+# 9. 🌐 Endpoint de Introspecção
 
 Esta é uma das partes mais importantes do desenho.
 
@@ -665,6 +783,34 @@ flowchart TD
     B --> C[🧠 AuthService]
     C --> D[🔌 ExternalAuthGateway]
     D --> E[🌐 AuthApiClient]
+    E --> F[🧩 API Principal]
+    F --> F1[Endpoint de introspecção]
+    F1 --> G[📦 Payload externo]
+    G --> H[🧭 AuthenticatedUserMapper]
+    H --> I[👤 AuthenticatedUser]
+    I --> J[🛡️ ScopesGuard]
+    J --> K[⚙️ Controller ou Use Case]
+```mermaid
+%%{init: {
+  "theme": "base",
+  "themeVariables": {
+    "background": "#0b1020",
+    "primaryColor": "#111827",
+    "primaryTextColor": "#e5e7eb",
+    "primaryBorderColor": "#f59e0b",
+    "lineColor": "#f59e0b",
+    "secondaryColor": "#172033",
+    "secondaryTextColor": "#e2e8f0",
+    "tertiaryColor": "#0f172a",
+    "tertiaryTextColor": "#f8fafc",
+    "fontFamily": "Inter, ui-sans-serif, system-ui, sans-serif"
+  }
+}}%%
+flowchart TD
+    A[📨 Request HTTP] --> B[🛡️ AuthGuard]
+    B --> C[🧠 AuthService]
+    C --> D[🔌 ExternalAuthGateway]
+    D --> E[🌐 AuthApiClient]
     E --> F[🧩 API Principal<br/>endpoint de introspecção]
     F --> G[📦 Payload externo do admin]
     G --> H[🧭 AuthenticatedUserMapper]
@@ -719,7 +865,7 @@ Responsável por:
 
 ---
 
-# 11. 🌳 Tree view completa do módulo auth da IA
+# 11. 🌳 Estrutura de Arquivos do Módulo Auth
 
 Abaixo está a estrutura recomendada para o módulo `auth` da API de IA, já no padrão modular enterprise.
 
@@ -826,7 +972,7 @@ Padroniza formatos diferentes de resposta da API principal.
 
 ---
 
-# 12. 🔐 Regras de segurança
+# 12. 🔐 Requisitos de Segurança
 
 A integração entre a API principal e a API de IA lida diretamente com o **perímetro administrativo da plataforma**.
 
@@ -870,6 +1016,32 @@ Portanto, esta seção é mandatória.
 
 ## 12.2 Fluxo de falhas de segurança
 
+```mermaid
+%%{init: {
+  "theme": "base",
+  "themeVariables": {
+    "background": "#0b1020",
+    "primaryColor": "#111827",
+    "primaryTextColor": "#e5e7eb",
+    "primaryBorderColor": "#ef4444",
+    "lineColor": "#ef4444",
+    "secondaryColor": "#172033",
+    "secondaryTextColor": "#e2e8f0",
+    "tertiaryColor": "#0f172a",
+    "tertiaryTextColor": "#f8fafc",
+    "fontFamily": "Inter, ui-sans-serif, system-ui, sans-serif"
+  }
+}}%%
+flowchart TD
+    A[📨 Request chega] --> B{Authorization existe?}
+    B -- Não --> C[🚫 401 Unauthorized]
+    B -- Sim --> D[🌐 Chamar API Principal]
+    D --> E{Auth respondeu OK?}
+    E -- Não --> F[🚫 Bloquear request]
+    E -- Sim --> G[👤 Construir usuário]
+    G --> H{Tem scopes exigidos?}
+    H -- Não --> I[⛔ 403 Forbidden]
+    H -- Sim --> J[✅ Seguir execução]
 ```mermaid
 %%{init: {
   "theme": "base",
@@ -988,7 +1160,7 @@ Isso reduz complexidade e evita mascarar problemas de integração logo no iníc
 
 ---
 
-# 15. 🚫 Anti-padrões a evitar
+# 15. 🚫 Anti-padrões
 
 Abaixo estão os principais erros que **não devem acontecer** nesta integração.
 
@@ -1014,7 +1186,7 @@ Errado porque contamina o domínio interno da API de IA.
 
 ---
 
-# 16. ✅ Decisão final
+# 16. ✅ Decisão Final da Fase 1
 
 ## 16.1 Veredito arquitetural
 
