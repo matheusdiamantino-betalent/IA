@@ -1,8 +1,6 @@
 # 🔐 Arquitetura de Autenticação Delegada
 ## Reaproveitamento do Auth da API Principal (AdonisJS) na API de IA de Questions (NestJS)
 
-> Documento técnico de arquitetura da **Fase 1**, estruturado para uso como **README técnico**, **documentação arquitetural** e **base de Pull Request (PR)**.
-
 ---
 
 ![Status](https://img.shields.io/badge/status-fase%201%20em%20implementa%C3%A7%C3%A3o-22c55e?style=for-the-badge)
