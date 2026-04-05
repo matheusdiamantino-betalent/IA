@@ -2,26 +2,24 @@
 
 <div align="center">
 
-![Status](https://img.shields.io/badge/status-Fase%201%20%E2%80%94%20Funda%C3%A7%C3%A3o%20Segura-0f766e?style=for-the-badge&logo=shield&logoColor=white)
-![Roadmap](https://img.shields.io/badge/roadmap-Incremental%20Delivery-2563eb?style=for-the-badge&logo=target&logoColor=white)
-![Arquitetura](https://img.shields.io/badge/architecture-Mon%C3%B3lito%20Modular-1d4ed8?style=for-the-badge&logo=stackshare&logoColor=white)
+![Status](https://img.shields.io/badge/status-Fase%201%20em%20Andamento-0f766e?style=for-the-badge&logo=target&logoColor=white)
+![Foco](https://img.shields.io/badge/foco-Funda%C3%A7%C3%A3o%20Arquitetural-1d4ed8?style=for-the-badge&logo=stackshare&logoColor=white)
+![Arquitetura](https://img.shields.io/badge/arquitetura-Mon%C3%B3lito%20Modular-1e293b?style=for-the-badge&logo=databricks&logoColor=white)
 ![Backend](https://img.shields.io/badge/backend-NestJS%20%2B%20TypeScript-e11d48?style=for-the-badge&logo=nestjs&logoColor=white)
-![Persistência](https://img.shields.io/badge/persistence-PostgreSQL%20%2B%20PGVector-334155?style=for-the-badge&logo=postgresql&logoColor=white)
-![Integração](https://img.shields.io/badge/integration-MySQL%20Legado-475569?style=for-the-badge&logo=mysql&logoColor=white)
-![Coordenação](https://img.shields.io/badge/coordination-Redis%20%2B%20BullMQ-b91c1c?style=for-the-badge&logo=redis&logoColor=white)
+![Persist%C3%AAncia](https://img.shields.io/badge/persist%C3%AAncia-PostgreSQL%20%2B%20PGVector-334155?style=for-the-badge&logo=postgresql&logoColor=white)
+![Integra%C3%A7%C3%A3o](https://img.shields.io/badge/integra%C3%A7%C3%A3o-MySQL%20Legado-475569?style=for-the-badge&logo=mysql&logoColor=white)
+![Coordena%C3%A7%C3%A3o](https://img.shields.io/badge/coordena%C3%A7%C3%A3o-Redis%20%2B%20BullMQ-b91c1c?style=for-the-badge&logo=redis&logoColor=white)
 ![Auth](https://img.shields.io/badge/auth-Reuso%20da%20api%2Fv1-7c3aed?style=for-the-badge&logo=auth0&logoColor=white)
-![Security](https://img.shields.io/badge/security-Secure%20by%20Default-065f46?style=for-the-badge&logo=vercel&logoColor=white)
-![Observability](https://img.shields.io/badge/observability-Logs%20%2B%20Tracing%20%2B%20Metrics-7c3aed?style=for-the-badge&logo=datadog&logoColor=white)
+![Seguran%C3%A7a](https://img.shields.io/badge/seguran%C3%A7a-Secure%20by%20Default-065f46?style=for-the-badge&logo=shield&logoColor=white)
+![Observabilidade](https://img.shields.io/badge/observabilidade-Logs%20%2B%20Tracing%20%2B%20Metrics-6d28d9?style=for-the-badge&logo=datadog&logoColor=white)
 
 </div>
-
-<br />
 
 <div align="center">
 
 ## 🏛️ Arquitetura orientada a domínio para processamento, governança, revisão e evolução incremental de questões com suporte a IA
 
-Projeto desenhado para crescimento em fases, com foco em **segurança**, **modularidade**, **rastreabilidade operacional**, **baixo acoplamento**, **processamento assíncrono**, **reaproveitamento de infraestrutura existente** e **expansão sustentável até produção completa**.
+**Documento técnico da solução com foco explícito na Fase 1**, etapa atualmente em andamento, preservando compatibilidade arquitetural com as fases futuras do roadmap.
 
 </div>
 
@@ -29,193 +27,230 @@ Projeto desenhado para crescimento em fases, com foco em **segurança**, **modul
 
 # 📚 Sumário
 
-- [1. Visão Executiva](#1-visão-executiva)
-- [2. Status Atual do Projeto](#2-status-atual-do-projeto)
-- [3. Decisão Arquitetural Oficial](#3-decisão-arquitetural-oficial)
-- [4. Objetivo da Plataforma](#4-objetivo-da-plataforma)
-- [5. Roadmap Oficial por Fases](#5-roadmap-oficial-por-fases)
-- [6. Interpretação Arquitetural do Roadmap](#6-interpretação-arquitetural-do-roadmap)
-- [7. Mapa Completo de Entregáveis por Fase](#7-mapa-completo-de-entregáveis-por-fase)
-- [8. Escopo Real da Fase 1](#8-escopo-real-da-fase-1)
-- [9. O que ainda não pertence à Fase 1](#9-o-que-ainda-não-pertence-à-fase-1)
+- [1. Visão Geral](#1-visão-geral)
+- [2. Objetivo do Documento](#2-objetivo-do-documento)
+- [3. Status Atual do Projeto](#3-status-atual-do-projeto)
+- [4. Diretriz Arquitetural Oficial](#4-diretriz-arquitetural-oficial)
+- [5. Objetivo da Plataforma](#5-objetivo-da-plataforma)
+- [6. Leitura Correta do Roadmap](#6-leitura-correta-do-roadmap)
+- [7. Roadmap por Fases e Status](#7-roadmap-por-fases-e-status)
+- [8. Fase 1 — Escopo em Andamento](#8-fase-1--escopo-em-andamento)
+- [9. O que Não Faz Parte da Entrega Atual](#9-o-que-não-faz-parte-da-entrega-atual)
 - [10. Princípios Arquiteturais](#10-princípios-arquiteturais)
 - [11. Visão Arquitetural de Alto Nível](#11-visão-arquitetural-de-alto-nível)
-- [12. Reaproveitamento da Autenticação da `api/v1`](#12-reaproveitamento-da-autenticação-da-apiv1)
-- [13. Estrutura Arquitetural por Módulo](#13-estrutura-arquitetural-por-módulo)
-- [14. Regras de Dependência Obrigatórias](#14-regras-de-dependência-obrigatórias)
-- [15. Bounded Contexts da Plataforma](#15-bounded-contexts-da-plataforma)
-- [16. Fluxo Operacional da Fase 1](#16-fluxo-operacional-da-fase-1)
-- [17. Fluxo Completo de Evolução do Produto](#17-fluxo-completo-de-evolução-do-produto)
-- [18. Fluxo de Processamento de Questões (MVP)](#18-fluxo-de-processamento-de-questões-mvp)
-- [19. Fluxo de Expansão para Materiais Didáticos](#19-fluxo-de-expansão-para-materiais-didáticos)
-- [20. Tree View Arquitetural Proposta](#20-tree-view-arquitetural-proposta)
-- [21. Modelo de Dados Conceitual da Fase 1](#21-modelo-de-dados-conceitual-da-fase-1)
-- [22. Segurança](#22-segurança)
-- [23. Observabilidade](#23-observabilidade)
-- [24. Resiliência e Confiabilidade](#24-resiliência-e-confiabilidade)
-- [25. ACL e Isolamento do Legado](#25-acl-e-isolamento-do-legado)
-- [26. Pipeline Futuro e Compatibilidade Evolutiva](#26-pipeline-futuro-e-compatibilidade-evolutiva)
-- [27. MVP vs Produção Completa](#27-mvp-vs-produção-completa)
-- [28. Riscos Técnicos e Trade-offs](#28-riscos-técnicos-e-trade-offs)
-- [29. Critérios de Pronto da Fase 1](#29-critérios-de-pronto-da-fase-1)
-- [30. Stack Técnica](#30-stack-técnica)
-- [31. Conclusão](#31-conclusão)
+- [12. Reuso da Autenticação da `api/v1`](#12-reuso-da-autenticação-da-apiv1)
+- [13. Bounded Contexts da Solução](#13-bounded-contexts-da-solução)
+- [14. Estrutura de Módulos do Monólito Modular](#14-estrutura-de-módulos-do-monólito-modular)
+- [15. Regras de Dependência](#15-regras-de-dependência)
+- [16. Fluxo Operacional Atual da Fase 1](#16-fluxo-operacional-atual-da-fase-1)
+- [17. Fluxo Evolutivo do Produto](#17-fluxo-evolutivo-do-produto)
+- [18. Tree View Arquitetural Proposta](#18-tree-view-arquitetural-proposta)
+- [19. Modelo de Dados Conceitual da Fundação](#19-modelo-de-dados-conceitual-da-fundação)
+- [20. Segurança](#20-segurança)
+- [21. Observabilidade](#21-observabilidade)
+- [22. Resiliência e Confiabilidade](#22-resiliência-e-confiabilidade)
+- [23. Integração com Legado via ACL](#23-integração-com-legado-via-acl)
+- [24. Stack Técnica](#24-stack-técnica)
+- [25. Critérios de Pronto da Fase 1](#25-critérios-de-pronto-da-fase-1)
+- [26. Riscos Técnicos e Trade-offs](#26-riscos-técnicos-e-trade-offs)
+- [27. Conclusão](#27-conclusão)
 
 ---
 
-# 1. Visão Executiva
+# 1. Visão Geral
 
-A **Plataforma de Questões com IA** foi concebida como uma base arquitetural robusta para suportar, com segurança e governança, o ciclo de vida de processamento, estruturação, revisão, enriquecimento e evolução de questões a partir de materiais-base e fluxos inteligentes.
+A **Plataforma de Questões com IA** foi concebida como uma solução de evolução incremental para suportar o ciclo de vida de ingestão, estruturação, classificação, enriquecimento, validação, rastreabilidade e operação de questões com apoio de IA.
 
-A solução foi desenhada para evoluir progressivamente até um pipeline completo envolvendo:
+A arquitetura foi desenhada desde o início para sustentar o roadmap completo do produto, mas a implementação atual está concentrada na **Fase 1 — Fundação Segura**, que estabelece a base técnica necessária para as etapas seguintes.
 
-- ingestão de PDFs;
-- extração de conteúdo;
-- classificação e enriquecimento de metadados;
-- resolução de identificadores e vínculos;
-- busca contextual e semântica;
-- adaptação e transformação assistida por IA;
-- geração de justificativas;
-- validação automatizada;
-- orquestração por agentes;
-- processamento assíncrono;
-- interface administrativa;
-- revisão humana;
-- observabilidade operacional;
-- hardening para produção completa.
+## Direção central da solução
 
-Entretanto, **o projeto não deve ser descrito como se todas essas capacidades já estivessem implementadas em produção**.
+> A base atual não existe para resolver apenas o início do projeto. Ela existe para evitar reescrita estrutural quando as fases de agentes, filas, busca semântica, revisão humana e observabilidade avançada forem incorporadas.
 
-A implementação atual deve ser entendida dentro da **Fase 1 — Infraestrutura / Fundação Segura**, que representa a base correta sobre a qual as fases posteriores serão construídas.
+## Resultado esperado desta fase
 
-## Tese arquitetural central
+Ao final da Fase 1, a plataforma deve possuir uma fundação consistente em:
 
-> **A arquitetura não foi desenhada para “resolver apenas o agora”. Ela foi desenhada para suportar o roadmap inteiro, sem que a base precise ser refeita a cada nova fase.**
-
-Isso significa que:
-
-- a Fase 1 precisa ser sólida o suficiente para sustentar as fases seguintes;
-- o README precisa separar com precisão **estado atual**, **MVP** e **versão completa**;
-- o roadmap precisa ser refletido como **evolução arquitetural real**, e não apenas como backlog visual.
+- arquitetura modular por domínio;
+- autenticação integrada ao ecossistema existente;
+- persistência principal preparada para evolução;
+- integração controlada com legado;
+- base de cache e coordenação;
+- validação, segurança e rastreabilidade mínimas;
+- contratos internos estáveis;
+- organização do projeto compatível com crescimento incremental.
 
 ---
 
-# 2. Status Atual do Projeto
+# 2. Objetivo do Documento
 
-## 🟢 Situação do projeto
+Este documento descreve, de forma técnica e organizada, a arquitetura aprovada para a plataforma, com foco prioritário na **Fase 1**, que é a etapa em andamento.
 
-O projeto encontra-se na etapa de **fundação estrutural**, correspondente à **Fase 1**, ainda que a arquitetura global já esteja desenhada para sustentar todas as fases seguintes.
+## Este documento existe para
 
-## O que isso significa tecnicamente
+- registrar a decisão arquitetural oficial;
+- deixar explícito o escopo real da fase atual;
+- separar corretamente o que está em andamento do que pertence às fases futuras;
+- orientar implementação, revisão técnica, onboarding e evolução do projeto;
+- servir como referência estável para discussões de arquitetura e execução.
 
-A base atual precisa estar pronta para suportar:
+## Este documento não pretende
 
-- persistência principal;
-- integração com legado;
-- cache;
-- contratos internos;
-- módulos coesos;
-- autenticação reaproveitada;
-- expansão futura com filas, agentes, indexação vetorial e operação assíncrona.
-
-## O que não deve ser comunicado de forma incorreta
-
-Ainda **não deve ser tratado como já pronto**:
-
-- pipeline multiagente completo;
-- orquestração plena em produção;
-- busca semântica completa em produção;
-- observabilidade madura;
-- interface operacional completa;
-- endurecimento final de produção.
+- comunicar que o roadmap inteiro já está implementado;
+- misturar backlog futuro com entrega atual;
+- tratar componentes planejados como já operacionais em produção.
 
 ---
 
-# 3. Decisão Arquitetural Oficial
+# 3. Status Atual do Projeto
 
-A direção arquitetural aprovada para a plataforma é:
+## 🟢 Situação atual
 
-## ✅ **Monólito Modular Pragmático por Domínio**
+O projeto está em **Fase 1 — Fundação Segura**, com foco na estrutura arquitetural e operacional mínima necessária para sustentar as próximas fases.
 
-com:
+## O que está em andamento agora
 
-- **NestJS + TypeScript**;
-- organização por **módulos de domínio**;
-- estrutura interna por módulo em:
-  - `infra/`
-  - `model/`
-  - `lib/`
-- uso disciplinado de `shared/`;
-- reaproveitamento da autenticação já existente da `api/v1`;
-- integração com base existente via **MySQL / ACL**;
-- persistência principal em **PostgreSQL + PGVector**;
-- coordenação e evolução assíncrona com **Redis + BullMQ**;
-- uso seletivo de conceitos de Clean/Hexagonal **sem excesso de abstração**.
+- bootstrap da aplicação NestJS;
+- definição dos módulos fundacionais;
+- integração com PostgreSQL e preparação para PGVector;
+- conexão controlada com MySQL legado;
+- base Redis para cache e futura coordenação assíncrona;
+- adaptação da autenticação existente da `api/v1`;
+- criação dos contratos internos e padrões transversais;
+- estrutura inicial de segurança, auditoria e observabilidade.
+
+## O que ainda não está no escopo da fase atual
+
+- pipeline multiagente operacional;
+- orquestração avançada com agentes;
+- interface administrativa madura;
+- busca semântica em produção;
+- processamento assíncrono completo com operação estável;
+- hardening final de produção.
+
+---
+
+# 4. Diretriz Arquitetural Oficial
+
+## ✅ Arquitetura aprovada
+
+A solução adota um **Monólito Modular Pragmático por Domínio**, implementado com **NestJS + TypeScript**, com organização interna disciplinada e preparada para evolução incremental.
+
+## Composição arquitetural principal
+
+- **Backend:** NestJS + TypeScript
+- **Persistência principal:** PostgreSQL
+- **Compatibilidade vetorial futura:** PGVector
+- **Integração legada:** MySQL via ACL
+- **Cache e coordenação:** Redis
+- **Filas e jobs futuros:** BullMQ
+- **Auth:** reaproveitamento da `api/v1`
+- **Observabilidade:** logs, tracing e métricas progressivas
 
 ## Motivos da decisão
 
-Essa arquitetura oferece o melhor equilíbrio entre:
+Essa abordagem equilibra:
 
 - simplicidade operacional;
-- clareza de ownership;
-- baixa fricção de evolução;
+- baixo custo cognitivo;
+- boa separação de responsabilidades;
 - facilidade de manutenção;
-- observabilidade centralizada;
-- capacidade de crescer sem fragmentação prematura.
+- centralização observável do runtime;
+- evolução segura sem fragmentação prematura.
 
-## O que foi conscientemente evitado
+## O que foi evitado conscientemente
 
 ### ❌ Microsserviços prematuros
-Porque aumentariam:
-- custo operacional;
-- overhead de tracing;
-- contratos distribuídos;
-- dificuldade de troubleshooting.
+Evita aumento de:
 
-### ❌ Abstração excessiva no core
-Porque geraria:
+- overhead operacional;
+- acoplamento distribuído;
+- custo de tracing e troubleshooting;
+- necessidade precoce de contratos de rede complexos.
+
+### ❌ Core excessivamente abstrato
+Evita:
+
 - boilerplate desnecessário;
-- lentidão de evolução;
-- custo cognitivo desproporcional.
+- desaceleração do desenvolvimento;
+- complexidade arquitetural desproporcional ao estágio atual.
 
-### ❌ Duplicação de autenticação
-Porque criaria:
-- drift de identidade;
-- inconsistência de escopo;
-- divergência de regras de acesso.
+### ❌ Nova pilha de autenticação paralela
+Evita:
 
----
-
-# 4. Objetivo da Plataforma
-
-A plataforma existe para suportar, com segurança e governança, o ciclo de vida de transformação de insumos em questões processadas, validadas, enriquecidas e operacionalmente utilizáveis, preservando compatibilidade futura com IA e com o ecossistema existente.
-
-## Objetivos principais
-
-- estruturar o pipeline de processamento de questões;
-- centralizar metadados e classificações;
-- suportar agentes de enriquecimento e validação;
-- preparar o sistema para processamento assíncrono;
-- permitir operação humana assistida;
-- sustentar expansão para materiais didáticos e busca semântica.
+- divergência de identidade;
+- regras duplicadas;
+- inconsistência de autorização;
+- drift entre sistemas.
 
 ---
 
-# 5. Roadmap Oficial por Fases
+# 5. Objetivo da Plataforma
 
-O roadmap oficial da plataforma, conforme definido, está organizado da seguinte forma:
+A plataforma existe para transformar insumos brutos em questões processadas, rastreáveis, classificadas, enriquecidas e operacionalmente utilizáveis, preservando governança, segurança e compatibilidade futura com IA e materiais-base.
 
-1. **Fase 1 — Infraestrutura**
-2. **Fase 2 — Agentes Básicos**
-3. **Fase 3 — Agentes Avançados**
-4. **Fase 4 — API e Processamento Assíncrono**
-5. **Fase 4B — Front-end Admin**
-6. **Pré-MVP — CI/CD e Testes**
-7. **🚀 Launch MVP — Processamento de Questões**
-8. **Fase 5 — Materiais Didáticos**
-9. **Fase 6 — Monitoramento**
-10. **Fase 7 — Qualidade Final**
-11. **🎉 Launch Produção — Versão Completa**
+## Objetivos estruturais
+
+- centralizar processamento de questões;
+- organizar classificação e metadados;
+- sustentar revisão humana e trilha operacional;
+- preparar o pipeline para automação incremental;
+- permitir expansão futura para materiais didáticos e busca semântica.
+
+## Objetivos arquiteturais
+
+- crescer por fases sem reescrita da base;
+- manter baixo acoplamento entre domínio novo e legado;
+- garantir segurança por padrão;
+- suportar operação síncrona agora e assíncrona depois;
+- preservar auditabilidade das operações.
+
+---
+
+# 6. Leitura Correta do Roadmap
+
+O roadmap deve ser interpretado em dois níveis complementares.
+
+## Nível 1 — Implementação atual
+
+A implementação real está centrada na construção da fundação correta do sistema.
+
+## Nível 2 — Arquitetura alvo já definida
+
+Mesmo sem todas as fases implementadas, a base atual já precisa nascer compatível com:
+
+- agentes;
+- filas;
+- jobs;
+- processamento assíncrono;
+- revisão humana;
+- indexação vetorial;
+- busca semântica;
+- observabilidade operacional madura.
+
+## Interpretação correta
+
+A Fase 1 não representa um protótipo descartável. Ela representa a base permanente do produto.
+
+---
+
+# 7. Roadmap por Fases e Status
+
+## Visão consolidada
+
+| Fase | Nome | Status | Objetivo central |
+|---|---|---|---|
+| 1 | Fundação Segura | 🟢 Em andamento | Estruturar base técnica, integrações, segurança e modularidade |
+| 2 | Agentes Básicos | ⚪ Planejada | Introduzir extração, classificação, resolução e busca |
+| 3 | Agentes Avançados | ⚪ Planejada | Adicionar adaptação, gabarito, validação e orquestração |
+| 4 | API e Processamento Assíncrono | ⚪ Planejada | Expor pipeline e operar com jobs e filas |
+| 4B | Front-end Admin | ⚪ Planejada | Oferecer superfície humana de operação |
+| Pré-MVP | CI/CD e Testes | ⚪ Planejada | Garantir lançabilidade mínima |
+| MVP | Processamento de Questões | ⚪ Planejada | Entregar primeira versão operacional utilizável |
+| 5 | Materiais Didáticos | ⚪ Planejada | Ingestão, chunking e indexação vetorial |
+| 6 | Monitoramento | ⚪ Planejada | Consolidar métricas, dashboards e tracing |
+| 7 | Qualidade Final | ⚪ Planejada | Hardening, otimização e testes completos |
+| Produção | Versão Completa | ⚪ Planejada | Operação plena e sustentável em escala |
 
 ## Fluxograma executivo do roadmap
 
@@ -223,348 +258,155 @@ O roadmap oficial da plataforma, conforme definido, está organizado da seguinte
 %%{init: {
   "theme": "base",
   "themeVariables": {
-    "background": "#050816",
-    "primaryColor": "#111827",
-    "primaryTextColor": "#e5e7eb",
+    "background": "#06121f",
+    "primaryColor": "#0f172a",
+    "primaryTextColor": "#e5eefb",
     "primaryBorderColor": "#38bdf8",
-    "secondaryColor": "#0f172a",
-    "secondaryTextColor": "#e5e7eb",
-    "tertiaryColor": "#111827",
-    "tertiaryTextColor": "#e5e7eb",
+    "secondaryColor": "#111827",
+    "secondaryTextColor": "#e5eefb",
+    "tertiaryColor": "#0b1220",
+    "tertiaryTextColor": "#e5eefb",
     "lineColor": "#94a3b8"
   }
 }}%%
-flowchart TD
-    START["🚩 Início do Projeto"]
+flowchart LR
+    A["🚀 Início"] --> B["🧱 Fase 1\nFundação Segura\nStatus: Em andamento"]
+    B --> C["🤖 Fase 2\nAgentes Básicos\nStatus: Planejada"]
+    C --> D["🧠 Fase 3\nAgentes Avançados\nStatus: Planejada"]
+    D --> E["📡 Fase 4\nAPI e Processamento Assíncrono\nStatus: Planejada"]
+    E --> F["🖥️ Fase 4B\nFront-end Admin\nStatus: Planejada"]
+    F --> G["🧪 Pré-MVP\nCI/CD e Testes\nStatus: Planejada"]
+    G --> H["🎯 MVP\nProcessamento de Questões\nStatus: Planejada"]
+    H --> I["📚 Fase 5\nMateriais Didáticos\nStatus: Planejada"]
+    I --> J["📈 Fase 6\nMonitoramento\nStatus: Planejada"]
+    J --> K["🛡️ Fase 7\nQualidade Final\nStatus: Planejada"]
+    K --> L["🏁 Produção\nVersão Completa\nStatus: Planejada"]
 
-    F1["Fase 1<br/>Infraestrutura"]
-    F2["Fase 2<br/>Agentes Básicos"]
-    F3["Fase 3<br/>Agentes Avançados"]
-    F4["Fase 4<br/>API e Processamento Assíncrono"]
-    F4B["Fase 4B<br/>Front-end Admin"]
-    PRE["Pré-MVP<br/>CI/CD e Testes"]
-    MVP["🚀 Launch MVP<br/>Processamento de Questões"]
-    F5["Fase 5<br/>Materiais Didáticos"]
-    F6["Fase 6<br/>Monitoramento"]
-    F7["Fase 7<br/>Qualidade Final"]
-    PROD["🎉 Launch Produção<br/>Versão Completa"]
-
-    START --> F1 --> F2 --> F3 --> F4 --> F4B --> PRE --> MVP --> F5 --> F6 --> F7 --> PROD
+    style B fill:#0f766e,stroke:#34d399,stroke-width:2px,color:#ffffff
+    style C fill:#1d4ed8,stroke:#60a5fa,stroke-width:2px,color:#ffffff
+    style D fill:#7c3aed,stroke:#a78bfa,stroke-width:2px,color:#ffffff
+    style E fill:#b45309,stroke:#f59e0b,stroke-width:2px,color:#ffffff
+    style F fill:#be123c,stroke:#fb7185,stroke-width:2px,color:#ffffff
+    style G fill:#334155,stroke:#94a3b8,stroke-width:2px,color:#ffffff
+    style H fill:#0ea5e9,stroke:#67e8f9,stroke-width:2px,color:#ffffff
+    style I fill:#2563eb,stroke:#93c5fd,stroke-width:2px,color:#ffffff
+    style J fill:#6d28d9,stroke:#c4b5fd,stroke-width:2px,color:#ffffff
+    style K fill:#15803d,stroke:#86efac,stroke-width:2px,color:#ffffff
+    style L fill:#111827,stroke:#cbd5e1,stroke-width:2px,color:#ffffff
 ```
 
 ---
 
-# 6. Interpretação Arquitetural do Roadmap
+# 8. Fase 1 — Escopo em Andamento
 
-O roadmap deve ser lido em dois planos simultâneos.
+## 🎯 Objetivo da fase
 
-## Plano A — Estado atual da implementação
-A implementação atual está concentrada na **fundação correta** do sistema, com foco em infraestrutura, contratos, organização modular, persistência, integração, autenticação e preparo do pipeline.
+Estabelecer a fundação técnica e arquitetural que sustentará o produto ao longo de todas as demais fases.
 
-## Plano B — Arquitetura alvo já decidida
-Mesmo antes da implementação completa das próximas fases, a arquitetura precisa nascer compatível com:
+## Escopo funcional da fase atual
 
-- agentes;
-- orquestração;
-- filas;
-- processamento assíncrono;
-- indexação vetorial;
-- busca semântica;
-- observabilidade;
-- endurecimento para produção.
+### 8.1 Bootstrap da aplicação
 
-> **A base atual deve respeitar o roadmap inteiro, mesmo que a implementação ainda esteja nos estágios iniciais.**
+- setup de **NestJS + TypeScript**;
+- estrutura inicial de módulos;
+- configuração de ambiente e inicialização segura;
+- padronização de bootstrap transversal.
 
-## Interpretação correta do roadmap
+### 8.2 Persistência principal
 
-### O que já precisa existir na fundação
-- boundaries corretos;
-- contratos claros;
-- persistência principal;
-- compatibilidade com integração legada;
-- cache;
-- auth reaproveitada;
-- desenho compatível com jobs e workers.
+- **PostgreSQL** como banco principal;
+- preparação de **PGVector** para compatibilidade futura;
+- base de entidades, migrações e versionamento de schema.
 
-### O que só deve ser considerado como evolução
-- pipeline multiagente completo;
-- UI operacional madura;
-- observabilidade plena;
-- expansão vetorial;
-- qualidade final de produção.
+### 8.3 Integração com legado
 
----
+- conexão com **MySQL**;
+- leitura e interoperabilidade controlada;
+- isolamento por **ACL**;
+- proibição de vazamento semântico do legado para o domínio novo.
 
-# 7. Mapa Completo de Entregáveis por Fase
+### 8.4 Cache e coordenação
 
-## 🟦 Fase 1 — Infraestrutura
+- **Redis** como infraestrutura de apoio;
+- suporte a cache inicial;
+- base compatível com expansão futura para filas, jobs e workers.
 
-### Objetivo
-Estabelecer a fundação técnica e operacional mínima correta da plataforma.
+### 8.5 Segurança estrutural
 
-### Entregáveis
-- Setup **NestJS + TypeScript**
-- **PostgreSQL + PGVector**
-- **MySQL Connection**
-- **Redis + Cache**
-- base inicial de **legislação / conhecimento primário**
-- configuração de ambiente
-- bootstrap do projeto
-- contratos estruturais iniciais
-- camada de integração com auth existente
+- autenticação integrada à `api/v1`;
+- autorização por escopo e política;
+- validação forte de payload;
+- sanitização e padronização de respostas de erro;
+- trilha inicial de auditoria.
 
-### Resultado esperado
-Ao final da Fase 1, o projeto precisa ter **uma fundação sólida e extensível**, ainda que sem pipeline avançado operacional.
+### 8.6 Observabilidade inicial
+
+- logs estruturados;
+- correlation id;
+- health checks;
+- tracing básico e pontos de extensibilidade.
+
+### 8.7 Contratos internos da plataforma
+
+- DTOs e schemas consistentes;
+- padrões de erro;
+- convenções para módulos e serviços;
+- bordas preparadas para expansão assíncrona.
+
+## Resultado esperado da Fase 1
+
+A plataforma não precisa entregar ainda o pipeline completo do produto, mas precisa entregar uma base capaz de recebê-lo sem ruptura estrutural.
 
 ---
 
-## 🟪 Fase 2 — Agentes Básicos
+# 9. O que Não Faz Parte da Entrega Atual
 
-### Objetivo
-Introduzir os primeiros componentes automatizados do pipeline.
+Os itens abaixo pertencem ao roadmap global, porém **não devem ser comunicados como implementados na fase atual**.
 
-### Entregáveis
-- **PDF Extraction Agent**
-- **Classification Agent**
-- **ID Resolution Agent**
-- **Search Agent**
+## Fora do escopo atual
 
-### Resultado esperado
-A plataforma passa a possuir os primeiros blocos funcionais para:
+- agentes operacionais completos;
+- orquestração multiagente madura;
+- upload e processamento editorial completos;
+- painel administrativo completo;
+- chunking inteligente em produção;
+- indexação vetorial ativa em produção;
+- busca semântica completa;
+- observabilidade operacional madura;
+- jobs produtivos com DLQ e reprocessamento consolidados;
+- hardening final de performance e confiabilidade.
 
-- extrair conteúdo;
-- enriquecer metadados;
-- resolver vínculos;
-- buscar contexto relevante.
+## Importante
 
----
-
-## 🟧 Fase 3 — Agentes Avançados
-
-### Objetivo
-Adicionar inteligência editorial e validação semântica ao fluxo.
-
-### Entregáveis
-- **Adaptation Agent**
-- **Answer Key Agent**
-- **Validation Agent**
-- **Orchestrator Agent**
-
-### Resultado esperado
-A solução passa a suportar:
-
-- reformulação;
-- geração de justificativas;
-- validação semântica;
-- coordenação entre agentes.
-
----
-
-## 🟩 Fase 4 — API e Processamento Assíncrono
-
-### Objetivo
-Transformar o pipeline em um sistema operacional escalável.
-
-### Entregáveis
-- **REST API Endpoints**
-- **Bull / BullMQ Queues**
-- **Job Status e Progress Tracking**
-
-### Resultado esperado
-O sistema deixa de ser apenas um conjunto de blocos lógicos e passa a operar como uma plataforma de execução assíncrona.
-
----
-
-## 🟥 Fase 4B — Front-end Admin
-
-### Objetivo
-Entregar a superfície humana de operação do MVP.
-
-### Entregáveis
-- dashboard principal
-- upload e listagem
-- interface de validação
-- visualização de questões
-- edição manual
-- métricas e logs operacionais
-
-### Resultado esperado
-A operação humana passa a interagir diretamente com o fluxo do produto.
-
----
-
-## 🟨 Pré-MVP — CI/CD e Testes
-
-### Objetivo
-Garantir lançabilidade mínima antes do MVP.
-
-### Entregáveis
-- testes unitários básicos
-- pipeline de CI/CD
-- deploy inicial
-
-### Resultado esperado
-O produto torna-se lançável com previsibilidade operacional mínima.
-
----
-
-## 🚀 Launch MVP — Processamento de Questões
-
-### Objetivo
-Entregar a primeira versão funcional e utilizável da plataforma.
-
-### Resultado esperado
-Nesse ponto, a plataforma já deve ser capaz de:
-
-- receber insumos;
-- processar questões;
-- coordenar etapas essenciais;
-- disponibilizar uma operação mínima utilizável.
-
----
-
-## 🟦 Fase 5 — Materiais Didáticos
-
-### Objetivo
-Expandir a plataforma para materiais-base e busca semântica.
-
-### Entregáveis
-- upload de PDFs didáticos
-- chunking inteligente
-- indexação vetorial
-- API de busca semântica
-
-### Resultado esperado
-A solução passa a operar também como plataforma de conhecimento contextualizado.
-
----
-
-## 🟪 Fase 6 — Monitoramento
-
-### Objetivo
-Consolidar visibilidade operacional madura.
-
-### Entregáveis
-- métricas
-- dashboards
-- logs estruturados
-
-### Resultado esperado
-A plataforma torna-se observável de forma consistente.
-
----
-
-## 🟩 Fase 7 — Qualidade Final
-
-### Objetivo
-Endurecimento final antes da versão completa de produção.
-
-### Entregáveis
-- testes automatizados
-- otimização de performance
-- deploy final
-
-### Resultado esperado
-A plataforma alcança um patamar de robustez adequado para operação completa.
-
----
-
-## 🎉 Launch Produção — Versão Completa
-
-### Objetivo
-Consolidar a versão completa da solução em produção.
-
-### Resultado esperado
-A plataforma opera com:
-
-- pipeline completo;
-- superfície operacional;
-- observabilidade madura;
-- expansão vetorial;
-- qualidade endurecida.
-
----
-
-# 8. Escopo Real da Fase 1
-
-A Fase 1 é a camada fundacional da plataforma.
-
-## Entregas corretas da Fase 1
-
-### 🧱 Infraestrutura Base
-- Setup **NestJS + TypeScript**
-- estrutura de bootstrap
-- configuração de ambiente
-- base de módulos
-
-### 🐘 Persistência Principal
-- **PostgreSQL** como banco principal
-- **PGVector** para compatibilidade futura com indexação vetorial
-- estrutura inicial de entidades e migrações
-
-### 🗄️ Integração com Base Existente
-- conexão **MySQL** para leitura e/ou integração com base legada
-- preparação para ACL
-
-### ⚡ Cache e Coordenação
-- **Redis**
-- base para cache
-- compatibilidade futura com filas e jobs
-
-### 📚 Base Inicial de Conhecimento
-- estrutura inicial para legislação e referência canônica
-
-### 🔐 Segurança Estrutural
-- autenticação reaproveitada
-- autorização
-- proteção básica de borda
-- validação e sanitização
-
----
-
-# 9. O que ainda não pertence à Fase 1
-
-Os itens abaixo pertencem ao roadmap da solução, mas **não devem ser tratados como entregues agora**.
-
-- agentes completos em produção;
-- orquestração completa do pipeline;
-- filas operacionais maduras;
-- interface admin completa;
-- upload e gestão avançada de materiais didáticos;
-- chunking inteligente;
-- indexação vetorial operacional;
-- API semântica madura;
-- dashboards completos;
-- otimização final de performance;
-- endurecimento final de produção.
+A arquitetura já considera esses elementos, mas a implementação atual permanece focada na base fundacional.
 
 ---
 
 # 10. Princípios Arquiteturais
 
-## 10.1 Domain First
-O domínio e o roadmap do produto definem a arquitetura.
+## 10.1 Domínio primeiro
+O desenho da solução parte do domínio do produto, não da ferramenta.
 
-## 10.2 Secure by Default
-Toda entrada e integração é tratada como potencialmente insegura até validação explícita.
+## 10.2 Segurança por padrão
+Toda entrada, integração e operação é tratada como potencialmente insegura até validação explícita.
 
-## 10.3 Modular by Responsibility
-Cada módulo representa uma responsabilidade clara.
+## 10.3 Modularidade por responsabilidade
+Cada módulo possui fronteira clara, objetivo específico e baixo acoplamento.
 
-## 10.4 Shared with Discipline
-`shared/` existe apenas para transversalidade real.
+## 10.4 Crescimento incremental
+A arquitetura deve permitir evolução por fases sem exigir refatoração estrutural ampla.
 
-## 10.5 Async-Ready by Design
-Mesmo antes da operação assíncrona completa, a base já deve nascer compatível com jobs, filas e workers.
+## 10.5 Legado isolado
+O legado é acessado por ACL, nunca absorvido diretamente no core canônico.
 
-## 10.6 Everything Auditable
-Toda operação relevante deve poder ser rastreada.
+## 10.6 Observabilidade desde a base
+Mesmo a fase fundacional precisa nascer rastreável.
 
-## 10.7 Incremental Evolution
-A arquitetura precisa evoluir sem reescrita estrutural.
+## 10.7 Preparação para assincronia
+Ainda que a fase atual seja majoritariamente fundacional, a arquitetura já deve suportar futuros jobs, filas e workers.
 
-## 10.8 Legacy Isolation
-O legado deve ser consumido via ACL, e não internalizado diretamente no domínio novo.
+## 10.8 Shared com disciplina
+`shared/` deve conter somente elementos transversais genuínos.
 
 ---
 
@@ -574,42 +416,42 @@ O legado deve ser consumido via ACL, e não internalizado diretamente no domíni
 %%{init: {
   "theme": "base",
   "themeVariables": {
-    "background": "#0b1220",
-    "primaryColor": "#111827",
-    "primaryTextColor": "#e5e7eb",
+    "background": "#07111d",
+    "primaryColor": "#0f172a",
+    "primaryTextColor": "#e5eefb",
     "primaryBorderColor": "#38bdf8",
-    "secondaryColor": "#0f172a",
-    "secondaryTextColor": "#e5e7eb",
-    "tertiaryColor": "#111827",
-    "tertiaryTextColor": "#e5e7eb",
+    "secondaryColor": "#111827",
+    "secondaryTextColor": "#e5eefb",
+    "tertiaryColor": "#0b1220",
+    "tertiaryTextColor": "#e5eefb",
     "lineColor": "#94a3b8"
   }
 }}%%
 flowchart TB
-    user["Usuário / Operador"]
-    admin["Admin / Editorial"]
-    legacyAuth["Auth existente — api/v1"]
-    redis["Redis / BullMQ"]
-    postgres["PostgreSQL / PGVector"]
-    mysql["MySQL / Base Existente"]
-    obs["Observabilidade"]
+    user["👤 Usuário"]
+    admin["🧑‍💼 Operação / Editorial"]
+    authv1["🔐 Auth existente\napi/v1"]
+    postgres["🐘 PostgreSQL\nPGVector-ready"]
+    mysql["🗄️ MySQL legado"]
+    redis["⚡ Redis\nCache / coordenação"]
+    obs["📈 Observabilidade"]
 
-    subgraph app["Plataforma Backend"]
-        api["API Core"]
-        auth["Auth Adapter"]
-        catalog["Catalog / Metadata"]
-        questions["Questions / Processing Core"]
-        staging["Staging / Review Buffer"]
-        audit["Audit / Trail"]
-        governance["Governance / Policies"]
-        agents["Agents Layer (Futuro)"]
-        retrieval["Semantic Retrieval (Futuro)"]
+    subgraph app["🏛️ Plataforma Backend"]
+        api["🌐 API Core"]
+        auth["🛡️ Auth Adapter"]
+        catalog["🗂️ Catalog"]
+        questions["❓ Questions"]
+        staging["🧪 Staging"]
+        audit["🧾 Audit"]
+        governance["📚 Governance"]
+        futureAgents["🤖 Agents Layer\nFuturo"]
+        futureRetrieval["🔎 Semantic Retrieval\nFuturo"]
     end
 
     user --> api
     admin --> api
     api --> auth
-    auth --> legacyAuth
+    auth --> authv1
 
     api --> catalog
     api --> questions
@@ -621,163 +463,115 @@ flowchart TB
     questions --> postgres
     staging --> postgres
     audit --> postgres
-
+    governance --> mysql
     api --> redis
     api --> obs
-    governance --> mysql
 
-    agents -. evolução .-> api
-    retrieval -. evolução .-> postgres
+    futureAgents -. evolução .-> api
+    futureRetrieval -. evolução .-> postgres
+
+    style api fill:#1d4ed8,stroke:#93c5fd,stroke-width:2px,color:#ffffff
+    style auth fill:#7c3aed,stroke:#c4b5fd,stroke-width:2px,color:#ffffff
+    style catalog fill:#0f766e,stroke:#6ee7b7,stroke-width:2px,color:#ffffff
+    style questions fill:#b45309,stroke:#fdba74,stroke-width:2px,color:#ffffff
+    style staging fill:#be123c,stroke:#fda4af,stroke-width:2px,color:#ffffff
+    style audit fill:#334155,stroke:#cbd5e1,stroke-width:2px,color:#ffffff
+    style governance fill:#0369a1,stroke:#7dd3fc,stroke-width:2px,color:#ffffff
+    style futureAgents fill:#312e81,stroke:#a5b4fc,stroke-width:2px,color:#ffffff
+    style futureRetrieval fill:#164e63,stroke:#67e8f9,stroke-width:2px,color:#ffffff
 ```
 
 ## Leitura técnica
 
-A arquitetura separa desde a base:
+A arquitetura já separa, desde a fundação:
 
-- entrada HTTP;
-- identidade e autorização;
-- núcleo de processamento;
-- catálogo e metadados;
-- staging e revisão futura;
+- borda HTTP;
+- autenticação e autorização;
+- domínio principal;
 - auditoria;
-- governança;
-- integração com legado;
-- compatibilidade com agentes e busca semântica.
+- staging de revisão futura;
+- governança e conhecimento canônico;
+- integração controlada com legado;
+- pontos explícitos de evolução para agentes e recuperação semântica.
 
 ---
 
-# 12. Reaproveitamento da Autenticação da `api/v1`
+# 12. Reuso da Autenticação da `api/v1`
 
-A nova plataforma **não deve implementar um sistema paralelo de autenticação**.
+A nova plataforma não deve criar um novo mecanismo de autenticação concorrente.
 
-Ela deve:
+## Estratégia adotada
 
-- reaproveitar a infraestrutura de identidade existente;
-- validar contexto e escopo via camada de adaptação;
-- manter consistência com o ambiente atual;
-- reduzir custo de integração e risco de drift.
+- reaproveitar identidade já existente;
+- adaptar token, contexto e claims ao novo domínio;
+- validar permissões por camada de adaptação;
+- manter consistência com o ecossistema atual.
 
-## Fluxo arquitetural da autenticação
+## Benefícios
+
+- reduz duplicação de regras;
+- evita drift de identidade;
+- simplifica governança de acesso;
+- reduz custo de integração e operação.
+
+## Fluxo arquitetural de autenticação
 
 ```mermaid
 %%{init: {
   "theme": "base",
   "themeVariables": {
-    "background": "#0b1220",
-    "primaryColor": "#111827",
-    "primaryTextColor": "#e5e7eb",
+    "background": "#07111d",
+    "primaryColor": "#0f172a",
+    "primaryTextColor": "#e5eefb",
     "primaryBorderColor": "#8b5cf6",
-    "secondaryColor": "#0f172a",
-    "secondaryTextColor": "#e5e7eb",
-    "tertiaryColor": "#111827",
-    "tertiaryTextColor": "#e5e7eb",
+    "secondaryColor": "#111827",
+    "secondaryTextColor": "#e5eefb",
+    "tertiaryColor": "#0b1220",
+    "tertiaryTextColor": "#e5eefb",
     "lineColor": "#94a3b8"
   }
 }}%%
 flowchart LR
-    A["Request autenticado"] --> B["Auth Module (Adapter)"]
-    B --> C["Validação de token / contexto"]
-    C --> D["Integração com api/v1"]
-    D --> E["Resolução de identidade e permissões"]
-    E --> F["Acesso liberado ao domínio"]
+    A["📨 Requisição autenticada"] --> B["🛡️ Auth Module"]
+    B --> C["🔎 Validação de token\ne contexto"]
+    C --> D["🔗 Integração com\napi/v1"]
+    D --> E["🧾 Resolução de\nidentidade e permissões"]
+    E --> F["✅ Acesso liberado\nao domínio"]
+
+    style B fill:#7c3aed,stroke:#c4b5fd,stroke-width:2px,color:#ffffff
+    style D fill:#1d4ed8,stroke:#93c5fd,stroke-width:2px,color:#ffffff
+    style F fill:#0f766e,stroke:#6ee7b7,stroke-width:2px,color:#ffffff
 ```
 
 ---
 
-# 13. Estrutura Arquitetural por Módulo
+# 13. Bounded Contexts da Solução
 
-Cada módulo segue uma organização interna simples, previsível e disciplinada.
+## Contextos fundacionais
 
-```text
-modules/<modulo>/
-├── infra/
-├── model/
-└── lib/
-```
+### `auth`
+Responsável por adaptação de identidade, contexto autenticado e autorização.
 
-## `model/`
-Contém:
-- DTOs;
-- enums;
-- interfaces;
-- schemas;
-- contratos;
-- tipos;
-- validações.
+### `organizations`
+Responsável pela noção de organização, escopo e pertencimento.
 
-## `infra/`
-Contém:
-- controllers;
-- services;
-- repositories;
-- processors;
-- gateways;
-- clients;
-- adapters.
+### `catalog`
+Responsável por taxonomias, metadados, disciplinas, tópicos e referências estruturais.
 
-## `lib/`
-Contém:
-- helpers;
-- parsers;
-- mappers;
-- normalizers;
-- factories;
-- utilitários do módulo.
+### `questions`
+Responsável pelo núcleo de questões, versões e estados canônicos.
 
----
+### `staging`
+Responsável por buffers de entrada, revisão e estados intermediários.
 
-# 14. Regras de Dependência Obrigatórias
+### `audit`
+Responsável por trilhas de auditoria, rastreabilidade e eventos de operação.
 
-## Permitido
-- `infra` usar `model`;
-- `infra` usar `lib`;
-- `lib` usar `model`.
+### `governance`
+Responsável por regras canônicas, bases de referência e integração com conhecimento estruturante.
 
-## Proibido
-- `model` depender de `infra`;
-- `lib` acessar integrações externas diretamente;
-- `shared` virar “depósito genérico”;
-- domínio absorver semântica do legado.
+## Contextos previstos para evolução
 
-## Diagrama de dependência permitida
-
-```mermaid
-%%{init: {
-  "theme": "base",
-  "themeVariables": {
-    "background": "#0b1220",
-    "primaryColor": "#111827",
-    "primaryTextColor": "#e5e7eb",
-    "primaryBorderColor": "#14b8a6",
-    "secondaryColor": "#0f172a",
-    "secondaryTextColor": "#e5e7eb",
-    "tertiaryColor": "#111827",
-    "tertiaryTextColor": "#e5e7eb",
-    "lineColor": "#94a3b8"
-  }
-}}%%
-flowchart TD
-    infra["infra"] --> model["model"]
-    infra --> lib["lib"]
-    lib --> model
-```
-
----
-
-# 15. Bounded Contexts da Plataforma
-
-## Contextos estruturais da solução
-
-### Núcleo atual / fundacional
-- `auth`
-- `organizations`
-- `catalog`
-- `questions`
-- `staging`
-- `audit`
-- `governance`
-
-### Evolução prevista
 - `ingestion`
 - `extraction`
 - `classification`
@@ -794,222 +588,205 @@ flowchart TD
 
 ---
 
-# 16. Fluxo Operacional da Fase 1
+# 14. Estrutura de Módulos do Monólito Modular
+
+Cada módulo deve seguir uma organização interna simples, previsível e disciplinada.
+
+```text
+modules/<modulo>/
+├── infra/
+├── model/
+└── lib/
+```
+
+## `model/`
+
+Contém elementos de contrato e modelagem, como:
+
+- DTOs;
+- enums;
+- interfaces;
+- schemas;
+- tipos;
+- regras declarativas de validação.
+
+## `infra/`
+
+Contém elementos de execução e integração, como:
+
+- controllers;
+- services;
+- repositories;
+- gateways;
+- clients;
+- processors;
+- adapters.
+
+## `lib/`
+
+Contém elementos utilitários e internos do módulo, como:
+
+- parsers;
+- helpers;
+- mappers;
+- normalizers;
+- factories.
+
+---
+
+# 15. Regras de Dependência
+
+## Regras permitidas
+
+- `infra` pode depender de `model`;
+- `infra` pode depender de `lib`;
+- `lib` pode depender de `model`.
+
+## Regras proibidas
+
+- `model` não pode depender de `infra`;
+- `lib` não deve acessar integrações externas diretamente;
+- `shared` não pode virar depósito genérico;
+- o domínio novo não pode herdar semântica do legado.
+
+## Diagrama de dependência permitida
 
 ```mermaid
 %%{init: {
   "theme": "base",
   "themeVariables": {
-    "background": "#0b1220",
-    "primaryColor": "#111827",
-    "primaryTextColor": "#e5e7eb",
+    "background": "#07111d",
+    "primaryColor": "#0f172a",
+    "primaryTextColor": "#e5eefb",
+    "primaryBorderColor": "#14b8a6",
+    "secondaryColor": "#111827",
+    "secondaryTextColor": "#e5eefb",
+    "tertiaryColor": "#0b1220",
+    "tertiaryTextColor": "#e5eefb",
+    "lineColor": "#94a3b8"
+  }
+}}%%
+flowchart TD
+    INFRA["⚙️ infra"] --> MODEL["🧩 model"]
+    INFRA --> LIB["🛠️ lib"]
+    LIB --> MODEL
+
+    style INFRA fill:#1d4ed8,stroke:#93c5fd,stroke-width:2px,color:#ffffff
+    style MODEL fill:#0f766e,stroke:#6ee7b7,stroke-width:2px,color:#ffffff
+    style LIB fill:#b45309,stroke:#fdba74,stroke-width:2px,color:#ffffff
+```
+
+---
+
+# 16. Fluxo Operacional Atual da Fase 1
+
+Este é o fluxo operacional que representa a lógica da fundação atual da plataforma.
+
+```mermaid
+%%{init: {
+  "theme": "base",
+  "themeVariables": {
+    "background": "#07111d",
+    "primaryColor": "#0f172a",
+    "primaryTextColor": "#e5eefb",
     "primaryBorderColor": "#22c55e",
-    "secondaryColor": "#0f172a",
-    "secondaryTextColor": "#e5e7eb",
-    "tertiaryColor": "#111827",
-    "tertiaryTextColor": "#e5e7eb",
+    "secondaryColor": "#111827",
+    "secondaryTextColor": "#e5eefb",
+    "tertiaryColor": "#0b1220",
+    "tertiaryTextColor": "#e5eefb",
     "lineColor": "#94a3b8"
   }
 }}%%
-flowchart TD
-    A["Entrada HTTP / Request"] --> B["Auth / Policy Guard"]
-    B --> C["Validation / Sanitization"]
-    C --> D["Use Case / Application Service"]
-    D --> E["Regra de domínio"]
-    E --> F["Persistência"]
-    F --> G["Audit / Trail"]
-    G --> H["Resposta padronizada"]
+flowchart LR
+    A["🌐 Entrada HTTP"] --> B["🛡️ Guardas de auth\ne política"]
+    B --> C["✅ Validação\ne sanitização"]
+    C --> D["🧠 Use case / service"]
+    D --> E["📚 Regra de domínio"]
+    E --> F["🐘 Persistência"]
+    F --> G["🧾 Auditoria"]
+    G --> H["📦 Resposta padronizada"]
+
+    style B fill:#7c3aed,stroke:#c4b5fd,stroke-width:2px,color:#ffffff
+    style C fill:#0f766e,stroke:#6ee7b7,stroke-width:2px,color:#ffffff
+    style D fill:#1d4ed8,stroke:#93c5fd,stroke-width:2px,color:#ffffff
+    style F fill:#334155,stroke:#cbd5e1,stroke-width:2px,color:#ffffff
+    style G fill:#be123c,stroke:#fda4af,stroke-width:2px,color:#ffffff
+    style H fill:#0369a1,stroke:#7dd3fc,stroke-width:2px,color:#ffffff
 ```
 
-## Interpretação
+## Leitura da fase atual
 
-A Fase 1 não é “vazia” apenas por não conter ainda todo o pipeline futuro.  
-Ela já precisa garantir:
+Mesmo sem o pipeline completo, a Fase 1 já precisa garantir:
 
-- segurança;
-- estruturação;
-- previsibilidade;
-- persistência;
-- rastreabilidade;
-- base correta para expansão.
+- entrada segura;
+- regras de autorização claras;
+- payloads validados;
+- domínio coeso;
+- persistência consistente;
+- auditoria mínima;
+- previsibilidade de resposta.
 
 ---
 
-# 17. Fluxo Completo de Evolução do Produto
+# 17. Fluxo Evolutivo do Produto
 
-O fluxo abaixo traduz o roadmap em uma leitura arquitetural de ponta a ponta, sem cortes de texto e com nomes completos.
+O fluxo abaixo mostra a progressão arquitetural completa da solução, mantendo explícito que se trata de evolução futura sobre a base atual.
 
 ```mermaid
 %%{init: {
   "theme": "base",
   "themeVariables": {
-    "background": "#050816",
-    "primaryColor": "#111827",
-    "primaryTextColor": "#e5e7eb",
+    "background": "#06121f",
+    "primaryColor": "#0f172a",
+    "primaryTextColor": "#e5eefb",
     "primaryBorderColor": "#f59e0b",
-    "secondaryColor": "#0f172a",
-    "secondaryTextColor": "#e5e7eb",
-    "tertiaryColor": "#111827",
-    "tertiaryTextColor": "#e5e7eb",
+    "secondaryColor": "#111827",
+    "secondaryTextColor": "#e5eefb",
+    "tertiaryColor": "#0b1220",
+    "tertiaryTextColor": "#e5eefb",
     "lineColor": "#94a3b8"
   }
 }}%%
 flowchart TD
-    START["Início do Projeto"]
+    START["🧱 Fundação\nFase 1"] --> A["🤖 Extração"]
+    A --> B["🏷️ Classificação"]
+    B --> C["🧭 Resolução\nde identificadores"]
+    C --> D["🔎 Busca contextual"]
+    D --> E["🧠 Adaptação"]
+    E --> F["📝 Geração de\ngabarito"]
+    F --> G["🧪 Validação"]
+    G --> H["🎛️ Orquestração"]
+    H --> I["📡 API + filas + jobs"]
+    I --> J["🖥️ Revisão humana"]
+    J --> K["🚀 Operação MVP"]
+    K --> L["📚 Materiais didáticos\ne busca semântica"]
+    L --> M["📈 Monitoramento maduro"]
+    M --> N["🛡️ Hardening final"]
 
-    subgraph P1["FASE 1 — Infraestrutura"]
-        P1A["Setup NestJS + TypeScript"]
-        P1B["PostgreSQL + PGVector"]
-        P1C["MySQL Connection"]
-        P1D["Redis + Cache"]
-        P1E["Base de Legislação Inicial"]
-        P1A --> P1B --> P1C --> P1D --> P1E
-    end
-
-    subgraph P2["FASE 2 — Agentes Básicos"]
-        P2A["PDF Extraction Agent"]
-        P2B["Classification Agent"]
-        P2C["ID Resolution Agent"]
-        P2D["Search Agent"]
-        P2A --> P2B --> P2C --> P2D
-    end
-
-    subgraph P3["FASE 3 — Agentes Avançados"]
-        P3A["Adaptation Agent"]
-        P3B["Answer Key Agent"]
-        P3C["Validation Agent"]
-        P3D["Orchestrator Agent"]
-        P3A --> P3B --> P3C --> P3D
-    end
-
-    subgraph P4["FASE 4 — API e Processamento Assíncrono"]
-        P4A["REST API Endpoints"]
-        P4B["Bull / BullMQ Queues"]
-        P4C["Job Status e Progress Tracking"]
-        P4A --> P4B --> P4C
-    end
-
-    subgraph P4B["FASE 4B — Front-end Admin"]
-        P4B1["Dashboard Principal"]
-        P4B2["Upload e Listagem"]
-        P4B3["Interface de Validação"]
-        P4B4["Visualização e Edição Manual"]
-        P4B5["Métricas e Logs"]
-        P4B1 --> P4B2 --> P4B3 --> P4B4 --> P4B5
-    end
-
-    subgraph PRE["PRÉ-MVP — CI/CD e Testes"]
-        PRE1["Testes Unitários Básicos"]
-        PRE2["Pipeline de CI/CD"]
-        PRE3["Deploy"]
-        PRE1 --> PRE2 --> PRE3
-    end
-
-    MVP["Launch MVP — Processamento de Questões"]
-
-    subgraph P5["FASE 5 — Materiais Didáticos"]
-        P5A["Upload de PDFs Didáticos"]
-        P5B["Chunking Inteligente"]
-        P5C["Indexação Vetorial"]
-        P5D["API de Busca Semântica"]
-        P5A --> P5B --> P5C --> P5D
-    end
-
-    subgraph P6["FASE 6 — Monitoramento"]
-        P6A["Métricas e Dashboards"]
-        P6B["Logs Estruturados"]
-        P6A --> P6B
-    end
-
-    subgraph P7["FASE 7 — Qualidade Final"]
-        P7A["Testes Automatizados"]
-        P7B["Otimização de Performance"]
-        P7C["Deploy Final"]
-        P7A --> P7B --> P7C
-    end
-
-    PROD["Launch Produção — Versão Completa"]
-
-    START --> P1 --> P2 --> P3 --> P4 --> P4B --> PRE --> MVP --> P5 --> P6 --> P7 --> PROD
+    style START fill:#0f766e,stroke:#6ee7b7,stroke-width:2px,color:#ffffff
+    style A fill:#1d4ed8,stroke:#93c5fd,stroke-width:2px,color:#ffffff
+    style B fill:#7c3aed,stroke:#c4b5fd,stroke-width:2px,color:#ffffff
+    style C fill:#0369a1,stroke:#7dd3fc,stroke-width:2px,color:#ffffff
+    style D fill:#164e63,stroke:#67e8f9,stroke-width:2px,color:#ffffff
+    style E fill:#6d28d9,stroke:#c4b5fd,stroke-width:2px,color:#ffffff
+    style F fill:#b45309,stroke:#fdba74,stroke-width:2px,color:#ffffff
+    style G fill:#be123c,stroke:#fda4af,stroke-width:2px,color:#ffffff
+    style H fill:#334155,stroke:#cbd5e1,stroke-width:2px,color:#ffffff
+    style I fill:#0ea5e9,stroke:#67e8f9,stroke-width:2px,color:#ffffff
+    style J fill:#1e293b,stroke:#cbd5e1,stroke-width:2px,color:#ffffff
+    style K fill:#059669,stroke:#86efac,stroke-width:2px,color:#ffffff
+    style L fill:#2563eb,stroke:#93c5fd,stroke-width:2px,color:#ffffff
+    style M fill:#6d28d9,stroke:#c4b5fd,stroke-width:2px,color:#ffffff
+    style N fill:#111827,stroke:#cbd5e1,stroke-width:2px,color:#ffffff
 ```
+
+## Observação de leitura
+
+Este fluxo descreve a direção arquitetural do produto e não deve ser interpretado como descrição da entrega atual.
 
 ---
 
-# 18. Fluxo de Processamento de Questões (MVP)
-
-Este diagrama representa o caminho lógico do produto até o **Launch MVP**.
-
-```mermaid
-%%{init: {
-  "theme": "base",
-  "themeVariables": {
-    "background": "#050816",
-    "primaryColor": "#111827",
-    "primaryTextColor": "#e5e7eb",
-    "primaryBorderColor": "#06b6d4",
-    "secondaryColor": "#0f172a",
-    "secondaryTextColor": "#e5e7eb",
-    "tertiaryColor": "#111827",
-    "tertiaryTextColor": "#e5e7eb",
-    "lineColor": "#94a3b8"
-  }
-}}%%
-flowchart LR
-    A["PDF / Insumo"] --> B["Extraction Agent"]
-    B --> C["Classification Agent"]
-    C --> D["ID Resolution Agent"]
-    D --> E["Search Agent"]
-    E --> F["Adaptation Agent"]
-    F --> G["Answer Key Agent"]
-    G --> H["Validation Agent"]
-    H --> I["Orchestrator Agent"]
-    I --> J["REST API + Queues"]
-    J --> K["Admin Review / Dashboard"]
-    K --> L["MVP Operacional"]
-```
-
-## Objetivo desse fluxo
-Esse pipeline representa a primeira cadeia funcional do produto, combinando:
-
-- extração;
-- classificação;
-- enriquecimento;
-- adaptação;
-- validação;
-- operação humana.
-
----
-
-# 19. Fluxo de Expansão para Materiais Didáticos
-
-Após o MVP, a solução evolui para ingestão de materiais-base e busca semântica.
-
-```mermaid
-%%{init: {
-  "theme": "base",
-  "themeVariables": {
-    "background": "#050816",
-    "primaryColor": "#111827",
-    "primaryTextColor": "#e5e7eb",
-    "primaryBorderColor": "#3b82f6",
-    "secondaryColor": "#0f172a",
-    "secondaryTextColor": "#e5e7eb",
-    "tertiaryColor": "#111827",
-    "tertiaryTextColor": "#e5e7eb",
-    "lineColor": "#94a3b8"
-  }
-}}%%
-flowchart LR
-    A["PDF Didático"] --> B["Upload"]
-    B --> C["Chunking Inteligente"]
-    C --> D["Indexação Vetorial"]
-    D --> E["API de Busca Semântica"]
-    E --> F["Suporte ao pipeline de agentes"]
-```
-
----
-
-# 20. Tree View Arquitetural Proposta
+# 18. Tree View Arquitetural Proposta
 
 ```text
 src/
@@ -1047,11 +824,29 @@ src/
 │   │   ├── model/
 │   │   └── lib/
 │   ├── organizations/
+│   │   ├── infra/
+│   │   ├── model/
+│   │   └── lib/
 │   ├── catalog/
+│   │   ├── infra/
+│   │   ├── model/
+│   │   └── lib/
 │   ├── questions/
+│   │   ├── infra/
+│   │   ├── model/
+│   │   └── lib/
 │   ├── staging/
+│   │   ├── infra/
+│   │   ├── model/
+│   │   └── lib/
 │   ├── audit/
+│   │   ├── infra/
+│   │   ├── model/
+│   │   └── lib/
 │   ├── governance/
+│   │   ├── infra/
+│   │   ├── model/
+│   │   └── lib/
 │   ├── ingestion/
 │   ├── extraction/
 │   ├── classification/
@@ -1085,9 +880,13 @@ src/
     └── load/
 ```
 
+## Observação arquitetural
+
+Nem todos os módulos acima precisam estar implementados agora. Parte deles já deve existir como direção estrutural do monólito modular, preservando consistência para as fases seguintes.
+
 ---
 
-# 21. Modelo de Dados Conceitual da Fase 1
+# 19. Modelo de Dados Conceitual da Fundação
 
 ## Entidades centrais esperadas
 
@@ -1109,102 +908,140 @@ src/
 %%{init: {
   "theme": "base",
   "themeVariables": {
-    "background": "#0b1220",
-    "primaryColor": "#111827",
-    "primaryTextColor": "#e5e7eb",
+    "background": "#07111d",
+    "primaryColor": "#0f172a",
+    "primaryTextColor": "#e5eefb",
     "primaryBorderColor": "#f59e0b",
-    "secondaryColor": "#0f172a",
-    "secondaryTextColor": "#e5e7eb",
-    "tertiaryColor": "#111827",
-    "tertiaryTextColor": "#e5e7eb",
+    "secondaryColor": "#111827",
+    "secondaryTextColor": "#e5eefb",
+    "tertiaryColor": "#0b1220",
+    "tertiaryTextColor": "#e5eefb",
     "lineColor": "#94a3b8"
   }
 }}%%
 erDiagram
-    ORGANIZATIONS ||--o{ USERS : contains
-    USERS ||--o{ AUDIT_LOGS : generates
-    ORGANIZATIONS ||--o{ COLLECTIONS : owns
-    COLLECTIONS ||--o{ DISCIPLINES : groups
-    DISCIPLINES ||--o{ TOPICS : contains
-    TOPICS ||--o{ QUESTIONS : classifies
-    QUESTIONS ||--o{ QUESTION_VERSIONS : versions
-    QUESTIONS }o--o{ LEGAL_REFERENCES : links
+    ORGANIZATIONS ||--o{ USERS : "possui"
+    USERS ||--o{ AUDIT_LOGS : "gera"
+    ORGANIZATIONS ||--o{ COLLECTIONS : "controla"
+    COLLECTIONS ||--o{ DISCIPLINES : "organiza"
+    DISCIPLINES ||--o{ TOPICS : "classifica"
+    TOPICS ||--o{ QUESTIONS : "categoriza"
+    QUESTIONS ||--o{ QUESTION_VERSIONS : "versiona"
+    QUESTIONS }o--o{ LEGAL_REFERENCES : "vincula"
 ```
+
+## Leitura de modelagem
+
+A Fase 1 não precisa esgotar toda a modelagem final, mas precisa estabelecer o núcleo canônico sobre o qual o versionamento, a classificação e a auditoria irão evoluir.
 
 ---
 
-# 22. Segurança
+# 20. Segurança
 
 ## Controles mínimos da fundação
 
-- autenticação obrigatória;
-- autorização por escopo e política;
-- validação forte de payload;
-- sanitização de entrada;
-- proteção contra vazamento de erro sensível;
-- segregação de credenciais;
-- trilha mínima de auditoria.
+- autenticação obrigatória nas rotas protegidas;
+- autorização por escopo, papel e política;
+- validação forte de entrada;
+- sanitização de payload e normalização de contratos;
+- segregação segura de credenciais;
+- tratamento controlado de exceções;
+- auditoria mínima de operações sensíveis.
 
 ## Regras obrigatórias
 
 1. Nenhuma rota sensível sem autenticação.
 2. Nenhuma operação crítica sem autorização explícita.
 3. Nenhum payload entra no domínio sem validação.
-4. Nenhuma exceção técnica deve vazar stack em produção.
-5. Nenhuma integração com legado deve bypassar a ACL.
+4. Nenhum erro técnico sensível deve vazar em produção.
+5. Nenhuma integração com legado pode bypassar a ACL.
+6. Nenhuma credencial deve estar acoplada ao código da aplicação.
+
+## Segurança por camadas
+
+### Camada de entrada
+- guards;
+- pipes de validação;
+- serialização controlada;
+- rate limiting quando aplicável.
+
+### Camada de domínio/aplicação
+- verificação de escopo;
+- invariantes de uso;
+- proibição de operações não autorizadas.
+
+### Camada de infraestrutura
+- acesso a banco e integrações com credenciais segregadas;
+- observabilidade de falhas;
+- timeouts e comportamento defensivo.
 
 ---
 
-# 23. Observabilidade
+# 21. Observabilidade
 
-A observabilidade deve crescer junto com o roadmap.
+A observabilidade deve amadurecer junto com o produto, mas a base precisa nascer instrumentável.
 
-## Na fundação
+## Na Fase 1
+
 - logs estruturados;
 - correlation id;
+- health checks;
 - tracing básico;
-- health checks.
+- pontos de integração para métricas.
 
 ## No MVP
+
 - status de jobs;
-- visibilidade de pipeline;
-- falhas por etapa.
+- visibilidade por etapa do pipeline;
+- falhas por componente;
+- rastreabilidade por requisição e execução.
 
 ## Na produção completa
+
 - dashboards operacionais;
 - métricas de throughput;
 - métricas de falha;
-- visibilidade por agente;
-- logs estruturados maduros.
+- observabilidade por agente;
+- visibilidade de degradação e fila.
 
 ---
 
-# 24. Resiliência e Confiabilidade
+# 22. Resiliência e Confiabilidade
 
-A base já deve nascer preparada para evolução operacional.
+A fundação precisa ser compatível com operação robusta futura.
 
-## Fundamentos
+## Fundamentos esperados agora
+
 - tratamento consistente de erro;
-- previsibilidade operacional;
-- isolamento de responsabilidade;
 - contratos estáveis;
-- compatibilidade com retries e jobs.
+- separação clara de responsabilidade;
+- comportamento previsível em falhas;
+- preparação para retries e jobs.
 
-## Evolução posterior
-- retries por etapa;
+## Evolução prevista
+
+- retries controlados por etapa;
 - DLQ;
 - reprocessamento;
-- tolerância a falhas em agentes;
-- observabilidade de degradação.
+- idempotência em jobs críticos;
+- visibilidade de degradação operacional.
 
 ---
 
-# 25. ACL e Isolamento do Legado
+# 23. Integração com Legado via ACL
 
-A base principal / legado **não deve contaminar o domínio novo**.
+A base legada não deve contaminar o modelo canônico do novo domínio.
 
 ## Regra obrigatória
-Toda integração com a base existente deve passar por uma **ACL (Anti-Corruption Layer)**.
+
+Toda interação com o legado deve ocorrer por uma **ACL — Anti-Corruption Layer**.
+
+## Objetivos da ACL
+
+- traduzir contratos do legado;
+- isolar semântica externa;
+- evitar acoplamento estrutural;
+- proteger o domínio novo contra regras implícitas e inconsistentes.
 
 ## Fluxo conceitual
 
@@ -1212,176 +1049,162 @@ Toda integração com a base existente deve passar por uma **ACL (Anti-Corruptio
 %%{init: {
   "theme": "base",
   "themeVariables": {
-    "background": "#0b1220",
-    "primaryColor": "#111827",
-    "primaryTextColor": "#e5e7eb",
+    "background": "#07111d",
+    "primaryColor": "#0f172a",
+    "primaryTextColor": "#e5eefb",
     "primaryBorderColor": "#ef4444",
-    "secondaryColor": "#0f172a",
-    "secondaryTextColor": "#e5e7eb",
-    "tertiaryColor": "#111827",
-    "tertiaryTextColor": "#e5e7eb",
+    "secondaryColor": "#111827",
+    "secondaryTextColor": "#e5eefb",
+    "tertiaryColor": "#0b1220",
+    "tertiaryTextColor": "#e5eefb",
     "lineColor": "#94a3b8"
   }
 }}%%
 flowchart LR
-    A["Domínio interno canônico"] --> B["ACL de integração / publicação"]
-    B --> C["Base principal / legado"]
+    A["🏛️ Domínio canônico"] --> B["🧱 ACL de integração"]
+    B --> C["🗄️ Base legada"]
+
+    style A fill:#0f766e,stroke:#6ee7b7,stroke-width:2px,color:#ffffff
+    style B fill:#be123c,stroke:#fda4af,stroke-width:2px,color:#ffffff
+    style C fill:#334155,stroke:#cbd5e1,stroke-width:2px,color:#ffffff
 ```
 
 ---
 
-# 26. Pipeline Futuro e Compatibilidade Evolutiva
-
-A arquitetura atual já nasce preparada para o pipeline completo futuro.
-
-```mermaid
-%%{init: {
-  "theme": "base",
-  "themeVariables": {
-    "background": "#050816",
-    "primaryColor": "#111827",
-    "primaryTextColor": "#e5e7eb",
-    "primaryBorderColor": "#06b6d4",
-    "secondaryColor": "#0f172a",
-    "secondaryTextColor": "#e5e7eb",
-    "tertiaryColor": "#111827",
-    "tertiaryTextColor": "#e5e7eb",
-    "lineColor": "#94a3b8"
-  }
-}}%%
-flowchart LR
-    A["PDF Extraction"] --> B["Classification"]
-    B --> C["ID Resolution"]
-    C --> D["Search"]
-    D --> E["Adaptation"]
-    E --> F["Answer Key"]
-    F --> G["Validation"]
-    G --> H["Orchestration"]
-    H --> I["Async Processing"]
-    I --> J["Human Review"]
-    J --> K["Publication"]
-```
-
-## Interpretação
-Esse fluxo **não significa que tudo já está pronto hoje**.  
-Ele existe para mostrar que a fundação foi desenhada para receber esse pipeline sem exigir reestruturação radical.
-
----
-
-# 27. MVP vs Produção Completa
-
-## 🚀 MVP — Processamento de Questões
-O MVP representa a primeira versão operacional utilizável da plataforma, com pipeline funcional mínimo, API, processamento assíncrono e superfície administrativa inicial.
-
-## 🎉 Produção Completa
-A versão completa adiciona:
-
-- materiais didáticos;
-- chunking;
-- indexação vetorial;
-- busca semântica;
-- observabilidade madura;
-- qualidade endurecida;
-- performance otimizada;
-- operação sustentável em escala.
-
-## Tabela comparativa
-
-| Dimensão | MVP | Produção Completa |
-|---|---|---|
-| Pipeline de agentes | Básico / funcional | Completo / robusto |
-| API | Operacional | Endurecida |
-| Filas | Essenciais | Maturidade operacional |
-| Admin | Superfície inicial | Operação madura |
-| Busca semântica | Não obrigatória | Ativa |
-| Observabilidade | Básica | Completa |
-| Qualidade | Mínima lançável | Hardening final |
-
----
-
-# 28. Riscos Técnicos e Trade-offs
-
-## Riscos controlados pela arquitetura
-
-### 1. Acoplamento com legado
-**Mitigação:** ACL + boundaries explícitos.
-
-### 2. Crescimento desordenado do monólito
-**Mitigação:** modularização por domínio + regras de dependência.
-
-### 3. Explosão prematura de complexidade
-**Mitigação:** roadmap incremental + fases bem separadas.
-
-### 4. Duplicação de identidade/autorização
-**Mitigação:** reuso da auth da `api/v1`.
-
-### 5. Reescrita estrutural no meio do roadmap
-**Mitigação:** arquitetura preparada desde a fundação para filas, vetores, agentes e evolução assíncrona.
-
----
-
-# 29. Critérios de Pronto da Fase 1
-
-A Fase 1 é considerada consistente quando possuir:
-
-- setup estrutural estável;
-- PostgreSQL + PGVector configurados;
-- integração MySQL controlada;
-- Redis funcional;
-- autenticação integrada;
-- contratos internos claros;
-- logs mínimos;
-- validação e sanitização;
-- documentação coerente com a fase.
-
----
-
-# 30. Stack Técnica
+# 24. Stack Técnica
 
 ## Backend
+
 - **NestJS**
 - **TypeScript**
 
 ## Persistência
+
 - **PostgreSQL**
 - **PGVector**
 
 ## Integração
+
 - **MySQL**
 
-## Coordenação
+## Cache e coordenação
+
 - **Redis**
 - **BullMQ**
 
 ## Observabilidade
+
 - **Pino**
 - **OpenTelemetry**
 
-## Infraestrutura
+## Infraestrutura de execução
+
 - **Docker**
 - **Docker Compose**
 
 ---
 
-# 31. Conclusão
+# 25. Critérios de Pronto da Fase 1
 
-A arquitetura definida para esta plataforma não existe apenas para “organizar o código”.
+A Fase 1 pode ser considerada consistente quando atender, no mínimo, aos pontos abaixo.
 
-Ela existe para garantir que o produto possa crescer corretamente ao longo das fases planejadas, preservando:
+## Estrutura e bootstrap
 
-- segurança;
-- consistência;
-- governança;
-- modularidade;
-- rastreabilidade;
-- compatibilidade com evolução futura.
+- aplicação inicializa de forma previsível;
+- configuração de ambiente estável;
+- bootstrap transversal definido.
 
-A **Fase 1** deve ser entendida como a **fundação correta do produto**, e não como um recorte improvisado.
+## Persistência e integração
 
-A partir dela, as fases seguintes podem ser adicionadas sem comprometer a integridade da solução.
+- PostgreSQL operacional;
+- PGVector preparado;
+- MySQL legado acessado de forma controlada;
+- Redis funcional.
+
+## Segurança
+
+- autenticação integrada;
+- autorização mínima funcional;
+- validação e sanitização implementadas;
+- exceções tratadas sem vazamento indevido.
+
+## Arquitetura
+
+- módulos fundacionais definidos;
+- regras de dependência respeitadas;
+- contratos internos padronizados;
+- ACL estabelecida para o legado.
+
+## Operação
+
+- logs estruturados mínimos;
+- health checks básicos;
+- auditoria inicial disponível.
+
+## Documentação
+
+- arquitetura descrita de forma coerente com a fase atual;
+- separação explícita entre fundação atual e evolução futura.
+
+---
+
+# 26. Riscos Técnicos e Trade-offs
+
+## 26.1 Acoplamento com legado
+
+**Risco:** o novo domínio absorver regras implícitas da base existente.
+
+**Mitigação:** ACL, contratos explícitos e adapters dedicados.
+
+## 26.2 Crescimento desordenado do monólito
+
+**Risco:** módulos perderem fronteira e o projeto virar um bloco acoplado.
+
+**Mitigação:** modularização por domínio, regras de dependência e revisão disciplinada.
+
+## 26.3 Complexidade prematura
+
+**Risco:** excesso de abstração e engenharia adiantada travarem a execução.
+
+**Mitigação:** pragmatismo arquitetural com evolução por fase.
+
+## 26.4 Duplicação de identidade e autorização
+
+**Risco:** surgirem dois centros de verdade para autenticação.
+
+**Mitigação:** reuso da `api/v1` com camada de adaptação.
+
+## 26.5 Reescrita estrutural nas próximas fases
+
+**Risco:** a base atual não suportar filas, agentes e busca semântica.
+
+**Mitigação:** preparar desde agora boundaries, contratos, persistência e runtime para a evolução prevista.
+
+---
+
+# 27. Conclusão
+
+A arquitetura desta plataforma foi definida para viabilizar crescimento seguro, incremental e sustentável, sem sacrificar clareza técnica nem introduzir complexidade prematura.
+
+O ponto central deste documento é simples e objetivo:
+
+> **o projeto está na Fase 1, e a documentação precisa refletir isso com precisão.**
+
+A fase atual é a construção da base correta do produto. É nessa etapa que se definem:
+
+- os limites dos módulos;
+- a disciplina de dependências;
+- a estratégia de integração com legado;
+- a reutilização da autenticação existente;
+- a preparação para filas, agentes e busca semântica;
+- a segurança por padrão;
+- a observabilidade mínima necessária.
+
+Quando essa fundação estiver consistente, as fases seguintes poderão evoluir sobre uma base previsível, auditável e tecnicamente sustentável.
 
 <div align="center">
 
-## 🚀 A fundação correta reduz reescrita, reduz acoplamento e acelera a evolução segura do produto
+## 🚀 Fundação correta agora para evolução segura depois
 
 </div>
+
