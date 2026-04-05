@@ -102,7 +102,7 @@ Isso significa que:
 
 # 2. Status Atual do Projeto
 
-## 🟢 Situação correta do projeto
+## 🟢 Situação do projeto
 
 O projeto encontra-se na etapa de **fundação estrutural**, correspondente à **Fase 1**, ainda que a arquitetura global já esteja desenhada para sustentar todas as fases seguintes.
 
