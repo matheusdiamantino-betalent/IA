@@ -3,270 +3,321 @@
 <div align="center">
 
 ![Status](https://img.shields.io/badge/status-Fase%201%20%E2%80%94%20Funda%C3%A7%C3%A3o%20Segura-0f766e?style=for-the-badge&logo=shield&logoColor=white)
-![Arquitetura](https://img.shields.io/badge/architecture-Modular%20Monolith-1d4ed8?style=for-the-badge&logo=stackshare&logoColor=white)
+![Arquitetura](https://img.shields.io/badge/architecture-Mon%C3%B3lito%20Modular-1d4ed8?style=for-the-badge&logo=stackshare&logoColor=white)
 ![Backend](https://img.shields.io/badge/backend-NestJS%20%2B%20TypeScript-e11d48?style=for-the-badge&logo=nestjs&logoColor=white)
-![Database](https://img.shields.io/badge/database-PostgreSQL-334155?style=for-the-badge&logo=postgresql&logoColor=white)
-![Cache](https://img.shields.io/badge/cache-Redis-b91c1c?style=for-the-badge&logo=redis&logoColor=white)
-![Observability](https://img.shields.io/badge/observability-Logs%20%2B%20Tracing%20%2B%20Metrics-7c3aed?style=for-the-badge&logo=datadog&logoColor=white)
+![Persistência](https://img.shields.io/badge/persistence-PostgreSQL-334155?style=for-the-badge&logo=postgresql&logoColor=white)
+![Coordenação](https://img.shields.io/badge/coordination-Redis%20%2B%20BullMQ-b91c1c?style=for-the-badge&logo=redis&logoColor=white)
+![Auth](https://img.shields.io/badge/auth-reuso%20da%20api%2Fv1-7c3aed?style=for-the-badge&logo=auth0&logoColor=white)
+![Pipeline](https://img.shields.io/badge/pipeline-evolu%C3%A7%C3%A3o%20incremental-0f172a?style=for-the-badge&logo=githubactions&logoColor=white)
 ![Security](https://img.shields.io/badge/security-Secure%20by%20Default-065f46?style=for-the-badge&logo=vercel&logoColor=white)
+![Observability](https://img.shields.io/badge/observability-Logs%20%2B%20Tracing%20%2B%20Metrics-7c3aed?style=for-the-badge&logo=datadog&logoColor=white)
 
 </div>
 
 <br />
 
-> Plataforma backend orientada a domínio para **governança, criação, staging, revisão futura e publicação controlada de questões**, projetada com foco em **segurança**, **auditabilidade**, **modularidade**, **resiliência operacional** e **evolução incremental por fases**.
+<div align="center">
+
+## 🏛️ Arquitetura orientada a domínio para geração, governança, staging, revisão futura e publicação controlada de questões
+
+Projeto estruturado para crescimento incremental com foco em **segurança**, **modularidade**, **rastreamento operacional**, **baixo acoplamento** e **evolução arquitetural sustentável**.
+
+</div>
 
 ---
 
-## 📌 Status Atual do Projeto
+# 📚 Sumário
 
-> **O projeto encontra-se oficialmente na `FASE 1 — Fundação Segura`.**
->
-> A arquitetura completa da plataforma já foi decidida, porém a implementação atual está **deliberadamente limitada ao núcleo estrutural**, assegurando que a evolução para ingestão, IA, revisão editorial e publicação aconteça **sem reescrita do core**, **sem acoplamento indevido** e **sem dívida arquitetural prematura**.
-
-### O que isso significa na prática
-
-A plataforma **ainda não está operando como pipeline completo de IA**.  
-Neste momento, ela estabelece a camada correta para suportar:
-
-- identidade e acesso;
-- controle de domínio;
-- taxonomia e organização de conteúdo;
-- CRUD governado de questões;
-- staging antes de fluxos futuros de revisão/publicação;
-- observabilidade mínima e auditabilidade;
-- padrões técnicos permanentes de arquitetura.
-
----
-
-# Sumário
-
-- [1. Visão Geral](#1-visão-geral)
-- [2. Objetivo da Plataforma](#2-objetivo-da-plataforma)
-- [3. Estado Atual do Projeto](#3-estado-atual-do-projeto)
-- [4. Escopo da Fase 1](#4-escopo-da-fase-1)
-- [5. Direção Arquitetural](#5-direção-arquitetural)
-- [6. Princípios Arquiteturais](#6-princípios-arquiteturais)
-- [7. Arquitetura de Alto Nível](#7-arquitetura-de-alto-nível)
-- [8. Fluxo Operacional da Fase 1](#8-fluxo-operacional-da-fase-1)
-- [9. Bounded Contexts da Fase 1](#9-bounded-contexts-da-fase-1)
-- [10. Organização Arquitetural por Camadas](#10-organização-arquitetural-por-camadas)
-- [11. Estrutura Sugerida do Repositório](#11-estrutura-sugerida-do-repositório)
-- [12. Modelo de Dados da Fase 1](#12-modelo-de-dados-da-fase-1)
-- [13. Segurança](#13-segurança)
-- [14. Observabilidade](#14-observabilidade)
-- [15. Resiliência e Confiabilidade](#15-resiliência-e-confiabilidade)
-- [16. Contratos e Convenções Técnicas](#16-contratos-e-convenções-técnicas)
-- [17. Fluxos Técnicos em Mermaid](#17-fluxos-técnicos-em-mermaid)
-- [18. Fora do Escopo da Fase 1](#18-fora-do-escopo-da-fase-1)
-- [19. Roadmap Incremental](#19-roadmap-incremental)
-- [20. Critérios de Pronto da Fase 1](#20-critérios-de-pronto-da-fase-1)
-- [21. Stack Técnica](#21-stack-técnica)
-- [22. Conclusão](#22-conclusão)
+- [1. Visão Executiva](#1-visão-executiva)
+- [2. Status Atual do Projeto](#2-status-atual-do-projeto)
+- [3. Decisão Arquitetural Oficial](#3-decisão-arquitetural-oficial)
+- [4. Objetivo da Plataforma](#4-objetivo-da-plataforma)
+- [5. Escopo Real da Fase 1](#5-escopo-real-da-fase-1)
+- [6. O que ainda não pertence à Fase 1](#6-o-que-ainda-não-pertence-à-fase-1)
+- [7. Princípios Arquiteturais](#7-princípios-arquiteturais)
+- [8. Visão Arquitetural de Alto Nível](#8-visão-arquitetural-de-alto-nível)
+- [9. Reaproveitamento da Autenticação da `api/v1`](#9-reaproveitamento-da-autenticação-da-apiv1)
+- [10. Estrutura Arquitetural por Módulo](#10-estrutura-arquitetural-por-módulo)
+- [11. Regras de Dependência Obrigatórias](#11-regras-de-dependência-obrigatórias)
+- [12. Bounded Contexts da Plataforma](#12-bounded-contexts-da-plataforma)
+- [13. Fluxo Operacional da Fase 1](#13-fluxo-operacional-da-fase-1)
+- [14. Tree View Arquitetural Proposta](#14-tree-view-arquitetural-proposta)
+- [15. Modelo de Dados Conceitual da Fase 1](#15-modelo-de-dados-conceitual-da-fase-1)
+- [16. Segurança](#16-segurança)
+- [17. Observabilidade](#17-observabilidade)
+- [18. Resiliência e Confiabilidade](#18-resiliência-e-confiabilidade)
+- [19. ACL e Isolamento do Legado](#19-acl-e-isolamento-do-legado)
+- [20. Pipeline Futuro e Compatibilidade Evolutiva](#20-pipeline-futuro-e-compatibilidade-evolutiva)
+- [21. Roadmap Incremental](#21-roadmap-incremental)
+- [22. Critérios de Pronto da Fase 1](#22-critérios-de-pronto-da-fase-1)
+- [23. Stack Técnica](#23-stack-técnica)
+- [24. Conclusão](#24-conclusão)
 
 ---
 
-# 1. Visão Geral
+# 1. Visão Executiva
 
-A plataforma foi concebida como uma **base operacional governada para produção de questões**, preparada para evoluir até um pipeline completo com:
+A **Plataforma de Questões com IA** foi concebida como uma base arquitetural robusta para suportar, com segurança e governança, o ciclo de vida de produção de questões estruturadas.
 
-- ingestão de conteúdo;
-- recuperação contextual;
-- agentes especializados;
+A solução foi desenhada para evoluir até um pipeline completo envolvendo:
+
+- ingestão documental;
+- parsing e estruturação de conteúdo;
+- classificação e resolução taxonômica;
+- recuperação contextual e normativa;
+- transformação assistida por IA;
 - revisão humana;
 - publicação controlada;
-- observabilidade e governança ponta a ponta.
+- rastreabilidade ponta a ponta.
 
-A implementação atual existe para garantir que a base da solução seja **estruturalmente correta antes da automação pesada**.
+Entretanto, **o projeto ainda não está nessa etapa**.
 
-Em termos arquiteturais, a Fase 1 entrega o que mais importa no início de uma plataforma desse tipo:
+A implementação atual concentra-se exclusivamente na **Fase 1 — Fundação Segura**, cuja responsabilidade é estabelecer a **base técnica correta** sobre a qual as próximas capacidades poderão ser adicionadas **sem reescrita estrutural**, **sem contaminação do domínio** e **sem acoplamento prematuro com complexidade desnecessária**.
 
-- **fronteiras internas fortes**;
-- **segurança por padrão**;
-- **consistência de domínio**;
-- **modelo evolutivo seguro**;
-- **capacidade de auditoria**;
-- **preparação real para pipeline futuro**.
+### 🎯 Premissa central da arquitetura
 
-### Decisão central da arquitetura
+> **Automação de IA não deve operar diretamente sobre o núcleo editorial e operacional sem um domínio seguro, rastreável, versionável, auditável e modularizado.**
 
-> **IA nunca deve operar diretamente sobre o coração editorial e operacional sem um núcleo seguro, rastreável, versionável e governado.**
+Essa decisão protege a plataforma contra:
 
-Essa decisão evita:
-
-- contaminação da base principal;
-- automação sem controle;
-- acoplamento entre domínio e vendor;
-- crescimento técnico desordenado;
-- perda de governança operacional.
+- crescimento desordenado;
+- acoplamento com fornecedores ou providers;
+- contaminação do modelo interno pelo legado;
+- complexidade operacional prematura;
+- dificuldade de manutenção e evolução.
 
 ---
 
-# 2. Objetivo da Plataforma
+# 2. Status Atual do Projeto
 
-A plataforma existe para suportar, com segurança e governança, o ciclo de vida de produção de questões e seus metadados, com possibilidade de evolução para automação assistida por IA.
+<div align="center">
 
-## Objetivos principais
+## 🟢 O projeto encontra-se oficialmente na **FASE 1 — Fundação Segura**
 
-- centralizar entidades acadêmicas e editoriais;
-- permitir organização por coleções, temas e tópicos;
-- manter um banco de questões governado;
+</div>
+
+## O que isso significa
+
+A arquitetura global já está decidida, mas a implementação atual cobre apenas o que é **estruturalmente necessário e tecnicamente correto** para sustentar a evolução futura.
+
+A Fase 1 não representa uma versão improvisada ou reduzida da plataforma.  
+Ela representa o **núcleo fundacional**, responsável por consolidar:
+
+- identidade e acesso;
+- boundaries arquiteturais;
+- governança do domínio;
+- persistência operacional inicial;
+- staging controlado;
+- auditabilidade;
+- observabilidade mínima;
+- disciplina de evolução.
+
+## Estado técnico correto da solução neste momento
+
+### ✅ Já faz parte da implementação-alvo da Fase 1
+- autenticação integrada ao fluxo existente;
+- autorização por escopo, papel e política;
+- estrutura modular por domínio;
+- base de catálogo e classificação;
+- CRUD governado de questões;
+- staging editorial;
+- persistência operacional;
+- logs e trilha mínima de rastreamento.
+
+### 🟡 Já faz parte da arquitetura decidida, mas não da entrega atual
+- pipeline assíncrono completo por jobs e steps;
+- ingestão documental expandida;
+- retrieval semântico;
+- transformação avançada assistida por IA;
+- revisão humana completa;
+- publicação automatizada avançada;
+- scoring, retries avançados e governança operacional completa.
+
+Essa separação é **intencional** e **arquiteturalmente correta**.
+
+---
+
+# 3. Decisão Arquitetural Oficial
+
+A direção aprovada para a plataforma é:
+
+## ✅ **Monólito Modular Pragmático por Domínio**
+
+com:
+
+- **NestJS + TypeScript** como stack principal;
+- organização por **módulos de domínio**;
+- estrutura interna por módulo em:
+  - `infra/`
+  - `model/`
+  - `lib/`
+- uso disciplinado de `shared/`;
+- reaproveitamento da autenticação já existente da `api/v1`;
+- **sem OCR no fluxo base**;
+- adoção seletiva de conceitos de **Clean Architecture** e **Hexagonal Architecture**, **sem dogmatismo**.
+
+## Por que essa foi a decisão correta
+
+Essa arquitetura oferece o melhor equilíbrio entre:
+
+- robustez estrutural;
+- simplicidade operacional;
+- clareza de ownership;
+- facilidade de navegação da base;
+- baixo acoplamento entre responsabilidades;
+- evolução incremental com segurança.
+
+## O que foi conscientemente evitado
+
+### ❌ Microsserviços prematuros
+Porque aumentariam:
+- custo operacional;
+- overhead de tracing;
+- complexidade de contratos;
+- dificuldade de troubleshooting;
+- dispersão de ownership.
+
+### ❌ Clean Architecture rígida desde o início
+Porque adicionaria:
+- abstrações excessivas;
+- boilerplate prematuro;
+- custo cognitivo desnecessário;
+- formalismo acima da necessidade atual do projeto.
+
+### ❌ OCR como etapa base
+Porque o cenário atual já trabalha com **documentos com texto extraível**, tornando o OCR uma complexidade injustificada no caminho crítico.
+
+---
+
+# 4. Objetivo da Plataforma
+
+A plataforma existe para suportar, com segurança e governança, o ciclo de vida de produção de questões e seus metadados, preservando qualidade estrutural, controle editorial e compatibilidade futura com automação assistida por IA.
+
+## Objetivos de negócio
+
+- centralizar questões e seus metadados;
+- organizar conteúdo por coleções, disciplinas, temas e tópicos;
 - suportar staging antes de publicação;
-- registrar autoria, revisão, alterações e contexto operacional;
-- criar uma base tecnicamente correta para expansão futura com IA.
+- preservar autoria, revisão, histórico e rastreabilidade;
+- preparar a base para automação assistida.
 
 ## Objetivos técnicos
 
 - manter **baixo acoplamento** entre domínio e infraestrutura;
 - garantir **segurança por padrão**;
 - preservar **auditabilidade ponta a ponta**;
-- suportar **crescimento incremental sem reescrita estrutural**;
-- preparar o sistema para **pipeline assíncrono e modular**.
+- permitir **evolução incremental sem reescrita**;
+- sustentar futura operação assíncrona por pipeline.
 
 ---
 
-# 3. Estado Atual do Projeto
+# 5. Escopo Real da Fase 1
 
-O projeto encontra-se na **Fase 1 — Fundação Segura**.
+A Fase 1 cobre o **núcleo operacional governado** da plataforma.
 
-Nesta etapa, o sistema **ainda não é a plataforma completa de IA**.  
-Ele representa o **núcleo arquitetural e operacional** sobre o qual as capacidades avançadas serão adicionadas de forma controlada.
+## 🛡️ Segurança e Identidade
+- integração com autenticação existente;
+- autorização por papéis e políticas;
+- escopo organizacional / tenancy quando aplicável;
+- proteção das rotas e operações sensíveis.
 
-## Capacidades efetivamente pertencentes à Fase 1
-
-- identidade e acesso;
-- segregação de responsabilidades;
-- governança de domínio;
-- persistência inicial;
-- estrutura de staging;
-- rastreabilidade;
-- observabilidade básica;
-- contratos e padrões de evolução.
-
-## Capacidades conscientemente adiadas
-
-- ingestão documental;
-- retrieval vetorial;
-- OCR;
-- agentes especializados;
-- pipeline assíncrono multi-step;
-- revisão automatizada;
-- publicação orquestrada.
-
-Essa delimitação é **intencional e correta**. Em projetos dessa natureza, antecipar pipeline avançado sem foundation costuma produzir uma base frágil, cara de manter e difícil de operar.
-
----
-
-# 4. Escopo da Fase 1
-
-A Fase 1 cobre exclusivamente os elementos fundamentais para o funcionamento seguro da plataforma.
-
-## Funcionalidades incluídas
-
-### Segurança e acesso
-- autenticação;
-- autorização baseada em papéis e permissões;
-- controle de acesso por contexto organizacional;
-- isolamento por tenant/organização quando aplicável.
-
-### Núcleo de domínio
+## 🧩 Núcleo de Domínio
 - coleções;
-- disciplinas/temas/tópicos;
+- disciplinas;
+- temas;
+- tópicos;
 - taxonomias básicas;
-- estrutura inicial de classificação;
-- gerenciamento de questões manuais.
+- modelagem inicial do banco de questões.
 
-### Banco de questões
+## 📝 Questões e Conteúdo
 - criação de questões;
 - edição;
 - versionamento básico;
-- status editorial;
-- staging controlado.
+- classificação inicial;
+- controle de estado editorial.
 
-### Governança e rastreabilidade
-- auditoria básica;
-- trilha de alteração;
-- logs estruturados;
-- correlação mínima de requests.
+## 🧪 Staging e Governança
+- área de staging;
+- controle transitório de conteúdo;
+- preparação para futura revisão/publicação;
+- trilha de alteração.
 
-### Base operacional
-- banco principal operacional;
-- estrutura de módulos;
+## 📈 Base Operacional
+- persistência principal;
 - contratos internos;
+- estrutura modular;
 - validação de entrada;
-- tratamento consistente de erros.
+- tratamento padronizado de erro;
+- logs estruturados mínimos.
 
 ---
 
-# 5. Direção Arquitetural
+# 6. O que ainda não pertence à Fase 1
 
-A arquitetura adotada é um **Monólito Modular**, organizado por **bounded contexts**, com **Clean Architecture** e **Hexagonal Architecture** como princípios de composição interna.
+Os itens abaixo fazem parte da **direção arquitetural do produto**, mas **não devem ser descritos como entregues agora**.
 
-Essa escolha equilibra corretamente:
+## Capacidades futuras
 
-- simplicidade operacional;
-- separação de responsabilidades;
-- clareza de domínio;
-- facilidade de manutenção;
-- extração futura de serviços, se necessária.
+- ingestão expandida de materiais-base;
+- OCR como fallback opcional;
+- pipeline assíncrono completo por jobs e steps;
+- parsing documental expandido;
+- classificação assistida por modelos;
+- retrieval vetorial;
+- embeddings;
+- resolução canônica avançada;
+- transformação semântica assistida por LLM;
+- revisão humana completa;
+- publicação automatizada governada;
+- observabilidade operacional avançada;
+- DLQ e reprocessamento fino por etapa.
 
-## Motivos da escolha
+## Diretriz importante
 
-A solução precisa:
+Esses elementos podem e devem aparecer neste documento como:
 
-- preservar coesão de domínio;
-- evitar fragmentação prematura;
-- permitir crescimento seguro;
-- sustentar observabilidade e auditoria;
-- reduzir custo operacional inicial.
+- **evolução arquitetural prevista**;
+- **compatibilidade futura**;
+- **roadmap técnico**;
+- **módulos planejados**.
 
-Microsserviços neste estágio adicionariam complexidade operacional cedo demais, sem retorno proporcional.
-
-## Resultado arquitetural esperado
-
-Ao final da evolução planejada, esta base deverá sustentar:
-
-- módulos coesos;
-- pipeline controlado;
-- integração desacoplada com providers;
-- ACL explícita para legado;
-- expansão segura para IA e revisão editorial;
-- extração futura de capacidades específicas, se economicamente justificável.
+Mas **não como funcionalidades concluídas da fase atual**.
 
 ---
 
-# 6. Princípios Arquiteturais
+# 7. Princípios Arquiteturais
 
-A plataforma é guiada pelos princípios abaixo.
+A arquitetura é guiada pelos princípios abaixo.
 
-## 6.1 Domain First
-O domínio define o sistema. Framework, banco, fila e integrações não definem a regra de negócio.
+## 7.1 Domain First
+O domínio define a solução. Framework, ORM, fila, cache ou provider não definem regra de negócio.
 
-## 6.2 Secure by Default
-Toda entrada, integração e saída é tratada como potencialmente insegura até validação explícita.
+## 7.2 Secure by Default
+Toda entrada, integração e saída deve ser tratada como potencialmente insegura até validação explícita.
 
-## 6.3 Staging Before Publish
-Nenhum conteúdo operacionalmente sensível deve ser tratado como definitivo sem camada intermediária controlada.
+## 7.3 Modular by Responsibility
+Cada módulo deve representar uma capacidade clara da plataforma, com ownership explícito.
 
-## 6.4 Everything Auditable
-A plataforma deve ser rastreável em requests, ações, mudanças e eventos relevantes.
+## 7.4 Shared with Discipline
+Reuso não deve virar centralização indevida. `shared/` existe apenas para transversalidade real.
 
-## 6.5 Low Coupling, High Cohesion
-Cada módulo possui responsabilidade clara e dependências explícitas.
+## 7.5 Staging Before Publish
+Conteúdo relevante não deve atravessar diretamente para publicação sem uma camada intermediária controlada.
 
-## 6.6 Observability by Design
-Logs, métricas e tracing não são acessórios; fazem parte da arquitetura.
+## 7.6 Everything Auditable
+A plataforma deve ser rastreável por request, operação, mudança de estado e evento relevante.
 
-## 6.7 Incremental Evolution
-A evolução ocorre por fases, preservando o núcleo e evitando reescrita estrutural.
+## 7.7 Incremental Evolution
+A base deve crescer por fases, preservando compatibilidade estrutural e evitando reescrita.
+
+## 7.8 Pragmatism over Dogma
+Padrões arquiteturais devem ser usados quando agregarem valor real, e não por formalismo.
 
 ---
 
-# 7. Arquitetura de Alto Nível
+# 8. Visão Arquitetural de Alto Nível
 
-Mesmo na Fase 1, a arquitetura já nasce preparada para a forma final da plataforma.
-
-## Visão consolidada
+## 🧭 Diagrama Macro da Plataforma
 
 ```mermaid
 %%{init: {
@@ -286,65 +337,307 @@ Mesmo na Fase 1, a arquitetura já nasce preparada para a forma final da platafo
 flowchart TB
     user["👤 Usuário / Operador"]
     admin["🛡️ Admin / Editorial"]
-    extdb["🗄️ Base Principal / Legado"]
-    redis["⚡ Redis"]
+    legacyAuth["🔑 Auth existente — api/v1"]
+    redis["⚡ Redis / BullMQ"]
     postgres["🐘 PostgreSQL"]
+    legacyDb["🗄️ Base Principal / Legado"]
     obs["📈 Observabilidade"]
 
     subgraph app["🏛️ Plataforma Backend"]
         api["🌐 API Core"]
-        auth["🔐 Auth / RBAC / Policies"]
-        qdomain["🧩 Question Domain"]
-        cdomain["🗂️ Catalog Domain"]
-        sdomain["🧪 Staging Domain"]
-        adomain["📝 Audit / Governance"]
-        shared["🧱 Shared Cross-Cutting"]
+        auth["🔐 Auth Adapter"]
+        catalog["🗂️ Catalog"]
+        questions["🧩 Questions"]
+        staging["🧪 Staging"]
+        audit["📝 Audit"]
+        governance["📜 Governance"]
+        shared["🧱 Shared"]
     end
 
     user --> api
     admin --> api
-
     api --> auth
-    api --> qdomain
-    api --> cdomain
-    api --> sdomain
-    api --> adomain
+    auth --> legacyAuth
+
+    api --> catalog
+    api --> questions
+    api --> staging
+    api --> audit
+    api --> governance
     api --> shared
 
-    qdomain --> postgres
-    cdomain --> postgres
-    sdomain --> postgres
-    adomain --> postgres
+    catalog --> postgres
+    questions --> postgres
+    staging --> postgres
+    audit --> postgres
 
     api --> redis
     api --> obs
+
+    governance -. futura publicação .-> legacyDb
 ```
 
-## Leitura arquitetural
+## Leitura técnica
 
-A Fase 1 concentra-se em:
+A Fase 1 concentra-se no núcleo operacional que precisa existir antes do pipeline avançado:
 
-- **API Core** como ponto de entrada e controle;
-- **Auth / RBAC** como camada obrigatória de proteção;
-- **Question Domain** como núcleo de conteúdo;
-- **Catalog Domain** como classificação e organização;
-- **Staging Domain** como proteção editorial;
-- **Audit / Governance** como base de rastreabilidade.
+- **API Core** como ponto de entrada;
+- **Auth Adapter** como camada de reaproveitamento da autenticação existente;
+- **Catalog** como base classificatória;
+- **Questions** como núcleo do conteúdo;
+- **Staging** como proteção editorial;
+- **Audit** como base de rastreabilidade;
+- **Governance** como guard rail estrutural.
 
-A estrutura já deixa espaço para:
+Essa arquitetura já nasce compatível com:
 
-- orquestração futura;
 - filas;
-- processamento assíncrono;
-- IA;
-- retrieval;
-- publicação governada.
+- workers;
+- steps persistidos;
+- ACL de publicação;
+- IA assistida;
+- revisão humana;
+- integração controlada com legado.
 
 ---
 
-# 8. Fluxo Operacional da Fase 1
+# 9. Reaproveitamento da Autenticação da `api/v1`
 
-O fluxo atual é intencionalmente mais enxuto do que a arquitetura final.
+Uma das decisões arquiteturais mais importantes da solução é **não duplicar a infraestrutura de identidade**.
+
+## Diretriz oficial
+
+A nova plataforma **não deve criar um sistema paralelo de autenticação**.
+
+Ela deve:
+
+- reaproveitar o fluxo já existente na `api/v1` do admin atual;
+- validar identidade e contexto via camada de adaptação;
+- manter consistência com a infraestrutura já estabelecida;
+- evitar divergência de regra, sessão, escopo ou política.
+
+## Benefícios
+
+- menor custo de implementação;
+- menor dispersão arquitetural;
+- menor duplicação de regra;
+- maior consistência operacional;
+- menor risco de drift entre sistemas.
+
+## Fluxo arquitetural
+
+```mermaid
+%%{init: {
+  "theme": "base",
+  "themeVariables": {
+    "background": "#0b1220",
+    "primaryColor": "#111827",
+    "primaryTextColor": "#e5e7eb",
+    "primaryBorderColor": "#8b5cf6",
+    "secondaryColor": "#0f172a",
+    "secondaryTextColor": "#e5e7eb",
+    "tertiaryColor": "#111827",
+    "tertiaryTextColor": "#e5e7eb",
+    "lineColor": "#94a3b8"
+  }
+}}%%
+flowchart LR
+    A["👤 Request autenticado"] --> B["🔐 Auth Module (Adapter)"]
+    B --> C["🔎 Validar token / contexto"]
+    C --> D["🔗 Consultar / integrar api/v1"]
+    D --> E["🛡️ Resolver identidade + escopo + permissões"]
+    E --> F["✅ Liberar acesso ao domínio"]
+```
+
+## Regra obrigatória
+
+> O módulo `auth` da nova plataforma deve funcionar como **camada de integração e adaptação**, e não como **sistema de identidade concorrente**.
+
+---
+
+# 10. Estrutura Arquitetural por Módulo
+
+Cada módulo segue uma organização interna simples, previsível e disciplinada.
+
+## Estrutura padrão
+
+```text
+modules/<modulo>/
+├── infra/
+├── model/
+└── lib/
+```
+
+## 📦 `model/`
+Responsável por definir a forma, o contrato e a estrutura do módulo.
+
+### Exemplos de conteúdo
+- DTOs;
+- enums;
+- interfaces;
+- types;
+- schemas;
+- validações;
+- contratos internos entre camadas.
+
+### Papel arquitetural
+
+`model/` representa **a linguagem estrutural do módulo**.
+
+É onde ficam os elementos que descrevem:
+
+- como o dado entra;
+- como o dado sai;
+- como o dado é validado;
+- como o módulo se comunica internamente.
+
+---
+
+## ⚙️ `infra/`
+Responsável por implementação concreta, execução e comunicação com o exterior.
+
+### Exemplos de conteúdo
+- controllers;
+- services;
+- processors;
+- repositories;
+- gateways;
+- clients;
+- adapters;
+- integrações externas.
+
+### Papel arquitetural
+
+`infra/` é a camada que:
+
+- expõe endpoints;
+- coordena chamadas;
+- acessa banco;
+- integra serviços externos;
+- executa operações técnicas.
+
+---
+
+## 🧰 `lib/`
+Responsável por código de apoio **específico daquele domínio**.
+
+### Exemplos de conteúdo
+- helpers;
+- parsers;
+- mapeadores;
+- normalizadores;
+- formatadores;
+- factories;
+- utilitários do módulo.
+
+### Papel arquitetural
+
+`lib/` existe para manter **apoio local do domínio** sem empurrar esse código para `shared/` indevidamente.
+
+---
+
+# 11. Regras de Dependência Obrigatórias
+
+Essas regras devem ser consideradas **não negociáveis**.
+
+## Regras principais
+
+### ✅ Permitido
+- `infra` usar `model`;
+- `infra` usar `lib`;
+- `lib` usar `model`.
+
+### ❌ Proibido
+- `model` depender de `infra`;
+- `lib` acessar integrações externas diretamente;
+- `shared` substituir ownership de módulo;
+- domínio falar diretamente a semântica do legado.
+
+## Diagrama de dependência permitida
+
+```mermaid
+%%{init: {
+  "theme": "base",
+  "themeVariables": {
+    "background": "#0b1220",
+    "primaryColor": "#111827",
+    "primaryTextColor": "#e5e7eb",
+    "primaryBorderColor": "#14b8a6",
+    "secondaryColor": "#0f172a",
+    "secondaryTextColor": "#e5e7eb",
+    "tertiaryColor": "#111827",
+    "tertiaryTextColor": "#e5e7eb",
+    "lineColor": "#94a3b8"
+  }
+}}%%
+flowchart TD
+    infra["⚙️ infra"] --> model["📦 model"]
+    infra --> lib["🧰 lib"]
+    lib --> model
+```
+
+## Interpretação arquitetural
+
+Essa regra existe para impedir:
+
+- vazamento de framework para o núcleo do módulo;
+- mistura entre contrato e execução;
+- acoplamento acidental com infraestrutura;
+- “efeito bola de neve” no crescimento do monólito.
+
+---
+
+# 12. Bounded Contexts da Plataforma
+
+A arquitetura final prevê múltiplos contextos, mas a Fase 1 concentra apenas uma parte deles em implementação real.
+
+## Módulos estruturais mais relevantes
+
+### 🔐 `auth`
+Integração e adaptação da autenticação já existente da `api/v1`.
+
+### 🏢 `organizations`
+Escopo organizacional, tenancy e segmentação de contexto.
+
+### 🗂️ `catalog`
+Coleções, disciplinas, temas, tópicos e taxonomia base.
+
+### 🧩 `questions`
+Núcleo da entidade questão e seus metadados.
+
+### 🧪 `staging`
+Estado transitório antes de revisão/publicação futura.
+
+### 📝 `audit`
+Registro de eventos críticos e rastreabilidade.
+
+### 📜 `governance`
+Políticas, convenções e contratos operacionais.
+
+---
+
+## Módulos previstos para evolução posterior
+
+- `ingestion`
+- `processing`
+- `extraction`
+- `classification`
+- `resolution`
+- `knowledge-retrieval`
+- `transformation`
+- `quality`
+- `review`
+- `publication`
+- `observability`
+- `health`
+
+Esses módulos já fazem parte da **arquitetura alvo**, mas **não devem ser interpretados como entregues na Fase 1**.
+
+---
+
+# 13. Fluxo Operacional da Fase 1
+
+A Fase 1 opera como um **núcleo governado de CRUD, domínio, autorização, staging e rastreamento**.
 
 ## Fluxo principal
 
@@ -364,215 +657,168 @@ O fluxo atual é intencionalmente mais enxuto do que a arquitetura final.
   }
 }}%%
 flowchart TD
-    A["👤 Usuário autenticado"] --> B["🛡️ Autorização / Policy Guard"]
-    B --> C["🧾 Validação de payload"]
-    C --> D["⚙️ Caso de uso da aplicação"]
+    A["👤 Usuário autenticado"] --> B["🛡️ Auth / Policy Guard"]
+    B --> C["🧾 Validation / Sanitization"]
+    C --> D["⚙️ Use Case / Service"]
     D --> E["📚 Regra de domínio"]
     E --> F["💾 Persistência"]
-    F --> G["📝 Registro de auditoria"]
+    F --> G["📝 Audit / Trail"]
     G --> H["📤 Resposta padronizada"]
 ```
 
-## Interpretação técnica
+## Leitura técnica do fluxo
 
-Na Fase 1, o sistema opera como uma **plataforma governada de CRUD e staging**, e não como um pipeline de IA.
-
-A ordem correta do fluxo é:
+A ordem correta da execução é:
 
 1. identidade;
 2. autorização;
 3. validação;
-4. caso de uso;
+4. aplicação;
 5. domínio;
 6. persistência;
 7. auditoria;
-8. resposta padronizada.
+8. resposta.
 
-Essa ordem evita que regras críticas sejam “puladas” por acoplamento indevido em controller, service ou adapter.
+Essa sequência existe para impedir que:
 
----
-
-# 9. Bounded Contexts da Fase 1
-
-A separação por contexto evita crescimento desordenado e facilita evolução futura.
-
-## 9.1 `auth`
-Responsável por:
-
-- autenticação;
-- sessão/token;
-- identidade;
-- autorização;
-- RBAC;
-- guards e policies.
-
-## 9.2 `organizations` / `tenancy`
-Responsável por:
-
-- tenant;
-- organização;
-- escopo organizacional;
-- segregação de dados;
-- governança de acesso.
-
-## 9.3 `catalog`
-Responsável por:
-
-- coleções;
-- disciplinas;
-- temas;
-- tópicos;
-- taxonomias;
-- relacionamentos classificatórios.
-
-## 9.4 `questions`
-Responsável por:
-
-- entidade principal de questão;
-- conteúdo;
-- metadados;
-- versão inicial;
-- estado editorial básico.
-
-## 9.5 `staging`
-Responsável por:
-
-- rascunhos;
-- estado transitório;
-- preparação para futura revisão/publicação;
-- isolamento da base definitiva.
-
-## 9.6 `audit`
-Responsável por:
-
-- trilha de eventos;
-- registro de alterações;
-- autoria;
-- contexto operacional.
+- regras críticas sejam puladas;
+- segurança seja aplicada tarde demais;
+- rastreabilidade fique opcional;
+- lógica de negócio vaze para controller ou integração.
 
 ---
 
-# 10. Organização Arquitetural por Camadas
+# 14. Tree View Arquitetural Proposta
 
-Cada módulo deve seguir a mesma disciplina estrutural.
-
-## Padrão interno
-
-```text
-interfaces -> application -> domain -> contracts/ports -> infrastructure
-```
-
-## Responsabilidade por camada
-
-### `interfaces`
-Contém:
-- controllers;
-- DTOs de entrada/saída;
-- handlers;
-- serializers;
-- interceptors específicos de borda.
-
-**Não deve conter regra de negócio.**
-
-### `application`
-Contém:
-- casos de uso;
-- orquestração transacional;
-- coordenação entre contratos;
-- serviços de aplicação.
-
-**Coordena o fluxo, mas não concentra a regra de domínio.**
-
-### `domain`
-Contém:
-- entidades;
-- value objects;
-- políticas;
-- invariantes;
-- serviços de domínio;
-- contratos do negócio.
-
-**É o centro da modelagem.**
-
-### `contracts/ports`
-Contém:
-- interfaces de repositórios;
-- gateways;
-- serviços externos abstratos;
-- contratos de comunicação.
-
-**Impede vazamento de infraestrutura para o domínio.**
-
-### `infrastructure`
-Contém:
-- ORM;
-- adapters;
-- repositories concretos;
-- cache;
-- mensageria;
-- integrações.
-
-**Implementa tecnologia, não regra de negócio.**
-
----
-
-# 11. Estrutura Sugerida do Repositório
-
-A estrutura abaixo representa a forma esperada do projeto na Fase 1.
+Abaixo está a estrutura recomendada para a solução com base na decisão aprovada.
 
 ```text
 src/
+├── main.ts
+├── app.module.ts
+│
 ├── bootstrap/
-│   ├── app/
-│   ├── validation/
-│   ├── exceptions/
-│   ├── telemetry/
-│   └── security/
+│   ├── app.bootstrap.ts
+│   ├── config.bootstrap.ts
+│   ├── logger.bootstrap.ts
+│   ├── validation.bootstrap.ts
+│   ├── exception-filters.bootstrap.ts
+│   ├── metrics.bootstrap.ts
+│   ├── tracing.bootstrap.ts
+│   ├── queues.bootstrap.ts
+│   ├── swagger.bootstrap.ts
+│   └── shutdown.bootstrap.ts
 │
 ├── config/
-│   ├── app/
-│   ├── database/
-│   ├── auth/
-│   ├── cache/
-│   ├── telemetry/
-│   └── security/
-│
-├── shared/
-│   ├── constants/
-│   ├── enums/
-│   ├── types/
-│   ├── helpers/
-│   ├── exceptions/
-│   ├── validation/
-│   ├── sanitization/
-│   ├── security/
-│   └── telemetry/
-│
-├── infra/
-│   ├── database/
-│   ├── cache/
-│   ├── logger/
-│   └── http/
+│   ├── app.config.ts
+│   ├── auth.config.ts
+│   ├── db.config.ts
+│   ├── redis.config.ts
+│   ├── queue.config.ts
+│   ├── storage.config.ts
+│   ├── llm.config.ts
+│   ├── vector.config.ts
+│   ├── observability.config.ts
+│   ├── security.config.ts
+│   ├── feature-flags.config.ts
+│   └── review-policy.config.ts
 │
 ├── modules/
 │   ├── auth/
+│   │   ├── infra/
+│   │   ├── model/
+│   │   └── lib/
+│   │
 │   ├── organizations/
+│   │   ├── infra/
+│   │   ├── model/
+│   │   └── lib/
+│   │
 │   ├── catalog/
+│   │   ├── infra/
+│   │   ├── model/
+│   │   └── lib/
+│   │
 │   ├── questions/
+│   │   ├── infra/
+│   │   ├── model/
+│   │   └── lib/
+│   │
 │   ├── staging/
-│   └── audit/
+│   │   ├── infra/
+│   │   ├── model/
+│   │   └── lib/
+│   │
+│   ├── audit/
+│   │   ├── infra/
+│   │   ├── model/
+│   │   └── lib/
+│   │
+│   ├── governance/
+│   │   ├── infra/
+│   │   ├── model/
+│   │   └── lib/
+│   │
+│   ├── ingestion/
+│   ├── processing/
+│   ├── extraction/
+│   ├── classification/
+│   ├── resolution/
+│   ├── knowledge-retrieval/
+│   ├── transformation/
+│   ├── quality/
+│   ├── review/
+│   ├── publication/
+│   ├── observability/
+│   └── health/
 │
-├── database/
-│   ├── migrations/
-│   ├── seeds/
-│   └── factories/
+├── shared/
+│   ├── infra/
+│   ├── model/
+│   └── lib/
 │
-└── main.ts
+├── docs/
+│   ├── architecture/
+│   ├── adr/
+│   ├── contracts/
+│   └── runbooks/
+│
+└── test/
+    ├── fixtures/
+    ├── factories/
+    ├── unit/
+    ├── integration/
+    ├── contract/
+    ├── e2e/
+    ├── resilience/
+    └── load/
 ```
+
+## Leitura da tree view
+
+### `bootstrap/`
+Composição da aplicação, validação, exceções, tracing, métricas, filas, documentação e ciclo de vida.
+
+### `config/`
+Isolamento da configuração por responsabilidade técnica.
+
+### `modules/`
+Centro da arquitetura, organizado por bounded contexts.
+
+### `shared/`
+Recursos genuinamente transversais e reutilizáveis.
+
+### `docs/`
+Material arquitetural e operacional do projeto.
+
+### `test/`
+Estratégia de qualidade organizada por nível de verificação.
 
 ---
 
-# 12. Modelo de Dados da Fase 1
+# 15. Modelo de Dados Conceitual da Fase 1
+
+A Fase 1 precisa garantir governança mínima do conteúdo e rastreabilidade estrutural.
 
 ## Entidades centrais
 
@@ -588,7 +834,7 @@ src/
 - `question_staging`
 - `audit_logs`
 
-## Relacionamentos esperados
+## Diagrama conceitual
 
 ```mermaid
 %%{init: {
@@ -616,46 +862,46 @@ erDiagram
     USERS ||--o{ AUDIT_LOGS : generates
 ```
 
-## Leitura do modelo
+## Objetivo do modelo
 
-Esse modelo busca garantir, já na Fase 1:
+Esse desenho garante, desde a base:
 
-- identidade e governança de autoria;
-- classificação consistente do banco de questões;
+- governança de autoria;
+- classificação consistente;
 - versionamento mínimo viável;
-- staging como estado intermediário controlado;
-- rastreabilidade de alterações.
+- staging como camada transitória;
+- auditabilidade estrutural.
 
 ---
 
-# 13. Segurança
+# 16. Segurança
 
-A segurança é um requisito estrutural da arquitetura.
+A segurança é um requisito **estrutural**, não opcional.
 
 ## Controles mínimos da Fase 1
 
 - autenticação obrigatória;
 - autorização por papel e política;
+- escopo organizacional quando aplicável;
 - validação forte de payload;
 - sanitização de entrada;
-- tratamento de erro sem vazamento sensível;
+- proteção contra vazamento de erro sensível;
 - segregação de credenciais;
-- hardening básico de borda;
 - trilha mínima de auditoria.
 
-## Diretrizes obrigatórias
+## Regras obrigatórias
 
 1. Nenhuma rota sensível sem autenticação.
 2. Nenhuma operação de escrita sem autorização explícita.
 3. Nenhum payload entra no domínio sem validação.
 4. Nenhuma exceção técnica deve vazar stack sensível em produção.
-5. Nenhum dado operacional crítico deve ser alterado sem rastreabilidade.
+5. Nenhum dado crítico deve ser alterado sem rastreabilidade.
 
 ---
 
-# 14. Observabilidade
+# 17. Observabilidade
 
-A observabilidade é nativa, não opcional.
+A observabilidade faz parte da arquitetura desde a fundação.
 
 ## Componentes mínimos
 
@@ -663,9 +909,9 @@ A observabilidade é nativa, não opcional.
 - correlation id;
 - tracing básico;
 - métricas operacionais essenciais;
-- health checks.
+- health endpoints.
 
-## Eventos importantes da Fase 1
+## Eventos que devem ser rastreados
 
 - login e autenticação;
 - falhas de autorização;
@@ -680,12 +926,12 @@ Mesmo nesta fase inicial, a plataforma já deve permitir:
 
 - troubleshooting consistente;
 - correlação de requests;
-- rastreabilidade mínima de falhas;
+- rastreabilidade de falhas;
 - leitura operacional confiável do comportamento do sistema.
 
 ---
 
-# 15. Resiliência e Confiabilidade
+# 18. Resiliência e Confiabilidade
 
 Mesmo sem pipeline pesado nesta fase, o sistema já deve nascer com padrões de robustez.
 
@@ -693,88 +939,41 @@ Mesmo sem pipeline pesado nesta fase, o sistema já deve nascer com padrões de 
 
 - tratamento consistente de erro;
 - validação determinística;
-- transações quando necessário;
 - isolamento de responsabilidade;
 - contratos estáveis;
-- previsibilidade operacional.
+- previsibilidade operacional;
+- base compatível com retries e evolução futura.
 
 ## O que esta fase ainda não exige como centro operacional
 
-- filas complexas;
-- DLQ;
-- reprocessamento por step;
+- DLQ como núcleo do fluxo;
+- reprocessamento fino por step;
+- workers especializados por etapa;
 - circuit breaker avançado;
-- retries distribuídos.
+- retries distribuídos complexos.
 
-Esses elementos pertencem à evolução planejada, mas a fundação deve ser compatível com sua futura introdução.
-
----
-
-# 16. Contratos e Convenções Técnicas
-
-## Convenções gerais
-
-- API versionada por prefixo;
-- DTOs explícitos;
-- erros padronizados;
-- enumeração de status relevantes;
-- naming consistente;
-- módulos isolados por contexto.
-
-## Exemplo de versionamento
-
-```text
-/api/v1/...
-```
-
-## Status sugeridos na Fase 1
-
-### Question status
-- `draft`
-- `staged`
-- `active`
-- `archived`
-
-### Audit event type
-- `created`
-- `updated`
-- `deleted`
-- `status_changed`
-- `access_denied`
+Esses elementos pertencem à evolução prevista, mas a fundação já deve ser compatível com sua futura introdução.
 
 ---
 
-# 17. Fluxos Técnicos em Mermaid
+# 19. ACL e Isolamento do Legado
 
-## 17.1 Fluxo de criação de questão
+A base principal / legado **não deve ditar a semântica interna da nova plataforma**.
 
-```mermaid
-%%{init: {
-  "theme": "base",
-  "themeVariables": {
-    "background": "#0b1220",
-    "primaryColor": "#111827",
-    "primaryTextColor": "#e5e7eb",
-    "primaryBorderColor": "#a855f7",
-    "secondaryColor": "#0f172a",
-    "secondaryTextColor": "#e5e7eb",
-    "tertiaryColor": "#111827",
-    "tertiaryTextColor": "#e5e7eb",
-    "lineColor": "#94a3b8"
-  }
-}}%%
-flowchart TD
-    A["POST /questions"] --> B["Auth Guard"]
-    B --> C["RBAC / Policy"]
-    C --> D["Validation Pipe"]
-    D --> E["CreateQuestionUseCase"]
-    E --> F["Question Domain Rules"]
-    F --> G["Question Repository"]
-    G --> H["Audit Log"]
-    H --> I["HTTP Response"]
-```
+## Diretriz obrigatória
 
-## 17.2 Fluxo de staging
+O legado deve ficar **sempre atrás de uma ACL (Anti-Corruption Layer)**.
+
+## Por quê
+
+Sem ACL, o sistema tende a sofrer:
+
+- vazamento de semântica antiga para o domínio novo;
+- acoplamento estrutural com a base principal;
+- dificuldade de evolução;
+- regras de negócio contaminadas por restrições históricas.
+
+## Fluxo conceitual
 
 ```mermaid
 %%{init: {
@@ -792,13 +991,21 @@ flowchart TD
   }
 }}%%
 flowchart LR
-    A["Question Draft"] --> B["Validation"]
-    B --> C["Move to Staging"]
-    C --> D["Register Audit Event"]
-    D --> E["Await Future Review / Publish Flow"]
+    A["🧩 Domínio interno canônico"] --> B["🛡️ ACL de publicação"]
+    B --> C["🗄️ Base principal / legado"]
 ```
 
-## 17.3 Fluxo de autorização
+## Regra prática
+
+> O domínio publica intenção e payload canônico. A ACL traduz esse payload para o modelo exigido pelo legado.
+
+---
+
+# 20. Pipeline Futuro e Compatibilidade Evolutiva
+
+A arquitetura atual já nasce preparada para a evolução futura, sem que isso obrigue a antecipação da complexidade agora.
+
+## Pipeline alvo (futuro)
 
 ```mermaid
 %%{init: {
@@ -815,119 +1022,77 @@ flowchart LR
     "lineColor": "#94a3b8"
   }
 }}%%
-flowchart TD
-    A["Request autenticado"] --> B["Resolve user context"]
-    B --> C["Resolve roles / permissions"]
-    C --> D{"Allowed?"}
-    D -- "Yes" --> E["Proceed"]
-    D -- "No" --> F["403 Forbidden + Audit"]
-```
-
-## 17.4 Evolução arquitetural prevista
-
-```mermaid
-%%{init: {
-  "theme": "base",
-  "themeVariables": {
-    "background": "#0b1220",
-    "primaryColor": "#111827",
-    "primaryTextColor": "#e5e7eb",
-    "primaryBorderColor": "#14b8a6",
-    "secondaryColor": "#0f172a",
-    "secondaryTextColor": "#e5e7eb",
-    "tertiaryColor": "#111827",
-    "tertiaryTextColor": "#e5e7eb",
-    "lineColor": "#94a3b8"
-  }
-}}%%
 flowchart LR
-    F1["Fase 1
-Foundation"] --> F2["Fase 2
-Ingestão + Conhecimento"]
-    F2 --> F3["Fase 3
-Pipeline de IA"]
-    F3 --> F4["Fase 4
-Revisão Editorial"]
-    F4 --> F5["Fase 5
-Publicação + Operação"]
+    A["📥 Ingestion"] --> B["📄 Extraction"]
+    B --> C["🏷️ Classification"]
+    C --> D["🧭 Resolution"]
+    D --> E["📚 Knowledge Retrieval"]
+    E --> F["🤖 Transformation"]
+    F --> G["🧪 Quality"]
+    G --> H["👨‍⚖️ Review"]
+    H --> I["🚀 Publication"]
 ```
 
----
+## Diretriz importante
 
-# 18. Fora do Escopo da Fase 1
+Esse pipeline:
 
-Os elementos abaixo fazem parte da direção arquitetural do produto, mas **não pertencem à implementação corrente desta fase**.
+- **faz parte da arquitetura alvo**;
+- **não deve ser tratado como entrega atual da Fase 1**;
+- **já influencia o desenho correto da fundação**.
 
-## Capacidades futuras
-
-- upload de materiais-base;
-- parsing de documentos;
-- OCR;
-- chunking;
-- embeddings;
-- retrieval vetorial;
-- agentes especializados;
-- geração automática de questões;
-- revisão automática multiagente;
-- score de confiança;
-- deduplicação semântica;
-- publicação assistida por pipeline;
-- exportação avançada;
-- dashboards operacionais completos.
-
-A presença desses elementos neste documento existe para **preservar coerência arquitetural futura**, e não para indicar que já estejam implementados nesta etapa.
+Ou seja, a base atual precisa ser **compatível com o pipeline futuro**, mas **não precisa implementá-lo integralmente agora**.
 
 ---
 
-# 19. Roadmap Incremental
+# 21. Roadmap Incremental
 
-## Fase 1 — Fundação Segura
-- auth;
-- RBAC;
-- tenants/organização;
-- coleções;
-- temas/tópicos;
-- CRUD de questões manuais;
+## 🟢 Fase 1 — Fundação Segura *(atual)*
+- auth integrada;
+- RBAC / policies;
+- tenancy / organização;
+- catálogo base;
+- CRUD governado de questões;
 - staging;
-- logs estruturados;
-- observabilidade mínima.
+- auditabilidade mínima;
+- observabilidade mínima;
+- contratos estruturais.
 
-## Fase 2 — Ingestão e Conhecimento
+## 🔵 Fase 2 — Ingestão e Conhecimento
 - upload;
+- extração textual;
 - parsing;
-- chunking;
-- indexação;
-- busca contextual.
+- estruturação inicial do pipeline;
+- base de conhecimento.
 
-## Fase 3 — Pipeline de IA
-- jobs;
+## 🟣 Fase 3 — Pipeline de IA
+- jobs e steps persistidos;
 - workers;
-- agentes;
-- validação automática;
+- classificação assistida;
+- transformação semântica;
 - governança de execução.
 
-## Fase 4 — Revisão Editorial
-- filas editoriais;
-- revisão humana;
-- comparação de versões;
+## 🟠 Fase 4 — Revisão Editorial
+- filas humanas;
+- claim e decisão;
+- ajustes;
 - aprovação/reprovação.
 
-## Fase 5 — Publicação e Operação
+## 🔴 Fase 5 — Publicação e Operação
+- ACL completa;
 - publicação controlada;
-- integração com legado;
-- métricas avançadas;
-- alertas;
-- dashboards.
+- observabilidade operacional avançada;
+- métricas, alertas e operação madura.
 
 ---
 
-# 20. Critérios de Pronto da Fase 1
+# 22. Critérios de Pronto da Fase 1
 
 A Fase 1 é considerada tecnicamente consistente quando possuir:
 
-- autenticação funcional;
+- autenticação funcional e integrada;
 - autorização aplicável aos principais recursos;
-- CRUD estável de entidades centrais;
+- CRUD estável das entidades centrais;
 - staging básico funcional;
 - persistência consistente;
 - logs estruturados mínimos;
@@ -937,46 +1102,75 @@ A Fase 1 é considerada tecnicamente consistente quando possuir:
 
 ---
 
-# 21. Stack Técnica
+# 23. Stack Técnica
 
 ## Backend
 - **NestJS**
 - **TypeScript**
-- **Zod** ou **class-validator**
 
 ## Persistência
 - **PostgreSQL**
-- ORM conforme estratégia do projeto
 
-## Cache / Coordenação
+## Coordenação / Evolução futura
 - **Redis**
+- **BullMQ**
 
 ## Observabilidade
 - **Pino**
 - **OpenTelemetry**
-- métricas básicas compatíveis com expansão futura
+- métricas compatíveis com expansão futura
 
 ## Infraestrutura
 - **Docker**
 - **Docker Compose**
 
+## Integrações previstas
+- autenticação existente da `api/v1`;
+- providers LLM;
+- storage de objetos;
+- serviços auxiliares de catálogo;
+- base principal via ACL.
+
 ---
 
-# 22. Conclusão
+# 24. Conclusão
 
-A Fase 1 não representa uma versão simplificada ou improvisada da plataforma final.  
-Ela representa a **camada estrutural correta** para que o sistema evolua sem acoplamento indevido, perda de governança ou crescimento desordenado.
+A arquitetura definida para esta plataforma não busca apenas “organizar o código”.  
+Ela existe para garantir que o sistema possa crescer com segurança, clareza e previsibilidade operacional.
 
-O valor desta fase está em estabelecer, desde o início:
+A **Fase 1** cumpre exatamente esse papel.
 
-- segurança;
-- disciplina arquitetural;
-- domínio consistente;
-- staging controlado;
-- rastreabilidade;
-- base operacional sustentável.
+Ela estabelece, desde o início:
 
-A partir dessa fundação, as próximas fases podem adicionar IA, automação, revisão avançada e publicação governada sem comprometer a integridade da solução.
+- uma base **modular**;
+- uma fundação **segura**;
+- um domínio **governado**;
+- uma estrutura **auditável**;
+- uma evolução **compatível com o pipeline futuro**.
+
+Essa decisão evita que a plataforma nasça:
+
+- superabstraída;
+- operacionalmente cara;
+- estruturalmente frágil;
+- dependente de improviso arquitetural.
+
+Ao final, o resultado é uma base:
+
+- **técnica e estruturalmente sólida**;
+- **simples de manter**;
+- **fácil de navegar**;
+- **aderente ao estágio atual do projeto**;
+- **pronta para crescer sem perder integridade**.
+
+---
+
+<div align="center">
+
+## 🚀 Fase 1 não é uma simplificação da plataforma
+### ela é a **fundação correta da plataforma**
+
+</div>
 
 ---
 
