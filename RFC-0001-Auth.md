@@ -3,12 +3,11 @@
 
 > **Status atual:** Documento técnico em evolução para a **Fase 1** do projeto.  
 > O desenho abaixo está **alinhado com o código real validado até aqui**, mas ainda pode receber refinamentos conforme avançarmos na implementação.
-## Reaproveitamento do Auth da API Principal (AdonisJS) na API de IA (NestJS)
 
 ---
 
-![Status](https://img.shields.io/badge/status-aprovado-22c55e?style=for-the-badge)
-![Arquitetura](https://img.shields.io/badge/arquitetura-monólito%20modular-3b82f6?style=for-the-badge)
+![Status](https://img.shields.io/badge/status-em%20construção-22c55e?style=for-the-badge)
+![Arquitetura](https://img.shields.io/badge/arquitetura-autenticação%20delegada-3b82f6?style=for-the-badge)
 ![Auth](https://img.shields.io/badge/auth-oat%20%2B%20redis-f59e0b?style=for-the-badge)
 ![Segurança](https://img.shields.io/badge/segurança-enterprise-ef4444?style=for-the-badge)
 ![Integração](https://img.shields.io/badge/integração-introspecção-a855f7?style=for-the-badge)
@@ -35,12 +34,13 @@
 - [15. Anti-padrões a evitar](#15--anti-padrões-a-evitar)
 - [16. Decisão final](#16--decisão-final)
 - [17. Próximos passos](#17--próximos-passos)
+- [18. Conclusão executiva](#18--conclusão-executiva)
 
 ---
 
 # 1. 🎯 Objetivo
 
-Este documento define a arquitetura oficial para **reaproveitamento da autenticação da API principal** na nova **API de IA**, garantindo:
+Este documento define a arquitetura oficial para **reaproveitamento da autenticação da API principal** na nova **API de IA de Questions**, garantindo:
 
 - consistência de identidade;
 - segurança por padrão;
@@ -60,7 +60,7 @@ Este documento define a arquitetura oficial para **reaproveitamento da autentica
 
 Com base nos arquivos da aplicação principal, o cenário atual já foi validado.
 
-## Stack de autenticação atual
+## 2.1 Stack de autenticação atual
 
 - **Framework:** AdonisJS
 - **Guard padrão:** `admin`
@@ -70,7 +70,7 @@ Com base nos arquivos da aplicação principal, o cenário atual já foi validad
 - **Autorização atual:** baseada em `roles`
 - **Rotas administrativas:** protegidas por `auth:admin` + `role:*`
 
-## Guards existentes
+## 2.2 Guards existentes
 
 ### Guard administrativo
 
@@ -113,7 +113,7 @@ api: {
 }
 ```
 
-## Conclusão importante
+## 2.3 Conclusão importante
 
 A **API de IA deve reaproveitar o contexto `admin`**, e não o `api`, porque o fluxo operacional interno e administrativo do sistema está claramente vinculado ao guard:
 
@@ -133,7 +133,7 @@ Se a API de IA tentar criar um auth próprio, os seguintes problemas surgem imed
 - necessidade de manter login e expiração em dois sistemas;
 - acoplamento incorreto entre domínio de IA e identidade.
 
-## Problema real
+## 3.1 Problema real
 
 A API de IA precisa saber:
 
@@ -148,7 +148,7 @@ Mas ela **não deve** assumir a responsabilidade de autenticar por conta própri
 
 # 4. 🏛️ Decisão arquitetural
 
-## Decisão oficial
+## 4.1 Decisão oficial
 
 A arquitetura adotada será de:
 
@@ -156,14 +156,14 @@ A arquitetura adotada será de:
 
 > **Nota técnica:** embora o termo “federação” possa ser usado em sentido amplo, o desenho que estamos implementando é, de forma mais precisa, uma arquitetura de **auth delegada**, na qual a **API principal é a autoridade de autenticação** e a **API de IA consome o contexto autenticado via introspecção**.
 
-### Papéis de cada sistema
+## 4.2 Papéis de cada sistema
 
 | Sistema | Responsabilidade |
 |---|---|
 | **API Principal (AdonisJS)** | Autoridade de autenticação e resolução de identidade |
 | **API de IA (NestJS)** | Consumidora de contexto autenticado e executora de autorização interna |
 
-## Em uma frase
+## 4.3 Em uma frase
 
 > A API principal autentica. A API de IA autoriza.
 
@@ -171,7 +171,7 @@ A arquitetura adotada será de:
 
 # 5. 🛰️ Visão executiva da solução
 
-## Objetivo da solução na prática
+## 5.1 Objetivo da solução na prática
 
 A **API de IA de Questions** será um serviço especializado em:
 
@@ -185,11 +185,13 @@ Porém, **ela não terá login próprio**.
 
 Ela dependerá da **sessão/token administrativo já emitido pela app principal**, garantindo que o acesso ao domínio de IA continue subordinado ao mesmo contexto administrativo da plataforma principal.
 
-## Resultado arquitetural desejado
+## 5.2 Resultado arquitetural desejado
 
 ```text
 A mesma identidade administrativa da app principal controla o acesso à API de IA.
 ```
+
+## 5.3 Diagrama executivo de alto nível
 
 ```mermaid
 %%{init: {
@@ -209,15 +211,15 @@ A mesma identidade administrativa da app principal controla o acesso à API de I
 }}%%
 flowchart LR
     FE[🖥️ Frontend Admin]
-    AP[🧩 API Principal\nAdonisJS]
-    RD[(🟥 Redis\nOpaque Token Store)]
-    IA[🤖 API de IA\nNestJS]
+    AP[🧩 API Principal<br/>AdonisJS]
+    RD[(🟥 Redis<br/>Opaque Token Store)]
+    IA[🤖 API de IA<br/>NestJS]
 
     FE -->|Login e sessão| AP
-    AP -->|Persistência/validação de token| RD
+    AP -->|Persistência e validação de token| RD
     FE -->|Authorization Bearer Token| IA
     IA -->|Introspecção do usuário autenticado| AP
-    AP -->|Admin autenticado + Roles| IA
+    AP -->|Admin autenticado e roles| IA
 ```
 
 ---
@@ -243,21 +245,20 @@ flowchart LR
   }
 }}%%
 flowchart TD
-    A[👤 Admin faz login no sistema principal] --> B[📨 POST /api/v1/login]
+    A[👤 Admin faz login<br/>no sistema principal] --> B[📨 POST /api/v1/login]
     B --> C[🧠 AuthController.auth]
     C --> D[🔐 auth.use admin.attempt]
-    D --> E[🛡️ Guard admin - driver OAT]
+    D --> E[🛡️ Guard admin<br/>driver OAT]
     E --> F[🟥 TokenProvider Redis]
     F --> G[🎟️ Token opaco emitido]
     G --> H[🖥️ Frontend recebe token]
 
-    H --> I[📡 Frontend chama API de IA com Authorization Bearer]
+    H --> I[📡 Frontend chama API de IA<br/>com Authorization Bearer]
     I --> J[🤖 API de IA recebe request]
     J --> K[🛡️ AuthGuard extrai token]
     K --> L[🔄 AuthService chama API Principal]
 
-    L --> M[🌐 GET /api/v1/profile hoje
-ou GET /api/v1/auth/me recomendado]
+    L --> M[🌐 GET /api/v1/profile hoje<br/>ou GET /api/v1/auth/me recomendado]
     M --> N[🛡️ Middleware auth:admin]
     N --> O[🔍 AuthMiddleware.authenticate]
     O --> P[🧪 auth.use admin.check]
@@ -267,17 +268,17 @@ ou GET /api/v1/auth/me recomendado]
     R -- Não --> S[⛔ 401 Unauthorized]
     S --> T[🚫 API de IA bloqueia acesso]
 
-    R -- Sim --> U[👤 auth.user resolvido como Admin]
-    U --> V[📚 Carrega Admin + roles]
-    V --> W[📦 API Principal retorna payload autenticado]
+    R -- Sim --> U[👤 auth.user resolvido<br/>como Admin]
+    U --> V[📚 Carrega Admin e roles]
+    V --> W[📦 API Principal retorna<br/>payload autenticado]
 
     W --> X[📥 API de IA recebe payload]
-    X --> Y[🧭 Mapper converte para AuthenticatedUser]
-    Y --> Z[🧠 Roles legadas viram scopes internos]
+    X --> Y[🧭 Mapper converte<br/>para AuthenticatedUser]
+    Y --> Z[🧠 Roles legadas viram<br/>scopes internos]
 
     Z --> AA{🔐 Usuário tem permissão?}
     AA -- Não --> AB[🚫 403 Forbidden]
-    AA -- Sim --> AC[⚙️ Controller / Use Case da IA executa]
+    AA -- Sim --> AC[⚙️ Controller ou Use Case<br/>da IA executa]
 ```
 
 ---
@@ -303,16 +304,16 @@ ou GET /api/v1/auth/me recomendado]
 sequenceDiagram
     participant U as 👤 Usuário Admin
     participant F as 🖥️ Frontend/Admin
-    participant P as 🧩 API Principal (AdonisJS)
+    participant P as 🧩 API Principal
     participant R as 🟥 Redis
-    participant I as 🤖 API IA (NestJS)
+    participant I as 🤖 API IA
 
     U->>F: Informa email e senha
     F->>P: POST /api/v1/login
     P->>P: AuthController.auth
     P->>P: auth.use('admin').attempt(email, password)
-    P->>R: Persiste/consulta token OAT
-    P-->>F: 200 { token }
+    P->>R: Persiste ou consulta token OAT
+    P-->>F: 200 com token
 
     F->>I: Request com Authorization Bearer token
     I->>I: AuthGuard extrai token
@@ -320,7 +321,7 @@ sequenceDiagram
     Note over I,P: Futuro recomendado: GET /api/v1/auth/me
     P->>P: middleware auth:admin
     P->>R: auth.use('admin').check()
-    R-->>P: Token válido / inválido
+    R-->>P: Token válido ou inválido
 
     alt token inválido
         P-->>I: 401 Unauthorized
@@ -328,9 +329,9 @@ sequenceDiagram
     else token válido
         P->>P: resolve auth.user
         P->>P: preload roles do Admin
-        P-->>I: Admin + roles
-        I->>I: Mapper -> AuthenticatedUser
-        I->>I: Roles -> Scopes
+        P-->>I: Admin autenticado com roles
+        I->>I: Mapper para AuthenticatedUser
+        I->>I: Conversão de roles para scopes
 
         alt sem permissão
             I-->>F: 403 Forbidden
@@ -395,7 +396,7 @@ flowchart LR
 | **API Principal** | Validar token e resolver identidade |
 | **API Principal** | Carregar roles do admin |
 | **API de IA** | Converter roles legadas em scopes internos |
-| **API de IA** | Decidir autorização por endpoint/caso de uso |
+| **API de IA** | Decidir autorização por endpoint e caso de uso |
 
 ---
 
@@ -403,7 +404,7 @@ flowchart LR
 
 A integração correta depende de contratos claros, estáveis e desacoplados do modelo interno do legado.
 
-## Objetivo desta seção
+## 8.1 Objetivo desta seção
 
 Definir:
 
@@ -413,11 +414,9 @@ Definir:
 
 Isso evita que a IA fique acoplada ao retorno cru do Adonis.
 
-A integração correta depende de contratos claros.
-
 ---
 
-## 8.1 Payload real esperado da API principal
+## 8.2 Payload real esperado da API principal
 
 ### Estado atual validado
 
@@ -460,15 +459,13 @@ Esse retorno pode variar dependendo do `Admin.ts`, serialização, colunas visí
 
 ---
 
-## 8.2 Payload ideal recomendado para exposição externa
+## 8.3 Payload ideal recomendado para exposição externa
 
 ### Recomendação arquitetural
 
 A API de IA **não deve depender do shape cru do model `Admin`**.
 
 O ideal é criar um payload externo mais estável, orientado a integração entre serviços.
-
-O ideal é que a API principal normalize o payload e exponha algo mais estável para a API de IA.
 
 ```json
 {
@@ -490,7 +487,7 @@ O ideal é que a API principal normalize o payload e exponha algo mais estável 
 
 ---
 
-## 8.3 Contrato interno canônico da API de IA
+## 8.4 Contrato interno canônico da API de IA
 
 A API de IA nunca deve espalhar o payload cru da API principal pelo sistema.
 
@@ -510,7 +507,7 @@ export interface AuthenticatedUser {
 
 ---
 
-## 8.4 Contrato externo esperado na API de IA
+## 8.5 Contrato externo esperado na API de IA
 
 ```ts
 export interface ExternalAdminProfile {
@@ -532,11 +529,41 @@ export interface ExternalAdminProfile {
 
 ---
 
+## 8.6 Mapeamento de roles para scopes
+
+A API de IA deve transformar os papéis legados em autorização própria.
+
+### Exemplo recomendado
+
+```ts
+export const ROLE_SCOPE_MAP: Record<string, string[]> = {
+  admin: ['*'],
+  contentcreator: [
+    'content.read',
+    'content.write',
+    'documents.read'
+  ],
+  questioncreator: [
+    'documents.read',
+    'documents.upload',
+    'processing.read',
+    'processing.retry',
+    'questions.generate',
+    'questions.review'
+  ],
+  seller: [
+    'dashboard.read'
+  ],
+}
+```
+
+---
+
 # 9. 🌐 Endpoint de introspecção recomendado
 
 Esta é uma das partes mais importantes do desenho.
 
-## Estado atual vs estado recomendado
+## 9.1 Estado atual vs estado recomendado
 
 ### Estado atual já utilizável
 Hoje, o endpoint que já pode servir de base para introspecção é:
@@ -552,10 +579,9 @@ Arquiteturalmente, o ideal é **não acoplar a API de IA ao endpoint de profile 
 
 Por isso, a recomendação é criar um endpoint dedicado exclusivamente para introspecção de identidade.
 
-Hoje, o endpoint `GET /api/v1/profile` já pode servir como base de introspecção.  
-Porém, arquiteturalmente, o ideal é criar um endpoint dedicado.
+---
 
-## 9.1 Rota recomendada
+## 9.2 Rota recomendada
 
 ### Recomendação de rota dedicada
 
@@ -565,7 +591,7 @@ Route.get('/auth/me', 'AuthController.me').middleware(['auth:admin'])
 
 ---
 
-## 9.2 Controller recomendado
+## 9.3 Controller recomendado
 
 ```ts
 public async me({ response, auth }: HttpContextContract) {
@@ -582,12 +608,12 @@ public async me({ response, auth }: HttpContextContract) {
 
 ---
 
-## 9.3 Melhorias recomendadas nesse endpoint
+## 9.4 Melhorias recomendadas nesse endpoint
 
 ### Idealmente, ele deve:
 
 - retornar payload estável e canônico;
-- não depender de regras de tela/perfil;
+- não depender de regras de tela ou perfil;
 - não estar acoplado a controller de UI administrativa;
 - ser protegido apenas por `auth:admin`;
 - responder exclusivamente contexto autenticado.
@@ -598,7 +624,7 @@ public async me({ response, auth }: HttpContextContract) {
 
 A API de IA precisa de um módulo de auth **delegado**, e não de um sistema de identidade novo.
 
-## Princípio de implementação
+## 10.1 Princípio de implementação
 
 O módulo `auth` da IA deve ser responsável apenas por:
 
@@ -614,9 +640,9 @@ Ele **não deve**:
 - manter login próprio;
 - reimplementar o guard do Adonis.
 
-A API de IA precisa de um módulo de auth **federado**, e não de um sistema de identidade novo.
+---
 
-## 10.1 Diagrama da arquitetura do módulo
+## 10.2 Diagrama da arquitetura do módulo
 
 ```mermaid
 %%{init: {
@@ -639,17 +665,17 @@ flowchart TD
     B --> C[🧠 AuthService]
     C --> D[🔌 ExternalAuthGateway]
     D --> E[🌐 AuthApiClient]
-    E --> F[🧩 API Principal /auth/me]
+    E --> F[🧩 API Principal<br/>endpoint de introspecção]
     F --> G[📦 Payload externo do admin]
     G --> H[🧭 AuthenticatedUserMapper]
     H --> I[👤 AuthenticatedUser]
     I --> J[🛡️ ScopesGuard]
-    J --> K[⚙️ Controller / Use Case]
+    J --> K[⚙️ Controller ou Use Case]
 ```
 
 ---
 
-## 10.2 Responsabilidade de cada componente
+## 10.3 Responsabilidade de cada componente
 
 ### `AuthGuard`
 Responsável por:
@@ -662,7 +688,7 @@ Responsável por:
 ### `AuthService`
 Responsável por:
 
-- orquestrar a autenticação federada;
+- orquestrar a autenticação delegada;
 - chamar o gateway externo;
 - receber o payload autenticado.
 
@@ -760,7 +786,7 @@ Cliente HTTP responsável por chamar a API principal.
 Abstração de integração externa com a autoridade de autenticação.
 
 ### `auth.service.ts`
-Serviço principal de autenticação federada.
+Serviço principal de autenticação delegada.
 
 ### `auth.guard.ts`
 Guard de autenticação para proteger rotas da API de IA.
@@ -793,7 +819,7 @@ Converte payload externo em `AuthenticatedUser`.
 Responsável por extrair e validar o header Authorization.
 
 ### `normalize-role.helper.ts`
-Normaliza nomes/slugs de role.
+Normaliza nomes e slugs de role.
 
 ### `external-auth-response.normalizer.ts`
 Padroniza formatos diferentes de resposta da API principal.
@@ -812,9 +838,6 @@ Isso significa que qualquer erro de modelagem aqui pode abrir brechas em:
 - rotas administrativas da camada de IA.
 
 Portanto, esta seção é mandatória.
-
-A integração de auth entre sistemas é uma superfície crítica.  
-Portanto, o desenho precisa seguir regras explícitas de segurança.
 
 ## 12.1 Requisitos obrigatórios
 
@@ -879,7 +902,7 @@ flowchart TD
 
 # 13. 📊 Observabilidade e auditoria
 
-A camada de autenticação federada precisa ser completamente observável.
+A camada de autenticação delegada precisa ser completamente observável.
 
 ## 13.1 Logs mínimos obrigatórios
 
@@ -893,7 +916,7 @@ A camada de autenticação federada precisa ser completamente observável.
 - `auth_provider_latency_ms`
 - `endpoint`
 - `method`
-- `decision` (`authorized` / `unauthorized` / `forbidden`)
+- `decision` (`authorized`, `unauthorized`, `forbidden`)
 
 ---
 
@@ -923,7 +946,7 @@ A API de IA deve ser capaz de auditar:
 
 - qual admin executou a operação;
 - em qual endpoint;
-- com quais roles/scopes;
+- com quais roles e scopes;
 - em qual horário;
 - com qual correlação de request.
 
@@ -931,7 +954,7 @@ Isso é especialmente importante para:
 
 - geração de questões;
 - reprocessamento;
-- aprovação/revisão;
+- aprovação e revisão;
 - publicação;
 - ações sensíveis do pipeline.
 
@@ -993,7 +1016,7 @@ Errado porque contamina o domínio interno da API de IA.
 
 # 16. ✅ Decisão final
 
-## Veredito arquitetural
+## 16.1 Veredito arquitetural
 
 Para o cenário da **IA de Questions**, o reaproveitamento do auth da app principal foi desenhado corretamente.
 
@@ -1004,7 +1027,7 @@ O que estamos construindo faz sentido porque:
 - o sistema atual já possui identidade, roles e validação de token;
 - a IA precisa apenas **consumir esse contexto com segurança**.
 
-## Arquitetura final aprovada
+## 16.2 Arquitetura final aprovada
 
 ### O que está oficialmente decidido para a Fase 1
 
@@ -1015,7 +1038,7 @@ O que estamos construindo faz sentido porque:
 - **API de IA converte roles em scopes internos**;
 - **API de IA decide autorização localmente**.
 
-## Resumo em uma linha
+## 16.3 Resumo em uma linha
 
 ```text
 Frontend → API IA → API Principal → Redis → Contexto Autenticado → IA
@@ -1027,19 +1050,19 @@ Frontend → API IA → API Principal → Redis → Contexto Autenticado → IA
 
 A implementação deve seguir de forma incremental, respeitando o estágio atual da construção.
 
-## Fase 1 — objetivo real desta entrega
+## 17.1 Fase 1 — objetivo real desta entrega
 
 Nesta fase, o objetivo não é construir um IAM complexo.  
 O objetivo é **habilitar o acesso administrativo seguro à API de IA**, reaproveitando corretamente a autenticação da app principal.
 
-## Na API Principal
+## 17.2 Na API Principal
 - manter o login administrativo existente como autoridade oficial;
 - usar `GET /api/v1/profile` como base inicial de introspecção;
 - criar `GET /api/v1/auth/me` como endpoint dedicado recomendado;
 - padronizar o payload de resposta;
 - garantir preload consistente de roles.
 
-## Na API de IA
+## 17.3 Na API de IA
 - criar o módulo `auth` completo;
 - implementar `AuthGuard`;
 - implementar `ScopesGuard`;
@@ -1048,7 +1071,7 @@ O objetivo é **habilitar o acesso administrativo seguro à API de IA**, reaprov
 - proteger endpoints críticos da IA;
 - escrever testes de integração ponta a ponta.
 
-## Evolução futura recomendada
+## 17.4 Evolução futura recomendada
 - adicionar cache curto de introspecção, se necessário;
 - adicionar métricas detalhadas de auth provider;
 - endurecer auditoria de operações críticas;
@@ -1056,19 +1079,21 @@ O objetivo é **habilitar o acesso administrativo seguro à API de IA**, reaprov
 
 ---
 
-# 🧾 Conclusão executiva
+# 18. 🧾 Conclusão executiva
 
 O desenho atual está **coerente com o código real que foi mapeado** e **faz sentido para o que estamos construindo**.
 
 A integração entre a app principal e a API de IA de Questions deve seguir o modelo de **autenticação delegada com introspecção**, usando a app principal como autoridade de identidade e a IA como consumidora de contexto autenticado.
 
-## O que isso garante na prática
+## 18.1 O que isso garante na prática
 
 - a IA não duplica login;
 - a IA não duplica identidade;
 - a IA não duplica emissão de token;
 - a IA continua subordinada ao mesmo perímetro administrativo da plataforma principal;
 - a autorização da IA evolui de forma própria e sustentável.
+
+## 18.2 Benefícios finais
 
 Essa abordagem garante:
 
@@ -1078,7 +1103,7 @@ Essa abordagem garante:
 - governança centralizada;
 - autorização mais madura e extensível na API de IA.
 
-## Em uma frase final
+## 18.3 Em uma frase final
 
 > A API de IA de Questions deve operar como um serviço administrativo especializado, **reaproveitando com segurança a autenticação já existente da app principal**, sem duplicar identidade, sem reinventar auth e sem quebrar a coerência arquitetural da plataforma.
 
