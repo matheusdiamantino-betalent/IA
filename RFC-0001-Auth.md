@@ -4,6 +4,18 @@
 
 ---
 
+![Status](https://img.shields.io/badge/status-fase%201%20em%20implementa%C3%A7%C3%A3o-22c55e?style=for-the-badge)
+![Arquitetura](https://img.shields.io/badge/arquitetura-autentica%C3%A7%C3%A3o%20delegada-3b82f6?style=for-the-badge)
+![Auth](https://img.shields.io/badge/auth-oat%20%2B%20redis-f59e0b?style=for-the-badge)
+![Segurança](https://img.shields.io/badge/seguran%C3%A7a-enterprise-ef4444?style=for-the-badge)
+![Integração](https://img.shields.io/badge/integra%C3%A7%C3%A3o-introspec%C3%A7%C3%A3o-a855f7?style=for-the-badge)
+![Stack](https://img.shields.io/badge/stack-adonisjs%20%2B%20nestjs-06b6d4?style=for-the-badge)
+![Scope](https://img.shields.io/badge/escopo-fase%201-0f172a?style=for-the-badge)
+## Reaproveitamento do Auth da API Principal (AdonisJS) na API de IA de Questions (NestJS)
+### Recorte Arquitetural da Fase 1 — Auth, Identidade e Autorização Delegada
+
+---
+
 > [!IMPORTANT]
 > Este documento representa **o recorte arquitetural do módulo de autenticação e autorização delegada da Fase 1**.
 >
