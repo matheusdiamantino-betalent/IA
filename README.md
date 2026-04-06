@@ -355,9 +355,9 @@ A lógica do roadmap é progressiva:
 
 # 9. Ciclo Completo das Fases
 
-Esta seção traduz a lógica da primeira imagem do roadmap para um diagrama Mermaid alinhado ao README principal.
+Esta seção traduz a lógica da primeira imagem do roadmap para um diagrama alinhado ao README principal.
 
-## 9.1 Mermaid — Ciclo completo de fases
+## 9.1 Ciclo completo de fases
 
 ```mermaid
 %%{init: {'theme':'base','themeVariables': {
@@ -484,6 +484,16 @@ Esse diagrama deixa explícito que o roadmap possui **dependência lógica entre
 
 # 10. Fase 1 — Fundação Segura
 
+<div align="center">
+
+![Fase](https://img.shields.io/badge/fase-1-10b981?style=for-the-badge&logo=target&logoColor=white)
+![Nome](https://img.shields.io/badge/nome-Funda%C3%A7%C3%A3o%20Segura-2563eb?style=for-the-badge&logo=shield&logoColor=white)
+![Status](https://img.shields.io/badge/status-Em%20Andamento-22c55e?style=for-the-badge&logo=progress&logoColor=white)
+![Dura%C3%A7%C3%A3o](https://img.shields.io/badge/dura%C3%A7%C3%A3o-2%20semanas-f59e0b?style=for-the-badge&logo=clockify&logoColor=white)
+![Escopo](https://img.shields.io/badge/escopo-Base%20Estrutural-7c3aed?style=for-the-badge&logo=stackshare&logoColor=white)
+
+</div>
+
 > [!IMPORTANT]
 > Esta é a **única fase atualmente em execução**. Todas as demais fases do roadmap devem ser interpretadas como **em planejamento**, servindo como direção arquitetural e não como entrega ativa.
 
@@ -549,6 +559,16 @@ A plataforma ainda não precisa entregar o pipeline completo do produto, mas pre
 
 # 11. Fase 2 — Agentes Básicos
 
+<div align="center">
+
+![Fase](https://img.shields.io/badge/fase-2-0ea5e9?style=for-the-badge&logo=bot&logoColor=white)
+![Nome](https://img.shields.io/badge/nome-Agentes%20B%C3%A1sicos-2563eb?style=for-the-badge&logo=openai&logoColor=white)
+![Status](https://img.shields.io/badge/status-Em%20Planejamento-eab308?style=for-the-badge&logo=gitbook&logoColor=white)
+![Dura%C3%A7%C3%A3o](https://img.shields.io/badge/dura%C3%A7%C3%A3o-6%20semanas-f59e0b?style=for-the-badge&logo=clockify&logoColor=white)
+![Escopo](https://img.shields.io/badge/escopo-Ingest%C3%A3o%20Assistida-a855f7?style=for-the-badge&logo=workflow&logoColor=white)
+
+</div>
+
 ## 🎯 Objetivo da fase
 
 Introduzir o primeiro conjunto de agentes responsáveis por transformar material bruto em estrutura processável.
@@ -597,6 +617,16 @@ Ao final desta fase, o sistema passa a ter **pipeline assistido inicial de inges
 
 # 12. Fase 3 — Agentes Avançados
 
+<div align="center">
+
+![Fase](https://img.shields.io/badge/fase-3-8b5cf6?style=for-the-badge&logo=sparkles&logoColor=white)
+![Nome](https://img.shields.io/badge/nome-Agentes%20Avan%C3%A7ados-a855f7?style=for-the-badge&logo=openai&logoColor=white)
+![Status](https://img.shields.io/badge/status-Em%20Planejamento-eab308?style=for-the-badge&logo=gitbook&logoColor=white)
+![Dura%C3%A7%C3%A3o](https://img.shields.io/badge/dura%C3%A7%C3%A3o-5%20semanas-f59e0b?style=for-the-badge&logo=clockify&logoColor=white)
+![Escopo](https://img.shields.io/badge/escopo-Orquestra%C3%A7%C3%A3o%20Inteligente-f43f5e?style=for-the-badge&logo=apacheairflow&logoColor=white)
+
+</div>
+
 ## 🎯 Objetivo da fase
 
 Transformar o pipeline inicial em um fluxo realmente inteligente, capaz de **adaptar, justificar, validar e coordenar** a geração e refinamento das questões.
@@ -644,6 +674,16 @@ Ao final desta fase, a plataforma passa a operar como um **pipeline de inteligê
 
 # 13. Fase 4 — API e Processamento Assíncrono
 
+<div align="center">
+
+![Fase](https://img.shields.io/badge/fase-4-0891b2?style=for-the-badge&logo=fastapi&logoColor=white)
+![Nome](https://img.shields.io/badge/nome-API%20e%20Processamento%20Ass%C3%ADncrono-0ea5e9?style=for-the-badge&logo=queue&logoColor=white)
+![Status](https://img.shields.io/badge/status-Em%20Planejamento-eab308?style=for-the-badge&logo=gitbook&logoColor=white)
+![Dura%C3%A7%C3%A3o](https://img.shields.io/badge/dura%C3%A7%C3%A3o-3%20semanas-f59e0b?style=for-the-badge&logo=clockify&logoColor=white)
+![Escopo](https://img.shields.io/badge/escopo-API%20%2B%20Jobs-f97316?style=for-the-badge&logo=bullmq&logoColor=white)
+
+</div>
+
 ## 🎯 Objetivo da fase
 
 Transformar o pipeline em uma **capacidade operacional utilizável por API**, com execução assíncrona e visibilidade de status.
@@ -684,6 +724,16 @@ Ao final desta fase, o pipeline deixa de ser apenas uma capacidade técnica inte
 ---
 
 # 14. Fase 4B — Front-end Admin
+
+<div align="center">
+
+![Fase](https://img.shields.io/badge/fase-4B-f43f5e?style=for-the-badge&logo=paneltop&logoColor=white)
+![Nome](https://img.shields.io/badge/nome-Front--end%20Admin-ec4899?style=for-the-badge&logo=react&logoColor=white)
+![Status](https://img.shields.io/badge/status-Em%20Planejamento-eab308?style=for-the-badge&logo=gitbook&logoColor=white)
+![Dura%C3%A7%C3%A3o](https://img.shields.io/badge/dura%C3%A7%C3%A3o-2%20semanas-f59e0b?style=for-the-badge&logo=clockify&logoColor=white)
+![Escopo](https://img.shields.io/badge/escopo-Opera%C3%A7%C3%A3o%20Humana-7c3aed?style=for-the-badge&logo=storybook&logoColor=white)
+
+</div>
 
 ## 🎯 Objetivo da fase
 
@@ -734,6 +784,16 @@ Ao final desta fase, a plataforma passa a ter **operabilidade humana real**, e n
 
 # 15. Pré-MVP — CI/CD e Testes
 
+<div align="center">
+
+![Marco](https://img.shields.io/badge/marco-Pr%C3%A9--MVP-0f172a?style=for-the-badge&logo=githubactions&logoColor=white)
+![Nome](https://img.shields.io/badge/nome-CI%2FCD%20e%20Testes-2563eb?style=for-the-badge&logo=githubactions&logoColor=white)
+![Status](https://img.shields.io/badge/status-Em%20Planejamento-eab308?style=for-the-badge&logo=gitbook&logoColor=white)
+![Dura%C3%A7%C3%A3o](https://img.shields.io/badge/dura%C3%A7%C3%A3o-2%20semanas-f59e0b?style=for-the-badge&logo=clockify&logoColor=white)
+![Escopo](https://img.shields.io/badge/escopo-Lan%C3%A7abilidade%20M%C3%ADnima-22c55e?style=for-the-badge&logo=checkmarx&logoColor=white)
+
+</div>
+
 ## 🎯 Objetivo da fase
 
 Preparar a solução para ser lançável de forma minimamente segura e repetível.
@@ -771,6 +831,15 @@ A plataforma passa a ter **lançabilidade mínima confiável**.
 
 # 16. MVP — Processamento de Questões
 
+<div align="center">
+
+![Marco](https://img.shields.io/badge/marco-MVP-f97316?style=for-the-badge&logo=rocket&logoColor=white)
+![Nome](https://img.shields.io/badge/nome-Processamento%20de%20Quest%C3%B5es-ef4444?style=for-the-badge&logo=target&logoColor=white)
+![Status](https://img.shields.io/badge/status-Em%20Planejamento-eab308?style=for-the-badge&logo=gitbook&logoColor=white)
+![Natureza](https://img.shields.io/badge/natureza-Primeira%20Vers%C3%A3o%20Operacional-8b5cf6?style=for-the-badge&logo=flag&logoColor=white)
+
+</div>
+
 ## 🎯 Objetivo do marco
 
 Entregar a primeira versão operacional realmente utilizável do produto.
@@ -794,6 +863,16 @@ Entrada real + pipeline útil + operação humana mínima + persistência confi�
 ---
 
 # 17. Fase 5 — Materiais Didáticos
+
+<div align="center">
+
+![Fase](https://img.shields.io/badge/fase-5-14b8a6?style=for-the-badge&logo=bookstack&logoColor=white)
+![Nome](https://img.shields.io/badge/nome-Materiais%20Did%C3%A1ticos-0f766e?style=for-the-badge&logo=readthedocs&logoColor=white)
+![Status](https://img.shields.io/badge/status-Em%20Planejamento-eab308?style=for-the-badge&logo=gitbook&logoColor=white)
+![Dura%C3%A7%C3%A3o](https://img.shields.io/badge/dura%C3%A7%C3%A3o-3%E2%80%934%20semanas-f59e0b?style=for-the-badge&logo=clockify&logoColor=white)
+![Escopo](https://img.shields.io/badge/escopo-RAG%20%2B%20Busca%20Sem%C3%A2ntica-06b6d4?style=for-the-badge&logo=weaviate&logoColor=white)
+
+</div>
 
 ## 🎯 Objetivo da fase
 
@@ -825,6 +904,16 @@ A plataforma passa a sustentar **fundamentação contextual e recuperação inte
 
 # 18. Fase 6 — Monitoramento
 
+<div align="center">
+
+![Fase](https://img.shields.io/badge/fase-6-eab308?style=for-the-badge&logo=datadog&logoColor=white)
+![Nome](https://img.shields.io/badge/nome-Monitoramento-ca8a04?style=for-the-badge&logo=grafana&logoColor=white)
+![Status](https://img.shields.io/badge/status-Em%20Planejamento-eab308?style=for-the-badge&logo=gitbook&logoColor=white)
+![Dura%C3%A7%C3%A3o](https://img.shields.io/badge/dura%C3%A7%C3%A3o-1%E2%80%932%20semanas-f59e0b?style=for-the-badge&logo=clockify&logoColor=white)
+![Escopo](https://img.shields.io/badge/escopo-Dashboards%20%2B%20Logs-2563eb?style=for-the-badge&logo=opentelemetry&logoColor=white)
+
+</div>
+
 ## 🎯 Objetivo da fase
 
 Consolidar a camada de operação observável do produto.
@@ -851,6 +940,16 @@ A plataforma passa a ter **visibilidade operacional madura**.
 ---
 
 # 19. Fase 7 — Qualidade Final
+
+<div align="center">
+
+![Fase](https://img.shields.io/badge/fase-7-ef4444?style=for-the-badge&logo=checkmarx&logoColor=white)
+![Nome](https://img.shields.io/badge/nome-Qualidade%20Final-b91c1c?style=for-the-badge&logo=testrail&logoColor=white)
+![Status](https://img.shields.io/badge/status-Em%20Planejamento-eab308?style=for-the-badge&logo=gitbook&logoColor=white)
+![Dura%C3%A7%C3%A3o](https://img.shields.io/badge/dura%C3%A7%C3%A3o-2%E2%80%933%20semanas-f59e0b?style=for-the-badge&logo=clockify&logoColor=white)
+![Escopo](https://img.shields.io/badge/escopo-Hardening%20de%20Produ%C3%A7%C3%A3o-7c3aed?style=for-the-badge&logo=dependabot&logoColor=white)
+
+</div>
 
 ## 🎯 Objetivo da fase
 
@@ -912,8 +1011,34 @@ Sem considerar paralelizações agressivas, a projeção do ciclo completo fica 
 ## 20.3 Projeção temporal do ciclo
 
 ```mermaid
+%%{init: {'theme':'base','themeVariables': {
+  'background':'#020617',
+  'primaryColor':'#081120',
+  'primaryTextColor':'#e5eefb',
+  'primaryBorderColor':'#22d3ee',
+  'lineColor':'#67e8f9',
+  'secondaryColor':'#0b1220',
+  'secondaryTextColor':'#e5eefb',
+  'tertiaryColor':'#111827',
+  'tertiaryTextColor':'#e5eefb',
+  'taskBkgColor':'#0f172a',
+  'taskTextColor':'#e5eefb',
+  'taskBorderColor':'#38bdf8',
+  'activeTaskBkgColor':'#14532d',
+  'activeTaskBorderColor':'#22c55e',
+  'doneTaskBkgColor':'#064e3b',
+  'doneTaskBorderColor':'#34d399',
+  'critBkgColor':'#4c0519',
+  'critBorderColor':'#fb7185',
+  'todayLineColor':'#f59e0b',
+  'gridColor':'#334155',
+  'sectionBkgColor':'#111827',
+  'sectionBkgColor2':'#1e293b',
+  'sectionTextColor':'#e5eefb',
+  'fontFamily':'Inter, Segoe UI, Arial'
+}}}%%
 gantt
-    title Projeção de Tempo — Plataforma de Questões com IA
+    title Roadmap de Execução — Plataforma de Questões com IA
     dateFormat  YYYY-MM-DD
     axisFormat  %d/%m
 
@@ -1208,9 +1333,9 @@ flowchart TD
 
 # 26. Pipeline Operacional Completo
 
-Esta seção traduz a lógica da segunda imagem para um Mermaid operacional aderente ao README.
+Esta seção traduz a lógica da segunda imagem para um diagrama operacional aderente ao README.
 
-## 26.1 Mermaid — Pipeline operacional da plataforma
+## 26.1 Pipeline operacional da plataforma
 
 ```mermaid
 %%{init: {'theme':'base','themeVariables': {
