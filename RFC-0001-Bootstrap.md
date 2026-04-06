@@ -19,7 +19,7 @@
 
 * * *
 
-[!IMPORTANT]
+> [!IMPORTANT]
 > Este documento descreve o recorte arquitetural da base de bootstrap da Fase 1.
 > O foco aqui não é o domínio funcional completo da plataforma, mas a fundação operacional que garante inicialização previsível, composição segura de módulos, configuração consistente e padronização transversal para a evolução do produto.
 
@@ -58,10 +58,10 @@ Em termos práticos, o bootstrap deixa de ser apenas o `main.ts` que sobe o serv
 
 ## Decisão central
 
-    O bootstrap compõe a aplicação.
-    O bootstrap valida o ambiente.
-    O bootstrap aplica políticas transversais.
-    O bootstrap só expõe a API quando a base estrutural estiver íntegra.
+- O bootstrap compõe a aplicação.
+- O bootstrap valida o ambiente.
+- O bootstrap aplica políticas transversais.
+- O bootstrap só expõe a API quando a base estrutural estiver íntegra.
 
 ## Resultado esperado
 
@@ -72,7 +72,7 @@ Em termos práticos, o bootstrap deixa de ser apenas o `main.ts` que sobe o serv
 - baseline de segurança e observabilidade desde a Fase 1;
 - compatibilidade real com as próximas fases do roadmap.
 
-[!NOTE]
+> [!NOTE]
 > O bootstrap da Fase 1 deve ser tratado como fundação estrutural permanente do produto.
 > Não é um arranjo provisório para o MVP, nem um atalho descartável antes das próximas fases.
 
@@ -451,7 +451,7 @@ export interface AppConfig {
 - configuração sensível deve ficar fora do código;
 - o bootstrap deve logar contexto suficiente para troubleshooting, sem vazar segredo.
 
-[!TIP]
+> [!TIP]
 > Referência técnica: o uso de `ConfigModule` com schema explícito e fábrica tipada reduz drift entre ambientes e melhora o isolamento de falhas na subida.
 
 * * *
@@ -771,7 +771,7 @@ export class AppModule {}
 - métricas de tempo de boot;
 - alarmes por falha recorrente na subida.
 
-[!NOTE]
+> [!NOTE]
 > O ponto central deste slice é simples: disponibilidade da aplicação sem coerência estrutural não é sucesso operacional.
 > Bootstrap válido é pré-condição de confiança para todo o restante da Fase 1.
 
@@ -890,5 +890,5 @@ Ao centralizar configuração, composição de módulos, políticas transversais
 
 Em síntese:
 
-    a Fase 1 não começa no domínio;
-    ela começa na forma correta de subir a plataforma.
+- a Fase 1 não começa no domínio;
+- ela começa na forma correta de subir a plataforma.
