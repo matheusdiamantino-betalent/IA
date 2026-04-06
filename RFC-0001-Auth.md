@@ -1,8 +1,4 @@
 # Arquitetura de Autenticação Delegada
-## Reaproveitamento do Auth da API Principal (AdonisJS) na API de IA de Questions (NestJS)
-### Recorte Arquitetural da Fase 1 — Auth, Identidade e Autorização Delegada
-
----
 
 ![Status](https://img.shields.io/badge/status-fase%201%20em%20implementa%C3%A7%C3%A3o-22c55e?style=for-the-badge)
 ![Arquitetura](https://img.shields.io/badge/arquitetura-autentica%C3%A7%C3%A3o%20delegada-3b82f6?style=for-the-badge)
@@ -323,26 +319,23 @@ flowchart TD
     C --> D[🗝️ Token OAT emitido]
     D --> E[Frontend recebe token]
 
-    E --> F[Frontend chama API de IA]
+    E --> F[Frontend chama API IA]
     F --> G[AuthGuard extrai token]
-    G --> H[AuthService
-chama API Principal]
-    H --> I[GET /profile
-ou /auth/me]
-    I --> J[auth:admin]
+    G --> H[AuthService]
+    H --> I[GET /profile<br/>ou /auth/me]
+    I --> J[auth admin]
     J --> K[Redis valida token]
 
-    K --> L{Token válido?}
+    K --> L{Token válido}
     L -- Não --> M[401 Unauthorized]
-    L -- Sim --> N[Admin autenticado
-\+ roles]
-    N --> O[Normalizer
-\+ Mapper]
-    O --> P[ScopesGuard
-(avalia acesso)]
-    P --> Q{Tem permissão?}
-    Q -- Não --> R[403 Forbidden]
-    Q -- Sim --> S[✅ Executa caso de uso]
+    L -- Sim --> N[Admin autenticado]
+    N --> O[Roles resolvidas]
+    O --> P[Normalizer]
+    P --> Q[Mapper]
+    Q --> R[ScopesGuard]
+    R --> S{Tem permissão}
+    S -- Não --> T[403 Forbidden]
+    S -- Sim --> U[✅ Executa caso de uso]
 ```
 
 ## 8.2 Sequência técnica de request
@@ -352,28 +345,27 @@ ou /auth/me]
   'primaryColor':'#0f172a','primaryTextColor':'#e2e8f0','primaryBorderColor':'#475569','lineColor':'#94a3b8','secondaryColor':'#111827','tertiaryColor':'#1e293b','background':'#020617','mainBkg':'#0f172a','secondBkg':'#111827','tertiaryBkg':'#1e293b','clusterBkg':'#0b1220','clusterBorder':'#334155','edgeLabelBackground':'#0f172a','fontFamily':'Inter, Segoe UI, Arial'
 }}}%%
 sequenceDiagram
-    participant F as 🖥️ Frontend
-    participant I as 🤖 API IA
-    participant P as 🧩 API Principal
-    participant R as 🔴 Redis
+    participant F as Frontend
+    participant I as API IA
+    participant P as API Principal
+    participant R as Redis
 
     F->>I: Request com Bearer Token
-    I->>I: AuthGuard extrai token
+    I->>I: Extrai token
     I->>P: GET /api/v1/profile
-    Note over I,P: Evolução recomendada
-GET /api/v1/auth/me
-    P->>P: middleware auth:admin
-    P->>R: auth.use('admin').check()
+    Note over I,P: Evolução recomendada: GET /api/v1/auth/me
+    P->>P: auth admin
+    P->>R: check token
     R-->>P: Token válido ou inválido
 
     alt token inválido
         P-->>I: 401
         I-->>F: 401
     else token válido
-        P-->>I: Admin autenticado + roles
-        I->>I: Normalizer estabiliza payload
-        I->>I: Mapper constrói AuthenticatedUser
-        I->>I: ScopesGuard avalia permissão
+        P-->>I: Admin autenticado e roles
+        I->>I: Normalizer
+        I->>I: Mapper
+        I->>I: ScopesGuard
 
         alt sem permissão
             I-->>F: 403
@@ -390,15 +382,15 @@ GET /api/v1/auth/me
   'primaryColor':'#0f172a','primaryTextColor':'#e2e8f0','primaryBorderColor':'#475569','lineColor':'#94a3b8','secondaryColor':'#111827','tertiaryColor':'#1e293b','background':'#020617','mainBkg':'#0f172a','secondBkg':'#111827','tertiaryBkg':'#1e293b','clusterBkg':'#0b1220','clusterBorder':'#334155','edgeLabelBackground':'#0f172a','fontFamily':'Inter, Segoe UI, Arial'
 }}}%%
 flowchart LR
-    A[🗝️ Token válido] --> B[👤 Admin autenticado]
+    A[Token válido] --> B[Admin autenticado]
     B --> C[Roles externas]
     C --> D[Normalizer]
     D --> E[Mapper]
     E --> F[Scopes internos]
     F --> G[ScopesGuard]
-    G --> H{Permissão suficiente?}
-    H -- Sim --> I[✅ Libera execução]
-    H -- Não --> J[🚫 Bloqueia acesso]
+    G --> H{Permissão suficiente}
+    H -- Sim --> I[Libera execução]
+    H -- Não --> J[Bloqueia acesso]
 ```
 
 ## Nota de decisão
