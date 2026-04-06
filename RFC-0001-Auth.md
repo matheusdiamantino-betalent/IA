@@ -4,6 +4,8 @@
 
 ---
 
+<div align="center">
+
 ![Status](https://img.shields.io/badge/status-fase%201%20em%20implementa%C3%A7%C3%A3o-22c55e?style=for-the-badge)
 ![Arquitetura](https://img.shields.io/badge/arquitetura-autentica%C3%A7%C3%A3o%20delegada-3b82f6?style=for-the-badge)
 ![Auth](https://img.shields.io/badge/auth-oat%20%2B%20redis-f59e0b?style=for-the-badge)
@@ -11,6 +13,8 @@
 ![Integração](https://img.shields.io/badge/integra%C3%A7%C3%A3o-introspec%C3%A7%C3%A3o-a855f7?style=for-the-badge)
 ![Stack](https://img.shields.io/badge/stack-adonisjs%20%2B%20nestjs-06b6d4?style=for-the-badge)
 ![Scope](https://img.shields.io/badge/escopo-fase%201-0f172a?style=for-the-badge)
+
+</div>
 
 ---
 
@@ -20,7 +24,13 @@
 > Ele **não descreve toda a Fase 1 da plataforma**, mas sim a fundação de segurança e acesso que habilita a evolução segura do domínio de Questions.
 
 > [!NOTE]
-> O documento foi estruturado para funcionar como **artefato final de entrega técnica**, adequado para revisão arquitetural, PR técnica, alinhamento backend e implementação incremental.
+> O documento foi estruturado para funcionar como **artefato final de entrega técnica**, adequado para:
+>
+> - revisão arquitetural;
+> - PR técnica;
+> - alinhamento entre squads backend;
+> - implementação incremental;
+> - base para hardening de segurança.
 
 ---
 
@@ -32,19 +42,21 @@
 - [4. Decisão de Arquitetura](#4-decisão-de-arquitetura)
 - [5. Contexto Técnico Validado](#5-contexto-técnico-validado)
 - [6. Objetivos do Slice](#6-objetivos-do-slice)
-- [7. Arquitetura de Alto Nível](#7-arquitetura-de-alto-nível)
-- [8. Fluxos Principais](#8-fluxos-principais)
-- [9. Boundary e Responsabilidades](#9-boundary-e-responsabilidades)
-- [10. Contrato de Integração](#10-contrato-de-integração)
-- [11. Endpoint de Introspecção](#11-endpoint-de-introspecção)
-- [12. Arquitetura Interna do Auth Module](#12-arquitetura-interna-do-auth-module)
-- [13. Estratégia de Roles, Scopes e Enforcement](#13-estratégia-de-roles-scopes-e-enforcement)
-- [14. Estrutura Técnica Recomendada](#14-estrutura-técnica-recomendada)
-- [15. Segurança, Resiliência e Observabilidade](#15-segurança-resiliência-e-observabilidade)
-- [16. Plano de Implementação](#16-plano-de-implementação)
-- [17. Critérios de Aceite Técnico](#17-critérios-de-aceite-técnico)
-- [18. Próximos Passos](#18-próximos-passos)
-- [19. Conclusão Executiva](#19-conclusão-executiva)
+- [7. Princípios Arquiteturais](#7-princípios-arquiteturais)
+- [8. Arquitetura de Alto Nível](#8-arquitetura-de-alto-nível)
+- [9. Fluxos Principais](#9-fluxos-principais)
+- [10. Boundary e Responsabilidades](#10-boundary-e-responsabilidades)
+- [11. Contrato de Integração](#11-contrato-de-integração)
+- [12. Endpoint de Introspecção](#12-endpoint-de-introspecção)
+- [13. Arquitetura Interna do Auth Module](#13-arquitetura-interna-do-auth-module)
+- [14. Estratégia de Roles, Scopes e Enforcement](#14-estratégia-de-roles-scopes-e-enforcement)
+- [15. Estrutura Técnica Recomendada](#15-estrutura-técnica-recomendada)
+- [16. Segurança, Resiliência e Observabilidade](#16-segurança-resiliência-e-observabilidade)
+- [17. ADR — Registro da Decisão](#17-adr--registro-da-decisão)
+- [18. Plano de Implementação](#18-plano-de-implementação)
+- [19. Critérios de Aceite Técnico](#19-critérios-de-aceite-técnico)
+- [20. Próximos Passos](#20-próximos-passos)
+- [21. Conclusão Executiva](#21-conclusão-executiva)
 
 ---
 
@@ -66,7 +78,10 @@ A API de IA autoriza localmente.
 - sessão lógica única;
 - sem duplicação de login ou token;
 - autorização desacoplada por domínio;
-- integração segura e auditável.
+- integração segura, auditável e evolutiva.
+
+> [!TIP]
+> Esta abordagem reduz acoplamento com o legado de autenticação e preserva independência evolutiva do domínio de Questions.
 
 ---
 
@@ -98,7 +113,7 @@ A API de IA autoriza localmente.
 
 # 3. Problema Arquitetural
 
-Se a API de IA implementar autenticação própria para resolver esse acesso, o sistema passa a carregar complexidade e risco desnecessários.
+Se a API de IA implementar autenticação própria para resolver esse acesso, o sistema passa a carregar complexidade, redundância e risco desnecessários.
 
 ## Riscos de um auth duplicado
 
@@ -112,12 +127,19 @@ Se a API de IA implementar autenticação própria para resolver esse acesso, o 
 
 ## O problema real
 
-A API de IA **não precisa autenticar o usuário do zero**. Ela precisa responder, com segurança:
+A API de IA **não precisa autenticar o usuário do zero**.
+
+Ela precisa responder, com segurança:
 
 - quem é o usuário autenticado;
 - se o token ainda é válido;
 - quais roles esse usuário possui;
 - o que esse usuário pode executar dentro do domínio de Questions.
+
+> [!IMPORTANT]
+> O problema não é “como fazer login na IA”.
+>
+> O problema correto é: **como confiar, de forma controlada, na identidade já autenticada pela plataforma principal**.
 
 ---
 
@@ -136,9 +158,18 @@ A API de IA **não precisa autenticar o usuário do zero**. Ela precisa responde
 
 ## Regra de ouro
 
+> [!IMPORTANT]
 > **A API de IA não autentica usuários.**
 >
 > Ela **confia de forma controlada** na identidade resolvida pela API principal.
+
+## Decisão operacional
+
+```text
+Auth centralizado.
+Autorização distribuída.
+Boundary preservado.
+```
 
 ---
 
@@ -208,65 +239,101 @@ Com autorização isolada por domínio.
 
 ---
 
-# 7. Arquitetura de Alto Nível
+# 7. Princípios Arquiteturais
 
-## 7.1 Visão executiva
+## Princípios norteadores
+
+### 7.1 Single Source of Truth
+A identidade administrativa deve existir em apenas um lugar confiável.
+
+### 7.2 Security by Default
+Qualquer incerteza de autenticação deve resultar em bloqueio, nunca em permissão.
+
+### 7.3 Boundary First
+A API de IA não deve conhecer detalhes internos do mecanismo de autenticação do Adonis.
+
+### 7.4 Stable Internal Contract
+O domínio da IA deve operar sobre um contrato autenticado interno estável, mesmo que o provider externo evolua.
+
+### 7.5 Local Authorization
+A semântica de acesso do domínio de Questions deve ser controlada localmente por scopes internos.
+
+> [!NOTE]
+> Estes princípios evitam que o auth vire um “vazamento estrutural” do core principal para dentro da IA.
+
+---
+
+# 8. Arquitetura de Alto Nível
+
+## 8.1 Diretriz visual para diagramas
+
+> [!TIP]
+> Os diagramas abaixo foram organizados em **alto nível**, com foco em leitura executiva, clareza de ownership e comunicação arquitetural.
+>
+> Recomenda-se manter este padrão visual em PRs, docs técnicas e RFCs futuras:
+>
+> - fundo escuro;
+> - contraste alto;
+> - textos curtos;
+> - ícones semânticos;
+> - espaçamento respirado;
+> - sem excesso de linhas cruzadas.
+
+## 8.2 Visão executiva
 
 ```mermaid
+%%{init: {'theme':'dark','themeVariables': {
+  'primaryColor':'#111827',
+  'primaryTextColor':'#e5e7eb',
+  'primaryBorderColor':'#6366f1',
+  'lineColor':'#94a3b8',
+  'secondaryColor':'#0f172a',
+  'tertiaryColor':'#1f2937',
+  'fontFamily':'Inter, Segoe UI, Arial'
+}}}%%
 flowchart LR
-    FE["🖥️ Frontend
-Administrativo"]
-    AP["🧩 API
-Principal"]
+    FE["🖥️ Frontend\nAdministrativo"]
+    AP["🏛️ API\nPrincipal"]
     RD[("🔴 Redis")]
-    IA["🤖 API de IA
-Questions"]
+    IA["🤖 API de IA\nQuestions"]
 
-    FE -->|"🔐 Login
-e sessão"| AP
+    FE -->|"🔐 Login\ne sessão"| AP
     AP -->|"🗝️ Token OAT"| RD
-    FE -->|"📨 Bearer
-Token"| IA
+    FE -->|"📨 Bearer\nToken"| IA
     IA -->|"🔎 Introspecção"| AP
-    AP -->|"👤 Admin autenticado
-e roles"| IA
-
-    style FE fill:#0f172a,stroke:#3b82f6,stroke-width:2px,color:#e2e8f0
-    style AP fill:#111827,stroke:#6366f1,stroke-width:2px,color:#e2e8f0
-    style IA fill:#111827,stroke:#8b5cf6,stroke-width:2px,color:#e2e8f0
-    style RD fill:#1f2937,stroke:#f97316,stroke-width:2px,color:#e2e8f0
+    AP -->|"👤 Admin autenticado\ne roles"| IA
 ```
 
-## 7.2 Diagrama de contexto
+## 8.3 Diagrama de contexto
 
 ```mermaid
+%%{init: {'theme':'dark','themeVariables': {
+  'primaryColor':'#111827',
+  'primaryTextColor':'#e5e7eb',
+  'primaryBorderColor':'#8b5cf6',
+  'lineColor':'#94a3b8',
+  'secondaryColor':'#0f172a',
+  'tertiaryColor':'#1f2937',
+  'fontFamily':'Inter, Segoe UI, Arial'
+}}}%%
 flowchart TB
     subgraph CLIENTE["🧑‍💼 Cliente"]
-        FE["Frontend
-Admin"]
+        FE["Frontend\nAdmin"]
     end
 
     subgraph CORE["🏛️ Core Principal"]
-        AP["API
-Principal"]
-        AUTH["Auth
-Admin"]
-        ROLE["Roles
-Admin"]
+        AP["API\nPrincipal"]
+        AUTH["Auth\nAdmin"]
+        ROLE["Roles\nAdmin"]
         REDIS[("Redis")]
     end
 
     subgraph IA_DOMAIN["🧠 Domínio IA Questions"]
-        IAA["API
-IA"]
-        GUARD["Auth
-Guard"]
-        MAP["Normalizer
-+ Mapper"]
-        SCOPE["Scopes
-Guard"]
-        USECASE["Use
-Cases"]
+        IAA["API\nIA"]
+        GUARD["Auth\nGuard"]
+        MAP["Normalizer\n+ Mapper"]
+        SCOPE["Scopes\nGuard"]
+        USECASE["Use\nCases"]
     end
 
     FE --> AP
@@ -281,29 +348,34 @@ Cases"]
     SCOPE --> USECASE
 ```
 
-## 7.3 Diagrama de ownership
+## 8.4 Diagrama de ownership
 
 ```mermaid
+%%{init: {'theme':'dark','themeVariables': {
+  'primaryColor':'#111827',
+  'primaryTextColor':'#e5e7eb',
+  'primaryBorderColor':'#22c55e',
+  'lineColor':'#94a3b8',
+  'secondaryColor':'#0f172a',
+  'tertiaryColor':'#1f2937',
+  'fontFamily':'Inter, Segoe UI, Arial'
+}}}%%
 flowchart LR
     subgraph MAIN["🏛️ API Principal"]
         M1["Login"]
-        M2["Token
-OAT"]
+        M2["Token\nOAT"]
         M3["Validação"]
-        M4["Identidade
-Admin"]
+        M4["Identidade\nAdmin"]
         M5["Roles"]
     end
 
     subgraph AI["🤖 API de IA"]
-        A1["Recepção
-do Token"]
+        A1["Recepção\ndo Token"]
         A2["Introspecção"]
         A3["Normalização"]
         A4["Scopes"]
         A5["Autorização"]
-        A6["Use
-Cases"]
+        A6["Use\nCases"]
     end
 
     M1 --> M2 --> M3 --> M4 --> M5
@@ -314,55 +386,57 @@ Cases"]
 
 ---
 
-# 8. Fluxos Principais
+# 9. Fluxos Principais
 
-## 8.1 Fluxo funcional ponta a ponta
+## 9.1 Fluxo funcional ponta a ponta
 
 ```mermaid
+%%{init: {'theme':'dark','themeVariables': {
+  'primaryColor':'#111827',
+  'primaryTextColor':'#e5e7eb',
+  'primaryBorderColor':'#f59e0b',
+  'lineColor':'#94a3b8',
+  'secondaryColor':'#0f172a',
+  'tertiaryColor':'#1f2937',
+  'fontFamily':'Inter, Segoe UI, Arial'
+}}}%%
 flowchart TD
-    A["🧑‍💼 Admin
-faz login"] --> B["POST
-/api/v1/login"]
-    B --> C["auth.use
-admin.attempt"]
-    C --> D["🗝️ Token OAT
-emitido"]
-    D --> E["Frontend
-recebe token"]
+    A["🧑‍💼 Admin\nfaz login"] --> B["POST\n/api/v1/login"]
+    B --> C["auth.use\nadmin.attempt"]
+    C --> D["🗝️ Token OAT\nemitido"]
+    D --> E["Frontend\nrecebe token"]
 
-    E --> F["Frontend chama
-API IA"]
-    F --> G["AuthGuard
-extrai token"]
+    E --> F["Frontend chama\nAPI IA"]
+    F --> G["AuthGuard\nextrai token"]
     G --> H["AuthService"]
-    H --> I["GET /profile
-ou /auth/me"]
-    I --> J["auth
-admin"]
-    J --> K["Redis valida
-token"]
+    H --> I["GET /profile\nou /auth/me"]
+    I --> J["auth\nadmin"]
+    J --> K["Redis valida\ntoken"]
 
     K --> L{"Token válido"}
-    L -- "Não" --> M["401
-Unauthorized"]
-    L -- "Sim" --> N["Admin
-autenticado"]
-    N --> O["Roles
-resolvidas"]
+    L -- "Não" --> M["401\nUnauthorized"]
+    L -- "Sim" --> N["Admin\nautenticado"]
+    N --> O["Roles\nresolvidas"]
     O --> P["Normalizer"]
     P --> Q["Mapper"]
-    Q --> R["Scopes
-Guard"]
+    Q --> R["Scopes\nGuard"]
     R --> S{"Tem permissão"}
-    S -- "Não" --> T["403
-Forbidden"]
-    S -- "Sim" --> U["✅ Executa
-caso de uso"]
+    S -- "Não" --> T["403\nForbidden"]
+    S -- "Sim" --> U["✅ Executa\ncaso de uso"]
 ```
 
-## 8.2 Sequência técnica de request
+## 9.2 Sequência técnica de request
 
 ```mermaid
+%%{init: {'theme':'dark','themeVariables': {
+  'primaryColor':'#111827',
+  'primaryTextColor':'#e5e7eb',
+  'primaryBorderColor':'#3b82f6',
+  'lineColor':'#94a3b8',
+  'secondaryColor':'#0f172a',
+  'tertiaryColor':'#1f2937',
+  'fontFamily':'Inter, Segoe UI, Arial'
+}}}%%
 sequenceDiagram
     participant F as Frontend
     participant I as API IA
@@ -372,8 +446,7 @@ sequenceDiagram
     F->>I: Request com Bearer Token
     I->>I: Extrai token
     I->>P: GET /api/v1/profile
-    Note over I,P: Evolução recomendada
-GET /api/v1/auth/me
+    Note over I,P: Evolução recomendada\nGET /api/v1/auth/me
     P->>P: auth admin
     P->>R: check token
     R-->>P: Token válido ou inválido
@@ -394,40 +467,43 @@ GET /api/v1/auth/me
     end
 ```
 
-## 8.3 Fluxo de decisão de autorização
+## 9.3 Fluxo de decisão de autorização
 
 ```mermaid
+%%{init: {'theme':'dark','themeVariables': {
+  'primaryColor':'#111827',
+  'primaryTextColor':'#e5e7eb',
+  'primaryBorderColor':'#a855f7',
+  'lineColor':'#94a3b8',
+  'secondaryColor':'#0f172a',
+  'tertiaryColor':'#1f2937',
+  'fontFamily':'Inter, Segoe UI, Arial'
+}}}%%
 flowchart LR
-    A["Token
-válido"] --> B["Admin
-autenticado"]
-    B --> C["Roles
-externas"]
+    A["Token\nválido"] --> B["Admin\nautenticado"]
+    B --> C["Roles\nexternas"]
     C --> D["Normalizer"]
     D --> E["Mapper"]
-    E --> F["Scopes
-internos"]
-    F --> G["Scopes
-Guard"]
+    E --> F["Scopes\ninternos"]
+    F --> G["Scopes\nGuard"]
     G --> H{"Permissão suficiente"}
-    H -- "Sim" --> I["Libera
-execução"]
-    H -- "Não" --> J["Bloqueia
-acesso"]
+    H -- "Sim" --> I["Libera\nexecução"]
+    H -- "Não" --> J["Bloqueia\nacesso"]
 ```
 
 ## Nota de decisão
 
-A separação entre **autenticação** e **autorização** é proposital e obrigatória:
-
-- autenticação responde **quem é**;
-- autorização responde **o que pode fazer**.
+> [!IMPORTANT]
+> A separação entre **autenticação** e **autorização** é proposital e obrigatória:
+>
+> - autenticação responde **quem é**;
+> - autorização responde **o que pode fazer**.
 
 ---
 
-# 9. Boundary e Responsabilidades
+# 10. Boundary e Responsabilidades
 
-## 9.1 O que cruza a fronteira entre sistemas
+## 10.1 O que cruza a fronteira entre sistemas
 
 - token Bearer recebido na request;
 - chamada de introspecção;
@@ -435,7 +511,7 @@ A separação entre **autenticação** e **autorização** é proposital e obrig
 - roles administrativas necessárias;
 - status mínimo de conta quando aplicável.
 
-## 9.2 O que não deve cruzar a fronteira
+## 10.2 O que não deve cruzar a fronteira
 
 - acesso direto ao Redis;
 - detalhes internos do provider do Adonis;
@@ -443,30 +519,33 @@ A separação entre **autenticação** e **autorização** é proposital e obrig
 - middleware legado reaproveitado de forma acoplada;
 - payload cru espalhado pela IA.
 
-## 9.3 Boundary model
+## 10.3 Boundary model
 
 ```mermaid
+%%{init: {'theme':'dark','themeVariables': {
+  'primaryColor':'#111827',
+  'primaryTextColor':'#e5e7eb',
+  'primaryBorderColor':'#06b6d4',
+  'lineColor':'#94a3b8',
+  'secondaryColor':'#0f172a',
+  'tertiaryColor':'#1f2937',
+  'fontFamily':'Inter, Segoe UI, Arial'
+}}}%%
 flowchart LR
     subgraph MAIN["🏛️ API Principal"]
-        A1["Auth
-Admin"]
+        A1["Auth\nAdmin"]
         A2["Roles"]
-        A3["Token
-Validation"]
-        A4["Redis"]
+        A3["Token\nValidation"]
+        A4[("Redis")]
     end
 
     subgraph AI["🤖 API IA"]
-        B1["Auth
-Guard"]
-        B2["External
-Gateway"]
+        B1["Auth\nGuard"]
+        B2["External\nGateway"]
         B3["Normalizer"]
         B4["Mapper"]
-        B5["Scopes
-Guard"]
-        B6["Use
-Cases"]
+        B5["Scopes\nGuard"]
+        B6["Use\nCases"]
     end
 
     A1 --> A3
@@ -481,7 +560,7 @@ Cases"]
     B5 --> B6
 ```
 
-## 9.4 Matriz de ownership
+## 10.4 Matriz de ownership
 
 | Tema | API Principal | API de IA |
 |---|---|---|
@@ -496,9 +575,9 @@ Cases"]
 
 ---
 
-# 10. Contrato de Integração
+# 11. Contrato de Integração
 
-## 10.1 Estado atual utilizável
+## 11.1 Estado atual utilizável
 
 Hoje, com base no comportamento atual do `AuthController.show`, o contrato efetivamente disponível é equivalente a:
 
@@ -510,7 +589,7 @@ return response.ok(
 )
 ```
 
-## 10.2 Exemplo de payload atual
+## 11.2 Exemplo de payload atual
 
 ```json
 {
@@ -534,7 +613,7 @@ return response.ok(
 }
 ```
 
-## 10.3 Payload recomendado para estabilização futura
+## 11.3 Payload recomendado para estabilização futura
 
 ```json
 {
@@ -547,7 +626,7 @@ return response.ok(
 }
 ```
 
-## 10.4 Contrato interno canônico da IA
+## 11.4 Contrato interno canônico da IA
 
 ```ts
 export interface AuthenticatedUser {
@@ -561,15 +640,18 @@ export interface AuthenticatedUser {
 }
 ```
 
-## 10.5 Regra de robustez
+## 11.5 Regra de robustez
 
 A IA pode ser tolerante a pequenas variações do payload externo, mas essa tolerância deve existir **somente na camada de normalização**.
 
 O domínio interno deve trabalhar sempre com um contrato estável.
 
+> [!TIP]
+> Regra prática: **tolerância fora, rigidez dentro**.
+
 ---
 
-# 11. Endpoint de Introspecção
+# 12. Endpoint de Introspecção
 
 ## Estado atual utilizável
 
@@ -606,11 +688,28 @@ public async me({ response, auth }: HttpContextContract) {
 - protegido apenas por `auth:admin`;
 - contrato previsível para integração entre serviços.
 
+## Recomendação enterprise adicional
+
+### Headers internos sugeridos entre serviços
+
+```http
+X-Internal-Client: questions-ai-api
+X-Correlation-Id: <uuid>
+X-Request-Id: <uuid>
+```
+
+### Controles recomendados
+
+- allowlist de origem interna por ambiente;
+- rate limit técnico para introspecção;
+- logs estruturados por request;
+- versionamento de contrato quando necessário.
+
 ---
 
-# 12. Arquitetura Interna do Auth Module
+# 13. Arquitetura Interna do Auth Module
 
-## 12.1 Princípio de implementação
+## 13.1 Princípio de implementação
 
 O `AuthModule` da IA deve ser responsável apenas por:
 
@@ -627,62 +726,60 @@ Ele **não deve**:
 - reimplementar o guard do Adonis;
 - acoplar a IA ao payload cru da API principal.
 
-## 12.2 Diagrama interno do módulo
+## 13.2 Diagrama interno do módulo
 
 ```mermaid
+%%{init: {'theme':'dark','themeVariables': {
+  'primaryColor':'#111827',
+  'primaryTextColor':'#e5e7eb',
+  'primaryBorderColor':'#ef4444',
+  'lineColor':'#94a3b8',
+  'secondaryColor':'#0f172a',
+  'tertiaryColor':'#1f2937',
+  'fontFamily':'Inter, Segoe UI, Arial'
+}}}%%
 flowchart TD
-    A["📨 Request
-HTTP"] --> B["🛡️ Auth
-Guard"]
-    B --> C["Auth
-Service"]
-    C --> D["External Auth
-Gateway"]
-    D --> E["Auth API
-Client"]
-    E --> F["🧩 API
-Principal"]
-    F --> G["Payload
-externo"]
-    G --> H["External Auth Response
-Normalizer"]
-    H --> I["Authenticated User
-Mapper"]
-    I --> J["Authenticated
-User"]
-    J --> K["Scopes
-Guard"]
-    K --> L["Controller
-Use Case"]
+    A["📨 Request\nHTTP"] --> B["🛡️ Auth\nGuard"]
+    B --> C["Auth\nService"]
+    C --> D["External Auth\nGateway"]
+    D --> E["Auth API\nClient"]
+    E --> F["🏛️ API\nPrincipal"]
+    F --> G["Payload\nexterno"]
+    G --> H["External Auth Response\nNormalizer"]
+    H --> I["Authenticated User\nMapper"]
+    I --> J["Authenticated\nUser"]
+    J --> K["Scopes\nGuard"]
+    K --> L["Controller\nUse Case"]
 ```
 
-## 12.3 Composição interna
+## 13.3 Composição interna
 
 ```mermaid
+%%{init: {'theme':'dark','themeVariables': {
+  'primaryColor':'#111827',
+  'primaryTextColor':'#e5e7eb',
+  'primaryBorderColor':'#22c55e',
+  'lineColor':'#94a3b8',
+  'secondaryColor':'#0f172a',
+  'tertiaryColor':'#1f2937',
+  'fontFamily':'Inter, Segoe UI, Arial'
+}}}%%
 flowchart LR
     subgraph INFRA["Infra"]
-        C1["Auth API
-Client"]
-        C2["External Auth
-Gateway"]
+        C1["Auth API\nClient"]
+        C2["External Auth\nGateway"]
     end
 
     subgraph APP["Application"]
-        A1["Auth
-Service"]
-        A2["Auth
-Guard"]
-        A3["Scopes
-Guard"]
+        A1["Auth\nService"]
+        A2["Auth\nGuard"]
+        A3["Scopes\nGuard"]
     end
 
     subgraph DOMAIN["Domain Contract"]
-        D1["Authenticated
-User"]
-        D2["Internal
-Scope"]
-        D3["Role Scope
-Map"]
+        D1["Authenticated\nUser"]
+        D2["Internal\nScope"]
+        D3["Role Scope\nMap"]
     end
 
     subgraph SUPPORT["Support"]
@@ -705,9 +802,20 @@ Map"]
     S4 --> S1
 ```
 
+## 13.4 Sequência interna de responsabilidades
+
+| Camada | Responsabilidade |
+|---|---|
+| **Client** | comunicação HTTP com provider externo |
+| **Gateway** | boundary técnico com a API principal |
+| **Service** | orquestração do processo de autenticação delegada |
+| **Normalizer** | tolerância a payloads externos variáveis |
+| **Mapper** | construção do contrato canônico interno |
+| **Guards** | enforcement técnico de acesso |
+
 ---
 
-# 13. Estratégia de Roles, Scopes e Enforcement
+# 14. Estratégia de Roles, Scopes e Enforcement
 
 ## Regra central
 
@@ -747,13 +855,27 @@ A autorização deve ocorrer em camadas complementares:
 - **ScopesGuard** → valida permissão técnica do endpoint;
 - **Application Layer / Use Case** → valida regra de negócio.
 
+## Exemplo de uso no NestJS
+
+```ts
+@UseGuards(AuthGuard, ScopesGuard)
+@RequiredScopes('questions.generate')
+@Post('/questions/generate')
+async generate(@CurrentUser() user: AuthenticatedUser) {
+  return this.generateQuestionsUseCase.execute({
+    actorId: user.id,
+  })
+}
+```
+
 ## Nota arquitetural
 
-Essa separação evita que a semântica de acesso da IA fique refém da modelagem de roles do legado.
+> [!IMPORTANT]
+> Essa separação evita que a semântica de acesso da IA fique refém da modelagem de roles do legado.
 
 ---
 
-# 14. Estrutura Técnica Recomendada
+# 15. Estrutura Técnica Recomendada
 
 ## Tree View do módulo
 
@@ -807,9 +929,9 @@ src/
 
 ---
 
-# 15. Segurança, Resiliência e Observabilidade
+# 16. Segurança, Resiliência e Observabilidade
 
-## 15.1 Segurança por padrão
+## 16.1 Segurança por padrão
 
 ### Obrigatório
 
@@ -821,7 +943,7 @@ src/
 - nunca persistir token puro;
 - nunca acessar Redis diretamente da IA.
 
-## 15.2 Resiliência
+## 16.2 Resiliência
 
 ### Regras recomendadas
 
@@ -833,9 +955,10 @@ src/
 
 ### Regra crítica
 
+> [!IMPORTANT]
 > **Falha de autenticação remota deve degradar para bloqueio, nunca para permissão.**
 
-## 15.3 Observabilidade
+## 16.3 Observabilidade
 
 ### Logs mínimos
 
@@ -859,7 +982,7 @@ src/
 - `auth_provider_latency_ms`
 - `auth_guard_execution_ms`
 
-## 15.4 Matriz de falha esperada
+## 16.4 Matriz de falha esperada
 
 | Situação | Resultado esperado |
 |---|---|
@@ -870,9 +993,54 @@ src/
 | Timeout da API principal | `503` ou bloqueio controlado |
 | Payload inválido do provider | `401` ou `502`, conforme política adotada |
 
+## 16.5 Hardening adicional recomendado
+
+### Segurança de integração interna
+
+- autenticação mTLS entre serviços em ambientes críticos;
+- allowlist por rede privada ou service mesh;
+- assinatura opcional de requests internos para rotas sensíveis;
+- versionamento explícito do endpoint de introspecção.
+
+### Proteção operacional
+
+- circuit breaker na camada cliente;
+- budget de timeout controlado;
+- dashboards dedicados de auth delegada;
+- alarmes por aumento de `401`, `403` e timeout.
+
 ---
 
-# 16. Plano de Implementação
+# 17. ADR — Registro da Decisão
+
+## ADR-001 — Modelo de autenticação entre API Principal e API de IA
+
+### Status
+**Aceito**
+
+### Contexto
+A API de IA precisa receber requests autenticadas do mesmo perímetro administrativo da plataforma principal, sem duplicar login, token ou estado de sessão.
+
+### Decisão
+Adotar **Autenticação Delegada com Introspecção Controlada**, usando a API Principal como autoridade de autenticação e a API de IA como consumidora de identidade autenticada com autorização local baseada em scopes.
+
+### Consequências positivas
+
+- elimina duplicação de auth;
+- reduz risco operacional;
+- preserva boundary arquitetural;
+- facilita troubleshooting;
+- melhora governança de identidade.
+
+### Trade-offs assumidos
+
+- dependência controlada da disponibilidade da API Principal;
+- necessidade de normalização de payload externo;
+- necessidade de observabilidade forte na integração.
+
+---
+
+# 18. Plano de Implementação
 
 ## API Principal
 
@@ -908,9 +1076,19 @@ src/
 - [ ] teste ponta a ponta entre APIs
 - [ ] payload externo inconsistente
 
+## Ordem de execução recomendada
+
+1. estabilizar contrato de introspecção na API principal;
+2. construir contrato interno canônico na IA;
+3. implementar guard de autenticação;
+4. implementar guard de scopes;
+5. proteger endpoints críticos;
+6. instrumentar observabilidade;
+7. validar com testes integrados.
+
 ---
 
-# 17. Critérios de Aceite Técnico
+# 19. Critérios de Aceite Técnico
 
 ## Critérios funcionais
 
@@ -930,11 +1108,12 @@ src/
 
 ## Critério arquitetural principal
 
+> [!IMPORTANT]
 > O módulo estará correto quando a API de IA puder confiar na identidade administrativa da API principal **sem se tornar dependente da implementação interna do auth do Adonis**.
 
 ---
 
-# 18. Próximos Passos
+# 20. Próximos Passos
 
 ## Na API Principal
 
@@ -954,9 +1133,24 @@ src/
 - proteger endpoints críticos da IA;
 - escrever testes de integração ponta a ponta.
 
+## Evolução futura sugerida
+
+### Fase 2
+
+- cache técnico controlado de introspecção;
+- circuit breaker maduro;
+- scopes mais granulares por caso de uso;
+- segregação por capability do domínio.
+
+### Fase 3
+
+- políticas centralizadas por policy engine, se necessário;
+- trilha de auditoria ampliada;
+- readiness para expansão multi-serviço.
+
 ---
 
-# 19. Conclusão Executiva
+# 21. Conclusão Executiva
 
 O desenho arquitetural está **coerente com o stack validado**, **compatível com o modelo técnico atual** e **adequado para implementação segura neste estágio da plataforma**.
 
@@ -977,4 +1171,5 @@ A API de IA executa.
 - **Uso pretendido:** Entrega técnica / PR arquitetural / implementação
 - **Escopo:** Slice de autenticação e autorização delegada da Fase 1
 - **Status:** Pronto para revisão e implementação
+- **Formato:** Markdown enterprise pronto para evolução incremental
 
