@@ -247,11 +247,15 @@ flowchart LR
     RD[(🔴 Redis)]
     IA[🤖 API de IA Questions]
 
-    FE -->|🔐 Login e sessão| AP
+    FE -->|🔐 Login
+e sessão| AP
     AP -->|🗝️ Token OAT| RD
-    FE -->|📨 Bearer Token| IA
-    IA -->|🔎 Introspecção| AP
-    AP -->|👤 Admin autenticado + roles| IA
+    FE -->|📨 Bearer
+Token| IA
+    IA -->|🔎
+Introspecção| AP
+    AP -->|👤 Admin autenticado
++ roles| IA
 
     style FE fill:#0f172a,stroke:#3b82f6,stroke-width:2px,color:#e2e8f0
     style AP fill:#111827,stroke:#6366f1,stroke-width:2px,color:#e2e8f0
@@ -321,16 +325,21 @@ flowchart TD
 
     E --> F[Frontend chama API de IA]
     F --> G[AuthGuard extrai token]
-    G --> H[AuthService chama API Principal]
-    H --> I[GET /api/v1/profile ou /auth/me]
+    G --> H[AuthService
+chama API Principal]
+    H --> I[GET /profile
+ou /auth/me]
     I --> J[auth:admin]
     J --> K[Redis valida token]
 
     K --> L{Token válido?}
     L -- Não --> M[401 Unauthorized]
-    L -- Sim --> N[Admin + roles]
-    N --> O[Normalizer + Mapper]
-    O --> P[ScopesGuard]
+    L -- Sim --> N[Admin autenticado
+\+ roles]
+    N --> O[Normalizer
+\+ Mapper]
+    O --> P[ScopesGuard
+(avalia acesso)]
     P --> Q{Tem permissão?}
     Q -- Não --> R[403 Forbidden]
     Q -- Sim --> S[✅ Executa caso de uso]
@@ -351,7 +360,8 @@ sequenceDiagram
     F->>I: Request com Bearer Token
     I->>I: AuthGuard extrai token
     I->>P: GET /api/v1/profile
-    Note over I,P: Evolução recomendada: GET /api/v1/auth/me
+    Note over I,P: Evolução recomendada
+GET /api/v1/auth/me
     P->>P: middleware auth:admin
     P->>R: auth.use('admin').check()
     R-->>P: Token válido ou inválido
