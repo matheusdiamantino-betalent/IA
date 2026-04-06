@@ -100,7 +100,7 @@ Ao final da Fase 1, a plataforma deve possuir uma fundação consistente em:
 - organização compatível com crescimento incremental.
 
 > [!IMPORTANT]
-> A Fase 1 não é um protótipo descartável. Ela representa a base permanente sobre a qual o produto continuará evoluindo.
+> Referência técnica: a Fase 1 deve ser tratada como base estrutural permanente do produto. Decisões de contrato, boundary, persistência e modularização não devem assumir descarte ou reescrita ampla nas fases seguintes.
 
 ---
 
@@ -122,8 +122,6 @@ Este documento descreve, de forma técnica e organizada, a arquitetura aprovada 
 - misturar backlog futuro com entrega atual;
 - tratar componentes planejados como já operacionais em produção.
 
-> [!NOTE]
-> Como README principal, este documento precisa ser útil tanto para quem chega ao repositório pela primeira vez quanto para quem já está implementando partes da solução.
 
 ---
 
@@ -211,8 +209,8 @@ Evita:
 - inconsistência de autorização;
 - drift entre sistemas.
 
-> [!TIP]
-> O monólito modular foi escolhido não como atalho, mas como a melhor estratégia para crescer com disciplina sem antecipar a complexidade de uma arquitetura distribuída.
+> [!NOTE]
+> Referência técnica de decisão: a escolha por monólito modular prioriza coesão de runtime, menor custo operacional e controle de boundary interno nesta fase do produto.
 
 ---
 
@@ -263,8 +261,6 @@ Mesmo sem todas as fases implementadas, a base atual já precisa nascer compatí
 
 A Fase 1 não representa um experimento provisório. Ela representa a base estrutural do produto.
 
-> [!TIP]
-> O roadmap não deve ser lido como lista de funcionalidades já entregues, e sim como orientação explícita para as decisões de arquitetura tomadas agora.
 
 ---
 
@@ -330,7 +326,7 @@ flowchart LR
 ```
 
 > [!NOTE]
-> O roadmap aparece no README para orientar a evolução da base, não para inflar artificialmente a percepção de entrega atual.
+> Referência técnica de leitura: o roadmap define compatibilidade evolutiva da arquitetura, mas não altera o status de entrega da Fase 1.
 
 ---
 
@@ -420,8 +416,6 @@ Os itens abaixo pertencem ao roadmap global, porém **não devem ser comunicados
 
 A arquitetura já considera esses elementos, mas a implementação atual permanece focada na base fundacional.
 
-> [!TIP]
-> Ser explícito sobre o que ainda não foi entregue melhora alinhamento técnico, reduz ruído entre times e preserva credibilidade arquitetural.
 
 ---
 
@@ -451,8 +445,8 @@ Ainda que a fase atual seja majoritariamente fundacional, a arquitetura já deve
 ## 10.8 Shared com disciplina
 `shared/` deve conter somente elementos transversais genuínos.
 
-> [!NOTE]
-> Esses princípios não são apenas preferências de organização. Eles funcionam como restrições práticas para evitar acoplamento, vazamento semântico do legado e crescimento desordenado do monólito.
+> [!IMPORTANT]
+> Referência técnica: os princípios desta seção funcionam como restrições de implementação e revisão arquitetural. Violações aqui tendem a introduzir acoplamento estrutural e erosionar o boundary entre domínio novo e legado.
 
 ---
 
@@ -548,8 +542,6 @@ A arquitetura já separa, desde a fundação:
 - `Staging` prepara revisão humana e estados intermediários sem poluir o core de questões;
 - `Agents Layer` e `Semantic Retrieval` aparecem no diagrama para explicitar compatibilidade evolutiva, e não entrega atual.
 
-> [!TIP]
-> O valor desse diagrama está em mostrar claramente o que já faz parte da base e o que já foi reservado como ponto de expansão futura.
 
 ---
 
@@ -601,7 +593,7 @@ flowchart LR
 ```
 
 > [!IMPORTANT]
-> O reuso da autenticação existente evita a criação de dois centros de verdade para identidade e autorização administrativa.
+> Referência técnica: o reuso da autenticação da `api/v1` preserva um único centro de verdade para identidade administrativa e evita divergência de sessão, permissão e revogação entre sistemas.
 
 ---
 
@@ -647,7 +639,7 @@ Responsável por regras canônicas, bases de referência e integração com conh
 - `publication`
 
 > [!NOTE]
-> Os bounded contexts futuros já aparecem aqui para orientar o desenho da base, mas não devem ser confundidos com módulos plenamente implementados na fase atual.
+> Referência técnica: os bounded contexts listados como futuros devem influenciar naming, contracts e boundaries, mas não devem introduzir dependências concretas prematuras na implementação atual.
 
 ---
 
@@ -695,8 +687,6 @@ Contém elementos utilitários e internos do módulo, como:
 - normalizers;
 - factories.
 
-> [!TIP]
-> Essa convenção reduz ambiguidade estrutural e facilita tanto a implementação quanto a leitura do código por novos membros do time.
 
 ---
 
@@ -741,7 +731,7 @@ flowchart TD
 ```
 
 > [!IMPORTANT]
-> Essas regras existem para preservar previsibilidade estrutural. Quando elas são quebradas cedo, o monólito modular começa a se comportar como um bloco acoplado.
+> Referência técnica: as regras de dependência desta seção devem ser tratadas como contrato estrutural do repositório. Qualquer exceção precisa ser explícita, revisada e justificada tecnicamente.
 
 ---
 
@@ -866,8 +856,6 @@ flowchart TD
 
 Este fluxo descreve a direção arquitetural do produto e não deve ser interpretado como descrição da entrega atual.
 
-> [!NOTE]
-> A presença das fases futuras no README existe para orientar decisões estruturais presentes, e não para sugerir maturidade operacional inexistente.
 
 ---
 
@@ -1023,8 +1011,8 @@ flowchart TD
 
 Nem todos os módulos acima precisam estar implementados agora. Parte deles já deve existir como direção estrutural do monólito modular, preservando consistência para as fases seguintes.
 
-> [!TIP]
-> A tree view do README deve comunicar intenção arquitetural, e não apenas listar diretórios. Ela ajuda a deixar claro o que já é fundação e o que já foi reservado como espaço de evolução.
+> [!NOTE]
+> Referência técnica: a tree view combina estrutura vigente e direção arquitetural prevista. Nem todos os diretórios futuros precisam existir fisicamente na Fase 1, mas a organização proposta deve orientar a expansão do repositório.
 
 ---
 
@@ -1075,7 +1063,7 @@ erDiagram
 A Fase 1 não precisa esgotar toda a modelagem final, mas precisa estabelecer o núcleo canônico sobre o qual versionamento, classificação e auditoria irão evoluir.
 
 > [!NOTE]
-> O valor deste modelo conceitual está menos em representar cada detalhe da persistência agora e mais em deixar claro quais entidades sustentam a semântica central do produto.
+> Referência técnica: o modelo conceitual desta seção serve como base semântica para naming, contratos, migrações iniciais e evolução do versionamento de questões.
 
 ---
 
@@ -1119,7 +1107,7 @@ A Fase 1 não precisa esgotar toda a modelagem final, mas precisa estabelecer o 
 - timeouts e comportamento defensivo.
 
 > [!IMPORTANT]
-> Segurança aqui não é um item complementar. Ela faz parte da definição de pronto da fundação.
+> Referência técnica: os controles de segurança descritos nesta seção fazem parte dos critérios mínimos de aceite da Fase 1 e devem ser considerados requisitos de implementação, não apenas recomendações.
 
 ---
 
@@ -1150,8 +1138,8 @@ A observabilidade deve amadurecer junto com o produto, mas a base precisa nascer
 - observabilidade por agente;
 - visibilidade de degradação e fila.
 
-> [!TIP]
-> Instrumentar desde a base reduz custo de diagnóstico no futuro e evita que observabilidade vire um esforço tardio e caro.
+> [!NOTE]
+> Referência técnica: logs estruturados, correlation id e health checks devem ser desenhados de forma compatível com a futura instrumentação de métricas, tracing distribuído e execução assíncrona.
 
 ---
 
@@ -1176,7 +1164,7 @@ A fundação precisa ser compatível com operação robusta futura.
 - visibilidade de degradação operacional.
 
 > [!NOTE]
-> Mesmo que a operação assíncrona ainda não esteja madura, a base precisa nascer sem bloquear essa evolução.
+> Referência técnica: contratos, tratamento de erro e desenho de módulos devem permanecer compatíveis com futura introdução de filas, retries, DLQ e idempotência operacional.
 
 ---
 
@@ -1220,7 +1208,7 @@ flowchart LR
 ```
 
 > [!IMPORTANT]
-> A ACL não é apenas uma camada técnica de acesso. Ela é uma proteção semântica do domínio novo contra o legado.
+> Referência técnica: a ACL deve concentrar tradução de contratos, adaptação semântica e isolamento das regras implícitas do legado. O domínio canônico não deve consumir estruturas legadas diretamente.
 
 ---
 
@@ -1299,8 +1287,8 @@ A Fase 1 pode ser considerada consistente quando atender, no mínimo, aos pontos
 - arquitetura descrita de forma coerente com a fase atual;
 - separação explícita entre fundação atual e evolução futura.
 
-> [!TIP]
-> O critério de pronto da Fase 1 não é “ter tudo funcionando”, e sim “ter a base correta pronta para crescer sem ruptura”.
+> [!NOTE]
+> Referência técnica: os critérios desta seção medem solidez da fundação arquitetural, e não completude funcional do roadmap do produto.
 
 ---
 
@@ -1337,7 +1325,7 @@ A Fase 1 pode ser considerada consistente quando atender, no mínimo, aos pontos
 **Mitigação:** preparar desde agora boundaries, contratos, persistência e runtime para a evolução prevista.
 
 > [!NOTE]
-> Os trade-offs aqui são conscientes: a arquitetura busca equilíbrio entre disciplina suficiente para crescer e pragmatismo suficiente para não travar a entrega fundacional.
+> Referência técnica: os trade-offs listados devem orientar revisão de PRs, ADRs e decisões de escopo para evitar tanto acoplamento precoce quanto abstração desnecessária.
 
 ---
 
