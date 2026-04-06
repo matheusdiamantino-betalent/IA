@@ -909,7 +909,7 @@ Sem considerar paralelizações agressivas, a projeção do ciclo completo fica 
 
 - estimativa consolidada: **24 a 27 semanas**
 
-## 20.3 Mermaid — Projeção temporal do ciclo
+## 20.3 Projeção temporal do ciclo
 
 ```mermaid
 gantt
