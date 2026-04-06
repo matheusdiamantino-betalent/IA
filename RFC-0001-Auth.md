@@ -23,9 +23,6 @@
 >
 > O foco aqui não é a plataforma inteira de Questions, mas a base de segurança e acesso que permite a evolução segura do domínio.
 
-> [!NOTE]
-> O material foi estruturado como artefato técnico final, adequado para revisão arquitetural, PR técnica, alinhamento entre squads backend, implementação incremental e posterior hardening de segurança.
-
 ---
 
 # Sumário
@@ -273,20 +270,6 @@ A semântica de acesso do domínio de Questions deve ser definida localmente por
 ---
 
 # 8. Arquitetura de Alto Nível
-
-## 8.1 Diretriz visual para diagramas
-
-> [!TIP]
-> Os diagramas abaixo foram desenhados em alto nível, com foco em leitura executiva, clareza de ownership e comunicação arquitetural.
->
-> O padrão visual recomendado para este conjunto é:
->
-> - fundo integralmente escuro;
-> - alto contraste entre blocos e bordas;
-> - cores neon equilibradas;
-> - rótulos curtos e sem poluição visual;
-> - bom espaçamento entre elementos;
-> - ícones semânticos para leitura mais rápida.
 
 ## 8.2 Visão executiva
 
