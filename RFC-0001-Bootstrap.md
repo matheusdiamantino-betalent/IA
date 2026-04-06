@@ -26,27 +26,28 @@
 * * *
 
 # Sumário
-- 1. Resumo Executivo
-- 2. Escopo do Documento
-- 3. Problema Arquitetural
-- 4. Decisão de Arquitetura
-- 5. Contexto Técnico Validado
-- 6. Objetivos do Slice
-- 7. Princípios Arquiteturais
-- 8. Arquitetura de Alto Nível
-- 9. Fluxos Principais
-- 10. Boundary e Responsabilidades
-- 11. Configuração e Contratos de Ambiente
-- 12. Ciclo de Inicialização da Aplicação
-- 13. Arquitetura Interna do Bootstrap
-- 14. Padrões Transversais de Fundação
-- 15. Estrutura Técnica Recomendada
-- 16. Segurança, Resiliência e Observabilidade
-- 17. ADR — Registro da Decisão
-- 18. Plano de Implementação
-- 19. Critérios de Aceite Técnico
-- 20. Próximos Passos
-- 21. Conclusão Executiva
+
+- [**1. Resumo Executivo**](#1-resumo-executivo)
+- [**2. Escopo do Documento**](#2-escopo-do-documento)
+- [**3. Problema Arquitetural**](#3-problema-arquitetural)
+- [**4. Decisão de Arquitetura**](#4-decisão-de-arquitetura)
+- [**5. Contexto Técnico Validado**](#5-contexto-técnico-validado)
+- [**6. Objetivos do Slice**](#6-objetivos-do-slice)
+- [**7. Princípios Arquiteturais**](#7-princípios-arquiteturais)
+- [**8. Arquitetura de Alto Nível**](#8-arquitetura-de-alto-nível)
+- [**9. Fluxos Principais**](#9-fluxos-principais)
+- [**10. Boundary e Responsabilidades**](#10-boundary-e-responsabilidades)
+- [**11. Configuração e Contratos de Ambiente**](#11-configuração-e-contratos-de-ambiente)
+- [**12. Ciclo de Inicialização da Aplicação**](#12-ciclo-de-inicialização-da-aplicação)
+- [**13. Arquitetura Interna do Bootstrap**](#13-arquitetura-interna-do-bootstrap)
+- [**14. Padrões Transversais de Fundação**](#14-padrões-transversais-de-fundação)
+- [**15. Estrutura Técnica Recomendada**](#15-estrutura-técnica-recomendada)
+- [**16. Segurança, Resiliência e Observabilidade**](#16-segurança-resiliência-e-observabilidade)
+- [**17. ADR — Registro da Decisão**](#17-adr--registro-da-decisão)
+- [**18. Plano de Implementação**](#18-plano-de-implementação)
+- [**19. Critérios de Aceite Técnico**](#19-critérios-de-aceite-técnico)
+- [**20. Próximos Passos**](#20-próximos-passos)
+- [**21. Conclusão Executiva**](#21-conclusão-executiva)
 
 * * *
 
