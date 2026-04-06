@@ -2,16 +2,16 @@
 
 <div align="center">
 
-![Status](https://img.shields.io/badge/status-Fase%201%20em%20Andamento-0f766e?style=for-the-badge&logo=target&logoColor=white)
-![Foco](https://img.shields.io/badge/foco-Funda%C3%A7%C3%A3o%20Arquitetural-1d4ed8?style=for-the-badge&logo=stackshare&logoColor=white)
-![Arquitetura](https://img.shields.io/badge/arquitetura-Mon%C3%B3lito%20Modular-1e293b?style=for-the-badge&logo=databricks&logoColor=white)
-![Backend](https://img.shields.io/badge/backend-NestJS%20%2B%20TypeScript-e11d48?style=for-the-badge&logo=nestjs&logoColor=white)
-![Persist%C3%AAncia](https://img.shields.io/badge/persist%C3%AAncia-PostgreSQL%20%2B%20PGVector-334155?style=for-the-badge&logo=postgresql&logoColor=white)
-![Integra%C3%A7%C3%A3o](https://img.shields.io/badge/integra%C3%A7%C3%A3o-MySQL%20Legado-475569?style=for-the-badge&logo=mysql&logoColor=white)
-![Coordena%C3%A7%C3%A3o](https://img.shields.io/badge/coordena%C3%A7%C3%A3o-Redis%20%2B%20BullMQ-b91c1c?style=for-the-badge&logo=redis&logoColor=white)
-![Auth](https://img.shields.io/badge/auth-Reuso%20da%20api%2Fv1-7c3aed?style=for-the-badge&logo=auth0&logoColor=white)
-![Seguran%C3%A7a](https://img.shields.io/badge/seguran%C3%A7a-Secure%20by%20Default-065f46?style=for-the-badge&logo=shield&logoColor=white)
-![Observabilidade](https://img.shields.io/badge/observabilidade-Logs%20%2B%20Tracing%20%2B%20Metrics-6d28d9?style=for-the-badge&logo=datadog&logoColor=white)
+![Status](https://img.shields.io/badge/status-Fase%201%20em%20Andamento-10b981?style=for-the-badge&logo=target&logoColor=white)
+![Foco](https://img.shields.io/badge/foco-Funda%C3%A7%C3%A3o%20Arquitetural-2563eb?style=for-the-badge&logo=stackshare&logoColor=white)
+![Arquitetura](https://img.shields.io/badge/arquitetura-Mon%C3%B3lito%20Modular-7c3aed?style=for-the-badge&logo=databricks&logoColor=white)
+![Backend](https://img.shields.io/badge/backend-NestJS%20%2B%20TypeScript-f43f5e?style=for-the-badge&logo=nestjs&logoColor=white)
+![Persist%C3%AAncia](https://img.shields.io/badge/persist%C3%AAncia-PostgreSQL%20%2B%20PGVector-0f766e?style=for-the-badge&logo=postgresql&logoColor=white)
+![Integra%C3%A7%C3%A3o](https://img.shields.io/badge/integra%C3%A7%C3%A3o-MySQL%20Legado-0891b2?style=for-the-badge&logo=mysql&logoColor=white)
+![Coordena%C3%A7%C3%A3o](https://img.shields.io/badge/coordena%C3%A7%C3%A3o-Redis%20%2B%20BullMQ-f97316?style=for-the-badge&logo=redis&logoColor=white)
+![Auth](https://img.shields.io/badge/auth-Reuso%20da%20api%2Fv1-a855f7?style=for-the-badge&logo=auth0&logoColor=white)
+![Seguran%C3%A7a](https://img.shields.io/badge/seguran%C3%A7a-Secure%20by%20Default-22c55e?style=for-the-badge&logo=shield&logoColor=white)
+![Observabilidade](https://img.shields.io/badge/observabilidade-Logs%20%2B%20Tracing%20%2B%20Metrics-eab308?style=for-the-badge&logo=datadog&logoColor=white)
 
 </div>
 
