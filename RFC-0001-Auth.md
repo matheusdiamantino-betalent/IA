@@ -237,113 +237,6 @@ Com autorização isolada por domínio.
   'edgeLabelBackground':'#0f172a',
   'fontFamily':'Inter, Segoe UI, Arial'
 }}}%%
-flowchart LR
-    FE[🖥️ Frontend Administrativo]
-    AP[🧩 API Principal]
-    RD[(🔴 Redis)]
-    IA[🤖 API de IA Questions]
-
-    FE -->|🔐 Login
-e sessão| AP
-    AP -->|🗝️ Token OAT| RD
-    FE -->|📨 Bearer
-Token| IA
-    IA -->|🔎
-Introspecção| AP
-    AP -->|👤 Admin autenticado
-+ roles| IA
-
-    style FE fill:#0f172a,stroke:#3b82f6,stroke-width:2px,color:#e2e8f0
-    style AP fill:#111827,stroke:#6366f1,stroke-width:2px,color:#e2e8f0
-    style IA fill:#111827,stroke:#8b5cf6,stroke-width:2px,color:#e2e8f0
-    style RD fill:#1f2937,stroke:#f97316,stroke-width:2px,color:#e2e8f0
-```
-
-## 7.2 Diagrama de contexto
-
-```mermaid
-%%{init: {'theme':'base','themeVariables': {
-  'primaryColor':'#0f172a','primaryTextColor':'#e2e8f0','primaryBorderColor':'#475569','lineColor':'#94a3b8','secondaryColor':'#111827','tertiaryColor':'#1e293b','background':'#020617','mainBkg':'#0f172a','secondBkg':'#111827','tertiaryBkg':'#1e293b','clusterBkg':'#0b1220','clusterBorder':'#334155','edgeLabelBackground':'#0f172a','fontFamily':'Inter, Segoe UI, Arial'
-}}}%%
-flowchart TB
-    subgraph CLIENTE[🧑‍💼 Cliente]
-        FE[Frontend Admin]
-    end
-
-    subgraph CORE[🏛️ Core Principal]
-        AP[API Principal]
-        AUTH[Auth Admin]
-        ROLE[Roles Admin]
-        REDIS[(Redis)]
-    end
-
-    subgraph IA_DOMAIN[🧠 Domínio IA Questions]
-        IAA[API IA]
-        GUARD[AuthGuard]
-        MAP[Normalizer + Mapper]
-        SCOPE[ScopesGuard]
-        USECASE[Use Cases]
-    end
-
-    FE --> AP
-    FE --> IAA
-    AP --> AUTH
-    AUTH --> REDIS
-    AP --> ROLE
-    IAA --> GUARD
-    GUARD --> AP
-    AP --> MAP
-    MAP --> SCOPE
-    SCOPE --> USECASE
-```
-
-## 7.3 Leitura arquitetural
-
-A API de IA está **intencionalmente desacoplada da mecânica interna do auth do Adonis**, consumindo apenas um contrato de introspecção autenticada.
-
-Isso preserva boundary, facilita manutenção e reduz acoplamento estrutural.
-
----
-
-# 8. Fluxos Principais
-
-## 8.1 Fluxo funcional ponta a ponta
-
-```mermaid
-%%{init: {'theme':'base','themeVariables': {
-  'primaryColor':'#0f172a','primaryTextColor':'#e2e8f0','primaryBorderColor':'#475569','lineColor':'#94a3b8','secondaryColor':'#111827','tertiaryColor':'#1e293b','background':'#020617','mainBkg':'#0f172a','secondBkg':'#111827','tertiaryBkg':'#1e293b','clusterBkg':'#0b1220','clusterBorder':'#334155','edgeLabelBackground':'#0f172a','fontFamily':'Inter, Segoe UI, Arial'
-}}}%%
-flowchart TD
-    A[🧑‍💼 Admin faz login] --> B[POST /api/v1/login]
-    B --> C[auth.use admin.attempt]
-    C --> D[🗝️ Token OAT emitido]
-    D --> E[Frontend recebe token]
-
-    E --> F[Frontend chama API IA]
-    F --> G[AuthGuard extrai token]
-    G --> H[AuthService]
-    H --> I[GET /profile<br/>ou /auth/me]
-    I --> J[auth admin]
-    J --> K[Redis valida token]
-
-    K --> L{Token válido}
-    L -- Não --> M[401 Unauthorized]
-    L -- Sim --> N[Admin autenticado]
-    N --> O[Roles resolvidas]
-    O --> P[Normalizer]
-    P --> Q[Mapper]
-    Q --> R[ScopesGuard]
-    R --> S{Tem permissão}
-    S -- Não --> T[403 Forbidden]
-    S -- Sim --> U[✅ Executa caso de uso]
-```
-
-## 8.2 Sequência técnica de request
-
-```mermaid
-%%{init: {'theme':'base','themeVariables': {
-  'primaryColor':'#0f172a','primaryTextColor':'#e2e8f0','primaryBorderColor':'#475569','lineColor':'#94a3b8','secondaryColor':'#111827','tertiaryColor':'#1e293b','background':'#020617','mainBkg':'#0f172a','secondBkg':'#111827','tertiaryBkg':'#1e293b','clusterBkg':'#0b1220','clusterBorder':'#334155','edgeLabelBackground':'#0f172a','fontFamily':'Inter, Segoe UI, Arial'
-}}}%%
 sequenceDiagram
     participant F as Frontend
     participant I as API IA
@@ -353,7 +246,7 @@ sequenceDiagram
     F->>I: Request com Bearer Token
     I->>I: Extrai token
     I->>P: GET /api/v1/profile
-    Note over I,P: Evolução recomendada: GET /api/v1/auth/me
+    Note over I,P: Evolução recomendada\nGET /api/v1/auth/me
     P->>P: auth admin
     P->>R: check token
     R-->>P: Token válido ou inválido
@@ -366,139 +259,13 @@ sequenceDiagram
         I->>I: Normalizer
         I->>I: Mapper
         I->>I: ScopesGuard
-
         alt sem permissão
             I-->>F: 403
         else autorizado
             I-->>F: 200
         end
     end
-```
-
-## 8.3 Fluxo de decisão de autorização
-
-```mermaid
-%%{init: {'theme':'base','themeVariables': {
-  'primaryColor':'#0f172a','primaryTextColor':'#e2e8f0','primaryBorderColor':'#475569','lineColor':'#94a3b8','secondaryColor':'#111827','tertiaryColor':'#1e293b','background':'#020617','mainBkg':'#0f172a','secondBkg':'#111827','tertiaryBkg':'#1e293b','clusterBkg':'#0b1220','clusterBorder':'#334155','edgeLabelBackground':'#0f172a','fontFamily':'Inter, Segoe UI, Arial'
-}}}%%
-flowchart LR
-    A[Token válido] --> B[Admin autenticado]
-    B --> C[Roles externas]
-    C --> D[Normalizer]
-    D --> E[Mapper]
-    E --> F[Scopes internos]
-    F --> G[ScopesGuard]
-    G --> H{Permissão suficiente}
-    H -- Sim --> I[Libera execução]
-    H -- Não --> J[Bloqueia acesso]
-```
-
-## Nota de decisão
-
-A separação entre **autenticação** e **autorização** é proposital e obrigatória:
-
-- autenticação responde **quem é**;
-- autorização responde **o que pode fazer**.
-
----
-
-# 9. Boundary e Responsabilidades
-
-## 9.1 O que cruza a fronteira entre sistemas
-
-- token Bearer recebido na request;
-- chamada de introspecção;
-- payload autenticado do admin;
-- roles administrativas necessárias;
-- status mínimo de conta quando aplicável.
-
-## 9.2 O que não deve cruzar a fronteira
-
-- acesso direto ao Redis;
-- detalhes internos do provider do Adonis;
-- segredos internos do auth principal;
-- middleware legado reaproveitado de forma acoplada;
-- payload cru espalhado pela IA.
-
-## 9.3 Boundary model
-
-```mermaid
-%%{init: {'theme':'base','themeVariables': {
-  'primaryColor':'#0f172a','primaryTextColor':'#e2e8f0','primaryBorderColor':'#475569','lineColor':'#94a3b8','secondaryColor':'#111827','tertiaryColor':'#1e293b','background':'#020617','mainBkg':'#0f172a','secondBkg':'#111827','tertiaryBkg':'#1e293b','clusterBkg':'#0b1220','clusterBorder':'#334155','edgeLabelBackground':'#0f172a','fontFamily':'Inter, Segoe UI, Arial'
-}}}%%
-flowchart LR
-    subgraph MAIN[🏛️ API Principal]
-        A1[Auth Admin]
-        A2[Roles]
-        A3[Token Validation]
-        A4[Redis]
-    end
-
-    subgraph AI[🤖 API IA]
-        B1[Auth Guard]
-        B2[External Gateway]
-        B3[Normalizer]
-        B4[Mapper]
-        B5[Scopes Guard]
-        B6[Use Cases]
-    end
-
-    A1 --> A3
-    A3 --> A4
-    A2 --> A1
-
-    B1 --> B2
-    B2 --> A1
-    B2 --> B3
-    B3 --> B4
-    B4 --> B5
-    B5 --> B6
-```
-
-## 9.4 Matriz de ownership
-
-| Tema | API Principal | API de IA |
-|---|---|---|
-| Login | ✅ | ❌ |
-| Emissão de token | ✅ | ❌ |
-| Revogação | ✅ | ❌ |
-| Introspecção | ✅ | Consome |
-| Normalização de payload | ❌ | ✅ |
-| Mapeamento para scopes | ❌ | ✅ |
-| Autorização de domínio | ❌ | ✅ |
-| Enforcement por endpoint | ❌ | ✅ |
-
----
-
-# 10. Contrato de Integração
-
-## 10.1 Estado atual utilizável
-
-Hoje, com base no comportamento atual do `AuthController.show`, o contrato efetivamente disponível é equivalente a:
-
-```ts
-const user = auth.user as Admin
-
-return response.ok(
-  await Admin.query().preload('roles').where('id', user.id).first()
-)
-```
-
-## 10.2 Exemplo de payload atual
-
-```json
-{
-  "id": 10,
-  "name": "Matheus Diamantino",
-  "email": "admin@empresa.com",
-  "roles": [
-    {
-      "id": 1,
-      "name": "admin",
-      "slug": "admin"
-    },
-    {
-      "id": 3,
+``` 3,
       "name": "questioncreator",
       "slug": "questioncreator"
     }
@@ -515,52 +282,38 @@ return response.ok(
   "id": 10,
   "name": "Matheus Diamantino",
   "email": "admin@empresa.com",
-  "roles": ["admin", "questioncreator"],
-  "active": true,
-  "status": "active"
-}
+  "r## 8.3 Fluxo de decisão de autorização
+
+```mermaid
+%%{init: {'theme':'base','themeVariables': {
+  'primaryColor':'#0f172a',
+  'primaryTextColor':'#e2e8f0',
+  'primaryBorderColor':'#475569',
+  'lineColor':'#94a3b8',
+  'secondaryColor':'#111827',
+  'tertiaryColor':'#1e293b',
+  'background':'#020617',
+  'mainBkg':'#0f172a',
+  'secondBkg':'#111827',
+  'tertiaryBkg':'#1e293b',
+  'clusterBkg':'#0b1220',
+  'clusterBorder':'#334155',
+  'edgeLabelBackground':'#0f172a',
+  'fontFamily':'Inter, Segoe UI, Arial'
+}}}%%
+flowchart LR
+    A["Token<br/>válido"] --> B["Admin<br/>autenticado"]
+    B --> C["Roles<br/>externas"]
+    C --> D["Normalizer"]
+    D --> E["Mapper"]
+    E --> F["Scopes<br/>internos"]
+    F --> G["Scopes<br/>Guard"]
+    G --> H{"Permissão suficiente"}
+    H -- "Sim" --> I["Libera<br/>execução"]
+    H -- "Não" --> J["Bloqueia<br/>acesso"]
 ```
 
-## 10.4 Contrato interno canônico da IA
-
-```ts
-export interface AuthenticatedUser {
-  id: number
-  name: string
-  email: string
-  roles: string[]
-  scopes: string[]
-  isActive: boolean
-  status?: string
-}
-```
-
-## 10.5 Regra de robustez
-
-A IA pode ser tolerante a pequenas variações do payload externo, mas essa tolerância deve existir **somente na camada de normalização**.
-
-O domínio interno deve trabalhar sempre com um contrato estável.
-
----
-
-# 11. Endpoint de Introspecção
-
-## Estado atual utilizável
-
-```http
-GET /api/v1/profile
-```
-
-## Evolução recomendada
-
-```ts
-Route.get('/auth/me', 'AuthController.me').middleware(['auth:admin'])
-```
-
-## Controller recomendado
-
-```ts
-public async me({ response, auth }: HttpContextContract) {
+## Nota de decisãose, auth }: HttpContextContract) {
   const user = auth.user as Admin
 
   const admin = await Admin.query()
@@ -591,33 +344,48 @@ O `AuthModule` da IA deve ser responsável apenas por:
 - receber o token;
 - validar esse token contra a API principal;
 - construir um `AuthenticatedUser` interno;
-- aplicar autorização por scopes.
-
-Ele **não deve**:
-
-- emitir token;
-- persistir sessão administrativa;
-- manter login próprio;
-- reimplementar o guard do Adonis;
-- acoplar a IA ao payload cru da API principal.
-
-## 12.2 Diagrama interno do módulo
+- aplicar ## 9.3 Boundary model
 
 ```mermaid
 %%{init: {'theme':'base','themeVariables': {
-  'primaryColor':'#0f172a','primaryTextColor':'#e2e8f0','primaryBorderColor':'#475569','lineColor':'#94a3b8','secondaryColor':'#111827','tertiaryColor':'#1e293b','background':'#020617','mainBkg':'#0f172a','secondBkg':'#111827','tertiaryBkg':'#1e293b','clusterBkg':'#0b1220','clusterBorder':'#334155','edgeLabelBackground':'#0f172a','fontFamily':'Inter, Segoe UI, Arial'
+  'primaryColor':'#0f172a',
+  'primaryTextColor':'#e2e8f0',
+  'primaryBorderColor':'#475569',
+  'lineColor':'#94a3b8',
+  'se## 12.2 Diagrama interno do módulo
+
+```mermaid
+%%{init: {'theme':'base','themeVariables': {
+  'primaryColor':'#0f172a',
+  'primaryTextColor':'#e2e8f0',
+  'primaryBorderColor':'#475569',
+  'lineColor':'#94a3b8',
+  'secondaryColor':'#111827',
+  'tertiaryColor':'#1e293b',
+  'background':'#020617',
+  'mainBkg':'#0f172a',
+  'secondBkg':'#111827',
+  'tertiaryBkg':'#1e293b',
+  'clusterBkg':'#0b1220',
+  'clusterBorder':'#334155',
+  'edgeLabelBackground':'#0f172a',
+  'fontFamily':'Inter, Segoe UI, Arial'
 }}}%%
 flowchart TD
-    A[📨 Request HTTP] --> B[🛡️ AuthGuard]
-    B --> C[AuthService]
-    C --> D[ExternalAuthGateway]
-    D --> E[AuthApiClient]
-    E --> F[🧩 API Principal]
-    F --> G[Payload externo]
-    G --> H[ExternalAuthResponseNormalizer]
-    H --> I[AuthenticatedUserMapper]
-    I --> J[AuthenticatedUser]
-    J --> K[ScopesGuard]
+    A["📨 Request<br/>HTTP"] --> B["🛡️ Auth<br/>Guard"]
+    B --> C["Auth<br/>Service"]
+    C --> D["External Auth<br/>Gateway"]
+    D --> E["Auth API<br/>Client"]
+    E --> F["🧩 API<br/>Principal"]
+    F --> G["Payload<br/>externo"]
+    G --> H["External Auth Response<br/>Normalizer"]
+    H --> I["Authenticated User<br/>Mapper"]
+    I --> J["Authenticated<br/>User"]
+    J --> K["Scopes<br/>Guard"]
+    K --> L["Controller<br/>Use Case"]
+```
+
+## 12.3 Composição internaJ --> K[ScopesGuard]
     K --> L[Controller / Use Case]
 ```
 
@@ -625,31 +393,44 @@ flowchart TD
 
 ```mermaid
 %%{init: {'theme':'base','themeVariables': {
-  'primaryColor':'#0f172a','primaryTextColor':'#e2e8f0','primaryBorderColor':'#475569','lineColor':'#94a3b8','secondaryColor':'#111827','tertiaryColor':'#1e293b','background':'#020617','mainBkg':'#0f172a','secondBkg':'#111827','tertiaryBkg':'#1e293b','clusterBkg':'#0b1220','clusterBorder':'#334155','edgeLabelBackground':'#0f172a','fontFamily':'Inter, Segoe UI, Arial'
+  'primaryColor':'#0f172a',
+  'primaryTextColor':'#e2e8f0',
+  'primaryBorderColor':'#475569',
+  'lineColor':'#94a3b8',
+  'secondaryColor':'#111827',
+  'tertiaryColor':'#1e293b',
+  'background':'#020617',
+  'mainBkg':'#0f172a',
+  'secondBkg':'#111827',
+  'tertiaryBkg':'#1e293b',
+  'clusterBkg':'#0b1220',
+  'clusterBorder':'#334155',
+  'edgeLabelBackground':'#0f172a',
+  'fontFamily':'Inter, Segoe UI, Arial'
 }}}%%
 flowchart LR
-    subgraph INFRA[Infra]
-        C1[AuthApiClient]
-        C2[ExternalAuthGateway]
+    subgraph INFRA["Infra"]
+        C1["Auth API<br/>Client"]
+        C2["External Auth<br/>Gateway"]
     end
 
-    subgraph APP[Application]
-        A1[AuthService]
-        A2[AuthGuard]
-        A3[ScopesGuard]
+    subgraph APP["Application"]
+        A1["Auth<br/>Service"]
+        A2["Auth<br/>Guard"]
+        A3["Scopes<br/>Guard"]
     end
 
-    subgraph DOMAIN[Domain Contract]
-        D1[AuthenticatedUser]
-        D2[InternalScope]
-        D3[RoleScopeMap]
+    subgraph DOMAIN["Domain Contract"]
+        D1["Authenticated<br/>User"]
+        D2["Internal<br/>Scope"]
+        D3["Role Scope<br/>Map"]
     end
 
-    subgraph SUPPORT[Support]
-        S1[Normalizer]
-        S2[Mapper]
-        S3[Decorators]
-        S4[Helpers]
+    subgraph SUPPORT["Support"]
+        S1["Normalizer"]
+        S2["Mapper"]
+        S3["Decorators"]
+        S4["Helpers"]
     end
 
     A2 --> A1
