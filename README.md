@@ -1756,14 +1756,6 @@ A Fase 1 pode ser considerada consistente quando atender, no mínimo, aos pontos
 7. fechar critérios de pronto da Fase 1;
 8. abrir implementação da Fase 2 sobre base já estável.
 
-## Entregáveis imediatos de maior valor
-
-- `README.md` alinhado ao estado real do projeto;
-- `docs/architecture/` com recortes arquiteturais por módulo;
-- `docs/adr/` com decisões principais;
-- estrutura real do monólito modular no repositório;
-- base mínima de testes e contratos.
-
 ---
 
 # 36. Conclusão
